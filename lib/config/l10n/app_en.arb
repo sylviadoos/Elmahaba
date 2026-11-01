@@ -1,0 +1,356 @@
+{
+  "login": "Log in",
+  "nameIsRequired": "Name is required!",
+  "nameIsNotValid": "This name is not valid",
+  "emailIsRequired": "Email is required!",
+  "emailIsNotValid": "This email is not valid",
+  "passwordIsRequired": "Password is required!",
+  "passwordIsNotValid": "This password is not valid",
+  "passwordMustBeAtLeast6Characters": "Password must be at least 6 characters",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "confirmPasswordIsRequired": "Confirm password is required!",
+  "confirmPasswordIsNotValid": "This confirm password is not valid",
+  "passwordAndConfirmPasswordMustBeSame": "Password and confirm password must be same!",
+  "phoneNumberIsRequired": "Phone number is required!",
+  "noInternet": "No internet connection!",
+  "cancelled": "The request to the server was cancelled",
+  "unknown": "An unexpected error occurred while connecting to the server, please try again later!",
+  "serverError": "Server error, please try again later!",
+  "unexpectedError": "An unexpected error occurred",
+  "expiredToken": "Session expired, please log in again",
+  "phoneNumberIsNotValid": "This phone number is not valid",
+  "thisFieldIsRequired": "This field is required",
+  "error": "Error",
+  "ok": "Ok",
+  "heyThere": "Hey There",
+  "welcomeBack": "Welcome back",
+  "email": "Email",
+  "password": "Password",
+  "forgotPasswordQuestion": "Forgot password?",
+  "register": "Register",
+  "or": "or",
+  "settings": "Settings",
+  "help": "Help",
+  "darkMode": "Dark mode",
+  "lightMode": "Light mode",
+  "logout": "Log out",
+  "home": "Home",
+  "profile": "Profile",
+  "hi": "Hi",
+  "apply": "Apply",
+  "seeAll": "See all",
+  "enterYourUsernameAndPasswordToLogin": "Enter your username and password to login",
+  "username": "Username",
+  "orLoginWith": "Or login with",
+  "dontHaveAnAccount": "Don't have an account?",
+  "name": "Name",
+  "confirmPassword": "Confirm Password",
+  "mobileNumber": "Mobile number",
+  "selectAnOption": "Select an option",
+  "loginSuccess": "Logged in successfully",
+  "registerSuccess": "Registered successfully",
+  "anErrorOccurred": "An error occurred",
+  "didntReceiveCode": "Didn't receive the code?",
+  "invalidCode": "Invalid code, please try again",
+  "resend": "Resend",
+  "emailVerification": "Email verification",
+  "pleaseEnterYourEmailAssociatedToYourAccount": "Please enter your email associated with your account",
+  "forgotPassword": "Forgot password",
+  "enterYourEmail": "Enter your email",
+  "loading": "Loading",
+  "confirm": "Confirm",
+  "resetPassword": "Reset password",
+  "passwordMustNotBeEmpty": "Password must not be empty and must contain at least 6 characters, one uppercase letter, and one number",
+  "enterYourPassword": "Enter your password",
+  "newPassword": "New password",
+  "rememberMe": "Remember me",
+  "continueButton": "Continue",
+  "skip": "Skip",
+  "next": "Next",
+  "back": "Back",
+  "getStarted": "Get started",
+  "pageXOfY": "{current} of {total}",
+  "@pageXOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingGradesTitle": "Follow your child’s grades",
+  "onboardingGradesBody": "See exam results, report cards and teacher notes the moment they’re published.",
+  "onboardingLessonsTitle": "Know what they learn each day",
+  "onboardingLessonsBody": "Daily lessons, homework and due dates — so you can help at home.",
+  "onboardingFeesTitle": "School fees, clear and simple",
+  "onboardingFeesBody": "See what’s paid and what’s due, pay online and keep every receipt.",
+  "aboutUs": "About us",
+  "news": "News",
+  "contact": "Contact",
+  "contactUs": "Contact us",
+  "schoolName": "Al Mahabbah Schools",
+  "schoolNameTwoLines": "Al Mahabbah\nSchools",
+  "welcomeTo": "Welcome to",
+  "schoolTagline": "Education Rooted in Love, Driven by Excellence",
+  "languageSchool": "Language school",
+  "curriculaInEnglish": "Curricula taught in English",
+  "whyFamiliesChooseUs": "Why families choose us",
+  "featureCurriculaTitle": "English curricula",
+  "featureCurriculaBody": "Language & cultural skills",
+  "featureBusesTitle": "School buses",
+  "featureBusesBody": "Safe, convenient transport",
+  "featureSafeTitle": "Safe & creative",
+  "featureSafeBody": "A friendly place to learn",
+  "featureValuesTitle": "Values first",
+  "featureValuesBody": "Kind, honest, respectful",
+  "latestNews": "Latest news",
+  "interestedInJoining": "Interested in joining?",
+  "admissionTeamWillAnswer": "Our admission team will answer your questions.",
+  "contactAdmission": "Contact admission",
+  "aboutSubtitle": "Our mission, vision and legacy",
+  "ourVision": "Our vision",
+  "visionBody": "One of the best language schools in Egypt, raising confident students ready for the world.",
+  "ourMission": "Our mission",
+  "mission1": "Quality education with a strong language focus",
+  "mission2": "A safe, friendly and creative environment",
+  "mission3": "Help every student find their talents",
+  "mission4": "Kind, honest and respectful students",
+  "mission5": "Ready for exams and for real life",
+  "ourLegacy": "Our legacy",
+  "legacyBody": "Generations of graduates who became confident leaders and lifelong learners.",
+  "legacyQuote": "“Our graduates carry our values wherever they go — honesty, respect, hard work, and open-mindedness.”",
+  "schoolPrincipal": "School Principal",
+  "principalName": "Mrs. Ahlam Louis Riad",
+  "principalInitials": "AR",
+  "newsSubtitle": "What’s happening at Al Mahabbah",
+  "filterAll": "All",
+  "noNewsYet": "No news yet",
+  "noNewsYetSubtitle": "School news and events will appear here.",
+  "tryAgain": "Try again",
+  "schoolNews": "School news",
+  "contactSubtitle": "We’re happy to hear from you",
+  "ourSchool": "Our school",
+  "openInGoogleMaps": "Open in Google Maps",
+  "callOrEmail": "Call or email",
+  "phone": "Phone",
+  "admission": "Admission",
+  "followUs": "Follow us",
+  "couldNotOpenLink": "Couldn’t open this link",
+  "appliedThroughWebsite": "Applied through our website?",
+  "confirmationEmailNote": "You should receive a confirmation email. If it doesn’t arrive within 24 hours, check your Spam folder or message the school’s official page.",
+  "otherLanguage": "عربي",
+  "loginSubtitle": "Parents, log in to follow your child’s school day.",
+  "emailOrMobile": "Email or mobile number",
+  "emailHint": "parent@email.com",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "continueAsGuest": "Continue as guest",
+  "newParent": "New parent?",
+  "createAnAccount": "Create an account",
+  "createAccount": "Create account",
+  "registerSubtitle": "Parent account — follow your children’s school day.",
+  "parentFullName": "Parent’s full name",
+  "asOnNationalId": "As on your national ID",
+  "phoneHint": "10 1234 5678",
+  "passwordHint": "At least 6 characters",
+  "agreePrefix": "I agree to the ",
+  "terms": "Terms",
+  "agreeAnd": " and ",
+  "privacyPolicy": "Privacy Policy",
+  "alreadyHaveAccount": "Already have an account?",
+  "verifyYourNumber": "Verify your number",
+  "otpSentTo": "We sent a 6-digit code by SMS to ",
+  "enterVerificationCode": "Enter verification code",
+  "resendCodeIn": "Resend code in {time}",
+  "@resendCodeIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "didntGetIt": "Didn’t get it?",
+  "resendCode": "Resend code",
+  "verify": "Verify",
+  "wrongNumber": "Wrong number?",
+  "changeIt": "Change it",
+  "lastStep": "Last step",
+  "addYourChildren": "Add your children",
+  "addChildrenSubtitle": "Link each child with their national ID number. You can add more than one.",
+  "childNationalId": "Child’s national ID",
+  "nationalIdDigitsHint": "14-digit number",
+  "add": "Add",
+  "nationalIdMatchNote": "We match it with the school records to find your child.",
+  "yourChildren": "Your children",
+  "childrenCount": "{count, plural, =1{1 child} other{{count} children}}",
+  "@childrenCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "childIdTail": "ID ••••{tail}",
+  "@childIdTail": {
+    "placeholders": {
+      "tail": {
+        "type": "String"
+      }
+    }
+  },
+  "linked": "Linked",
+  "removeChild": "Remove {name}",
+  "@removeChild": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "noChildrenYet": "No children added yet",
+  "goodMorning": "Good morning",
+  "myProfile": "My profile",
+  "notifications": "Notifications",
+  "today": "Today",
+  "results": "Results",
+  "attendance": "Attendance",
+  "fees": "Fees",
+  "chat": "Chat",
+  "schoolChat": "School chat",
+  "newCount": "{count} new",
+  "@newCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "daysPresentIn": "days present in {month}",
+  "@daysPresentIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "ofTheYearPaid": "of the year paid",
+  "needsYourAttention": "Needs your attention",
+  "chatGeneral": "General",
+  "chatPrivate": "Private",
+  "chatPrivateOnlyYou": "Private · only you see it",
+  "youReplied": "You replied",
+  "you": "You",
+  "chatReplyHint": "Reply by choosing one of the options on each message",
+  "term1": "Term 1",
+  "term2Soon": "Term 2 · Soon",
+  "term1Average": "Term 1 average",
+  "reportCardPdf": "Report card (PDF)",
+  "subjects": "Subjects",
+  "teachersNote": "Teacher’s note",
+  "present": "Present",
+  "absent": "Absent",
+  "late": "Late",
+  "officialHoliday": "Official holiday",
+  "friSatOff": "Fri & Sat off",
+  "thisMonth": "This month",
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "schoolYear": "School year {years}",
+  "@schoolYear": {
+    "placeholders": {
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "percentPaid": "{percent} paid",
+  "@percentPaid": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "remaining": "Remaining",
+  "paidAmount": "Paid {amount}",
+  "@paidAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "totalAmount": "Total {amount}",
+  "@totalAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "payAmount": "Pay {amount}",
+  "@payAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "egpAmount": "EGP {amount}",
+  "@egpAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "allFeesPaid": "All fees paid",
+  "installments": "Installments",
+  "paid": "Paid",
+  "due": "Due",
+  "receipts": "Receipts",
+  "pdf": "PDF",
+  "editProfile": "Edit profile",
+  "myChildren": "My children",
+  "addAChild": "Add a child",
+  "language": "Language",
+  "chatNotifications": "Chat notifications",
+  "changePassword": "Change password",
+  "contactTheSchool": "Contact the school",
+  "aboutSchool": "About Al Mahabbah",
+  "markAllRead": "Mark all read",
+  "allParents": "All parents",
+  "yesterday": "Yesterday",
+  "earlier": "Earlier",
+  "unread": "Unread",
+  "sendUsAMessage": "Send us a message",
+  "writeToUs": "Write to us",
+  "sendMessageSubtitle": "We’ll get back to you as soon as we can",
+  "firstName": "First name",
+  "firstNameHint": "Your first name",
+  "lastName": "Last name",
+  "lastNameHint": "Your last name",
+  "optional": "Optional",
+  "educationType": "Education type",
+  "chooseEducationType": "Choose education type",
+  "schoolStage": "Stage",
+  "chooseStage": "Choose stage",
+  "educationLanguage": "Language",
+  "stageBabyClass": "Baby Class",
+  "stageKg1": "KG1",
+  "stageKg2": "KG2",
+  "stagePrimary1": "First Primary",
+  "stagePrimary2": "Second Primary",
+  "stagePrimary3": "Third Primary",
+  "stagePrimary4": "Fourth Primary",
+  "stagePrimary5": "Fifth Primary",
+  "yourMessage": "Message",
+  "messageHint": "Write your message here…",
+  "sendMessage": "Send message",
+  "checkHighlightedFields": "Please check the highlighted fields.",
+  "messageSentTitle": "Message sent!",
+  "messageSentSubtitle": "Thank you! The school will get back to you soon.",
+  "done": "Done"
+}
