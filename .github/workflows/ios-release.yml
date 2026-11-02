@@ -75,11 +75,65 @@ jobs:
             | base64 --decode \
             > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
+          PROFILE_NAME=$(security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision \
+            | plutil -extract Name xml1 -o - - \
+            | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+          TEAM_ID=$(security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision \
+            | plutil -extract TeamIdentifier.0 xml1 -o - - \
+            | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+
+          echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          echo "TEAM_ID=$TEAM_ID" >> "$GITHUB_ENV"
+
+      # The Xcode project has CODE_SIGN_STYLE=Automatic, which needs a logged-in
+      # Apple ID to resolve in Xcode but can't do that on a CI runner. These
+      # xcodebuild command-line overrides take precedence over the project
+      # file and force manual signing with the cert/profile installed above.
       - name: Build IPA
         run: |
-          flutter build ipa \
+          flutter build ios \
             --release \
+            --no-codesign \
             --build-number=${{ github.run_number }}
+
+          cat > ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>${TEAM_ID}</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.almahabbahschools.parents</key>
+              <string>${PROFILE_NAME}</string>
+            </dict>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            archive
+
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa
 
       - name: Upload to App Store Connect
         env:
