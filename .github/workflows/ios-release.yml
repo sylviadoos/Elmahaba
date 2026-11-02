@@ -85,16 +85,33 @@ jobs:
           echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
           echo "TEAM_ID=$TEAM_ID" >> "$GITHUB_ENV"
 
-      # The Xcode project has CODE_SIGN_STYLE=Automatic, which needs a logged-in
-      # Apple ID to resolve in Xcode but can't do that on a CI runner. These
-      # xcodebuild command-line overrides take precedence over the project
-      # file and force manual signing with the cert/profile installed above.
+      # The Runner target has CODE_SIGN_STYLE=Automatic, which needs a
+      # logged-in Apple ID to resolve in Xcode but can't do that on a CI
+      # runner. Patch just the Runner target (not the Pods/SPM plugin
+      # targets flutter build regenerates below, which can't accept a
+      # provisioning profile at all) to manual signing with the installed
+      # cert/profile.
       - name: Build IPA
         run: |
           flutter build ios \
             --release \
             --no-codesign \
             --build-number=${{ github.run_number }}
+
+          gem list -i xcodeproj > /dev/null || gem install xcodeproj --no-document
+
+          ruby -e '
+            require "xcodeproj"
+            project = Xcodeproj::Project.open("ios/Runner.xcodeproj")
+            target = project.targets.find { |t| t.name == "Runner" }
+            target.build_configurations.each do |config|
+              config.build_settings["CODE_SIGN_STYLE"] = "Manual"
+              config.build_settings["CODE_SIGN_IDENTITY"] = "Apple Distribution"
+              config.build_settings["DEVELOPMENT_TEAM"] = ENV["TEAM_ID"]
+              config.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = ENV["PROFILE_NAME"]
+            end
+            project.save
+          '
 
           cat > ios/ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -124,10 +141,6 @@ jobs:
             -configuration Release \
             -destination "generic/platform=iOS" \
             -archivePath build/ios/archive/Runner.xcarchive \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
-            DEVELOPMENT_TEAM="$TEAM_ID" \
             archive
 
           xcodebuild -exportArchive \
