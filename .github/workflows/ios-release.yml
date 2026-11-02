@@ -46,6 +46,10 @@ jobs:
           security default-keychain \
             -s build.keychain
 
+          security list-keychains \
+            -d user \
+            -s build.keychain login.keychain
+
           security unlock-keychain \
             -p "github" \
             build.keychain
