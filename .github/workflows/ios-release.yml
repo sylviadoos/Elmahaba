@@ -126,7 +126,7 @@ jobs:
             <string>manual</string>
             <key>provisioningProfiles</key>
             <dict>
-              <key>com.almahabbahschools.parents</key>
+              <key>com.petra.almahabbahschools-parents</key>
               <string>${PROFILE_NAME}</string>
             </dict>
             <key>uploadSymbols</key>
