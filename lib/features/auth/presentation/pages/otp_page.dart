@@ -3,38 +3,74 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
+import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
+import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_back_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/icon_box.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/scrollable_fill.dart';
-import 'package:al_mahhaba_school/features/auth/presentation/widgets/auth_header_title.dart';
+import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/register_request_entity.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/extensions/verification_message.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/view_model/auth_event.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/view_model/auth_state.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/view_model/auth_view_model.dart';
+import 'package:al_mahhaba_school/core/widgets/red_header_title.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/otp_code_input.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/prompt_link.dart';
-import 'package:al_mahhaba_school/features/children/data/mock_children.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/resend_countdown.dart';
 
-/// Enter the 6-digit SMS code, with a resend countdown.
-class OtpPage extends StatefulWidget {
-  const OtpPage({super.key});
+/// Enter the 6-digit SMS code, with a resend countdown. The code is sent
+/// when the page opens; once it checks out, the account is created and the
+/// parent goes to Log in.
+class OtpPage extends StatelessWidget {
+  const OtpPage({super.key, required this.request, required this.phoneMasked});
+
+  /// What the parent filled in on Register.
+  final RegisterRequestEntity request;
+
+  /// e.g. "0120****154".
+  final String phoneMasked;
 
   @override
-  State<OtpPage> createState() => _OtpPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<AuthViewModel>()..doAction(SendOtpEvent(request)),
+      child: _OtpView(request: request, phoneMasked: phoneMasked),
+    );
+  }
 }
 
-class _OtpPageState extends State<OtpPage> {
+class _OtpView extends StatefulWidget {
+  const _OtpView({required this.request, required this.phoneMasked});
+
+  final RegisterRequestEntity request;
+  final String phoneMasked;
+
+  @override
+  State<_OtpView> createState() => _OtpViewState();
+}
+
+class _OtpViewState extends State<_OtpView> {
   static const int _codeLength = 6;
   static const int _resendSeconds = 45;
 
   final TextEditingController _codeController = TextEditingController();
   Timer? _timer;
   int _secondsLeft = _resendSeconds;
+
+  /// Whether the running action is sending the code (not checking it).
+  bool _sendingCode = true;
 
   @override
   void initState() {
@@ -58,14 +94,56 @@ class _OtpPageState extends State<OtpPage> {
     });
   }
 
+  /// Lets the parent ask for a new code right away.
+  void _stopCountdown() {
+    _timer?.cancel();
+    setState(() => _secondsLeft = 0);
+  }
+
   void _resend() {
-    // TODO: ask the API to send a new code.
+    _sendingCode = true;
     _codeController.clear();
     setState(_startCountdown);
+    context.read<AuthViewModel>().doAction(SendOtpEvent(widget.request));
+  }
+
+  void _verify() {
+    _sendingCode = false;
+    FocusScope.of(context).unfocus();
+    context.read<AuthViewModel>().doAction(
+      VerifyOtpEvent(widget.request, _codeController.text),
+    );
   }
 
   void _changeNumber() =>
       context.canPop() ? context.pop() : context.go(AppRoutes.register);
+
+  /// A fresh Log in, even when the one the parent started is under
+  /// Register (see the route).
+  void _toLogin() => context.go(AppRoutes.login, extra: widget.request.phone);
+
+  void _onState(BuildContext context, AuthState state) {
+    if (state.data is OtpSent) {
+      // The countdown runs from when the code really left.
+      setState(_startCountdown);
+      return;
+    }
+    if (state.data is Registered) {
+      context.showSnackBar(context.l10n.accountCreated);
+      _toLogin();
+      return;
+    }
+
+    final exception = state.exception;
+    if (exception == null) return;
+    if (_sendingCode) _stopCountdown();
+    context.showSnackBar(exception.verificationMessage(context), isError: true);
+    if (exception case ServerException(
+      code: AuthErrorCodes.alreadyRegistered,
+    )) {
+      _toLogin();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +168,10 @@ class _OtpPageState extends State<OtpPage> {
                 spacing: 18.h,
                 children: [
                   const AppBackButton(fallbackRoute: AppRoutes.register),
-                  AuthHeaderTitle(
+                  RedHeaderTitle(
                     title: l10n.verifyYourNumber,
                     subtitle: l10n.otpSentTo,
-                    subtitleBold: mockParentPhone,
+                    subtitleBold: widget.phoneMasked,
                   ),
                 ],
               ),
@@ -141,7 +219,7 @@ class _OtpPageState extends State<OtpPage> {
                       ),
                       Center(
                         child: _secondsLeft > 0
-                            ? _Countdown(seconds: _secondsLeft)
+                            ? ResendCountdown(seconds: _secondsLeft)
                             : PromptLink(
                                 prompt: l10n.didntGetIt,
                                 action: l10n.resendCode,
@@ -149,12 +227,16 @@ class _OtpPageState extends State<OtpPage> {
                                 fontSize: 14,
                               ),
                       ),
-                      AppButton(
-                        label: l10n.verify,
-                        // TODO: verify the code (Cubit) before continuing.
-                        onPressed: isComplete
-                            ? () => context.push(AppRoutes.addChildren)
-                            : null,
+                      BlocConsumer<AuthViewModel, AuthState>(
+                        listenWhen: (_, state) =>
+                            state.state == StateType.success ||
+                            state.state == StateType.error,
+                        listener: _onState,
+                        builder: (context, state) => AppButton(
+                          label: l10n.verify,
+                          isLoading: state.state == StateType.loading,
+                          onPressed: isComplete ? _verify : null,
+                        ),
                       ),
                       const Spacer(),
                       PromptLink(
@@ -169,40 +251,6 @@ class _OtpPageState extends State<OtpPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// "Resend code in 0:45", with the time in bold.
-class _Countdown extends StatelessWidget {
-  const _Countdown({required this.seconds});
-
-  final int seconds;
-
-  @override
-  Widget build(BuildContext context) {
-    final time = '0:${seconds.toString().padLeft(2, '0')}';
-    final text = context.l10n.resendCodeIn(time);
-    final timeAt = text.indexOf(time);
-
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: text.substring(0, timeAt)),
-          TextSpan(
-            text: time,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              color: AppColors.ink,
-            ),
-          ),
-          TextSpan(text: text.substring(timeAt + time.length)),
-        ],
-      ),
-      style: context.textTheme.bodyMedium?.copyWith(
-        height: 44 / 14,
-        color: AppColors.slate,
       ),
     );
   }

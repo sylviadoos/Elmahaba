@@ -308,6 +308,54 @@ abstract class AppLocalizations {
   /// **'Log out'**
   String get logout;
 
+  /// No description provided for @logOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out?'**
+  String get logOutTitle;
+
+  /// No description provided for @logOutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll need your mobile number and password to log in again.'**
+  String get logOutMessage;
+
+  /// No description provided for @deleteMyAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete my account'**
+  String get deleteMyAccount;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete your account?'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account, your linked children and your settings will be deleted. The school keeps your chat and complaint records.'**
+  String get deleteAccountMessage;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @accountDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was deleted'**
+  String get accountDeleted;
+
   /// No description provided for @home.
   ///
   /// In en, this message translates to:
@@ -464,11 +512,11 @@ abstract class AppLocalizations {
   /// **'Reset password'**
   String get resetPassword;
 
-  /// No description provided for @passwordMustNotBeEmpty.
+  /// No description provided for @passwordTooShort.
   ///
   /// In en, this message translates to:
-  /// **'Password must not be empty and must contain at least 6 characters, one uppercase letter, and one number'**
-  String get passwordMustNotBeEmpty;
+  /// **'Password must be at least 8 characters'**
+  String get passwordTooShort;
 
   /// No description provided for @enterYourPassword.
   ///
@@ -481,12 +529,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New password'**
   String get newPassword;
-
-  /// No description provided for @rememberMe.
-  ///
-  /// In en, this message translates to:
-  /// **'Remember me'**
-  String get rememberMe;
 
   /// No description provided for @continueButton.
   ///
@@ -893,14 +935,8 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Parents, log in to follow your child’s school day.'**
+  /// **'Parents, log in with the mobile number you gave the school to follow your child’s school day.'**
   String get loginSubtitle;
-
-  /// No description provided for @emailOrMobile.
-  ///
-  /// In en, this message translates to:
-  /// **'Email or mobile number'**
-  String get emailOrMobile;
 
   /// No description provided for @emailHint.
   ///
@@ -947,20 +983,8 @@ abstract class AppLocalizations {
   /// No description provided for @registerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Parent account — follow your children’s school day.'**
+  /// **'Parent account — sign up with the mobile number you gave the school to follow your children’s school day.'**
   String get registerSubtitle;
-
-  /// No description provided for @parentFullName.
-  ///
-  /// In en, this message translates to:
-  /// **'Parent’s full name'**
-  String get parentFullName;
-
-  /// No description provided for @asOnNationalId.
-  ///
-  /// In en, this message translates to:
-  /// **'As on your national ID'**
-  String get asOnNationalId;
 
   /// No description provided for @phoneHint.
   ///
@@ -968,11 +992,59 @@ abstract class AppLocalizations {
   /// **'10 1234 5678'**
   String get phoneHint;
 
+  /// No description provided for @fullPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'010 1234 5678'**
+  String get fullPhoneHint;
+
   /// No description provided for @passwordHint.
   ///
   /// In en, this message translates to:
-  /// **'At least 6 characters'**
+  /// **'At least 8 characters'**
   String get passwordHint;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the password again'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @accountAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'An account already exists for this number. Please log in.'**
+  String get accountAlreadyExists;
+
+  /// No description provided for @accountCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been created. Please log in.'**
+  String get accountCreated;
+
+  /// No description provided for @phoneVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t verify your number. Please try again.'**
+  String get phoneVerificationFailed;
+
+  /// No description provided for @otpWrongCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That code isn’t right. Check the SMS and try again.'**
+  String get otpWrongCode;
+
+  /// No description provided for @otpExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired. Please request a new one.'**
+  String get otpExpired;
+
+  /// No description provided for @tooManyAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again later.'**
+  String get tooManyAttempts;
 
   /// No description provided for @agreePrefix.
   ///
@@ -1058,6 +1130,174 @@ abstract class AppLocalizations {
   /// **'Change it'**
   String get changeIt;
 
+  /// No description provided for @forgotPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the mobile number on your account and we’ll send you a code.'**
+  String get forgotPasswordSubtitle;
+
+  /// No description provided for @useRegisteredNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the same number you registered with.'**
+  String get useRegisteredNumber;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get sendCode;
+
+  /// No description provided for @rememberedIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remembered it?'**
+  String get rememberedIt;
+
+  /// No description provided for @enterTheCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code'**
+  String get enterTheCode;
+
+  /// No description provided for @resetCodeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To reset your password, enter the 6-digit code we sent to '**
+  String get resetCodeSentTo;
+
+  /// No description provided for @setNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a new password'**
+  String get setNewPassword;
+
+  /// No description provided for @setNewPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a strong password you don’t use anywhere else.'**
+  String get setNewPasswordSubtitle;
+
+  /// No description provided for @enterNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new password'**
+  String get enterNewPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @typeItAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Type it again'**
+  String get typeItAgain;
+
+  /// No description provided for @ruleEightCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get ruleEightCharacters;
+
+  /// No description provided for @ruleHasLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains a letter'**
+  String get ruleHasLetter;
+
+  /// No description provided for @ruleHasNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Contains a number'**
+  String get ruleHasNumber;
+
+  /// No description provided for @rulePasswordsMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Both passwords match'**
+  String get rulePasswordsMatch;
+
+  /// No description provided for @saveNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Save new password'**
+  String get saveNewPassword;
+
+  /// No description provided for @passwordChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed'**
+  String get passwordChanged;
+
+  /// No description provided for @logInWithNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now log in with your new password.'**
+  String get logInWithNewPassword;
+
+  /// No description provided for @backToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to log in'**
+  String get backToLogin;
+
+  /// No description provided for @changePasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, enter your current password first.'**
+  String get changePasswordSubtitle;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get currentPassword;
+
+  /// No description provided for @enterCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current password'**
+  String get enterCurrentPassword;
+
+  /// No description provided for @forgotCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot your current password?'**
+  String get forgotCurrentPassword;
+
+  /// No description provided for @ruleNewPasswordsMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Both new passwords match'**
+  String get ruleNewPasswordsMatch;
+
+  /// No description provided for @ruleDifferentFromCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Different from the current password'**
+  String get ruleDifferentFromCurrent;
+
+  /// No description provided for @passwordUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get passwordUpdated;
+
+  /// No description provided for @useNewPasswordNextTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Next time you log in, use your new password.'**
+  String get useNewPasswordNextTime;
+
+  /// No description provided for @backToSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to settings'**
+  String get backToSettings;
+
   /// No description provided for @lastStep.
   ///
   /// In en, this message translates to:
@@ -1124,11 +1364,17 @@ abstract class AppLocalizations {
   /// **'Linked'**
   String get linked;
 
-  /// No description provided for @removeChild.
+  /// No description provided for @childLinked.
   ///
   /// In en, this message translates to:
-  /// **'Remove {name}'**
-  String removeChild(String name);
+  /// **'Your child has been linked to your account.'**
+  String get childLinked;
+
+  /// No description provided for @childLinkPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent to the school. You’ll see your child once the school confirms it.'**
+  String get childLinkPending;
 
   /// No description provided for @noChildrenYet.
   ///
@@ -1141,18 +1387,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Good morning'**
   String get goodMorning;
-
-  /// No description provided for @myProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'My profile'**
-  String get myProfile;
-
-  /// No description provided for @notifications.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications'**
-  String get notifications;
 
   /// No description provided for @today.
   ///
@@ -1214,11 +1448,65 @@ abstract class AppLocalizations {
   /// **'Needs your attention'**
   String get needsYourAttention;
 
+  /// No description provided for @attendanceNotTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance not taken yet'**
+  String get attendanceNotTaken;
+
+  /// No description provided for @absentLateCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{absentDays} absent · {lateDays} late'**
+  String absentLateCount(int absentDays, int lateDays);
+
+  /// No description provided for @noResultsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No results yet'**
+  String get noResultsYet;
+
+  /// No description provided for @noFeesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No fees yet'**
+  String get noFeesYet;
+
+  /// No description provided for @amountDueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} due {date}'**
+  String amountDueOn(String amount, String date);
+
+  /// No description provided for @amountOverdueSince.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} overdue since {date}'**
+  String amountOverdueSince(String amount, String date);
+
+  /// No description provided for @messagesAndNotices.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages {messages} · Notices {notices}'**
+  String messagesAndNotices(int messages, int notices);
+
   /// No description provided for @chatGeneral.
   ///
   /// In en, this message translates to:
   /// **'General'**
   String get chatGeneral;
+
+  /// No description provided for @chatNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get chatNew;
+
+  /// No description provided for @chatRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get chatRead;
 
   /// No description provided for @chatPrivate.
   ///
@@ -1226,53 +1514,137 @@ abstract class AppLocalizations {
   /// **'Private'**
   String get chatPrivate;
 
-  /// No description provided for @chatPrivateOnlyYou.
-  ///
-  /// In en, this message translates to:
-  /// **'Private · only you see it'**
-  String get chatPrivateOnlyYou;
-
-  /// No description provided for @youReplied.
-  ///
-  /// In en, this message translates to:
-  /// **'You replied'**
-  String get youReplied;
-
   /// No description provided for @you.
   ///
   /// In en, this message translates to:
   /// **'You'**
   String get you;
 
-  /// No description provided for @chatReplyHint.
+  /// No description provided for @yesterday.
   ///
   /// In en, this message translates to:
-  /// **'Reply by choosing one of the options on each message'**
-  String get chatReplyHint;
+  /// **'Yesterday'**
+  String get yesterday;
 
-  /// No description provided for @term1.
+  /// No description provided for @noMessagesYet.
   ///
   /// In en, this message translates to:
-  /// **'Term 1'**
-  String get term1;
+  /// **'No messages yet'**
+  String get noMessagesYet;
 
-  /// No description provided for @term2Soon.
+  /// No description provided for @noMessagesHint.
   ///
   /// In en, this message translates to:
-  /// **'Term 2 · Soon'**
-  String get term2Soon;
+  /// **'Messages from the school, and the ones you send, show here.'**
+  String get noMessagesHint;
 
-  /// No description provided for @term1Average.
+  /// No description provided for @olderMessagesFailed.
   ///
   /// In en, this message translates to:
-  /// **'Term 1 average'**
-  String get term1Average;
+  /// **'Couldn’t load older messages.'**
+  String get olderMessagesFailed;
 
-  /// No description provided for @reportCardPdf.
+  /// No description provided for @send.
   ///
   /// In en, this message translates to:
-  /// **'Report card (PDF)'**
-  String get reportCardPdf;
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @replyingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Replying to'**
+  String get replyingTo;
+
+  /// No description provided for @inReplyTo.
+  ///
+  /// In en, this message translates to:
+  /// **'In reply to'**
+  String get inReplyTo;
+
+  /// No description provided for @cancelReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel reply'**
+  String get cancelReply;
+
+  /// No description provided for @deletedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted'**
+  String get deletedMessage;
+
+  /// No description provided for @earlierMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'An earlier message'**
+  String get earlierMessage;
+
+  /// No description provided for @edited.
+  ///
+  /// In en, this message translates to:
+  /// **'Edited'**
+  String get edited;
+
+  /// No description provided for @chatCantSend.
+  ///
+  /// In en, this message translates to:
+  /// **'You can message the school while one of your children is enrolled.'**
+  String get chatCantSend;
+
+  /// No description provided for @chatClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'The chat is closed for now. You can still read messages.'**
+  String get chatClosed;
+
+  /// No description provided for @messageAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get messageAbout;
+
+  /// No description provided for @viewAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'View attendance'**
+  String get viewAttendance;
+
+  /// No description provided for @viewResults.
+  ///
+  /// In en, this message translates to:
+  /// **'View results'**
+  String get viewResults;
+
+  /// No description provided for @viewFees.
+  ///
+  /// In en, this message translates to:
+  /// **'View fees'**
+  String get viewFees;
+
+  /// No description provided for @result.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get result;
+
+  /// No description provided for @publishedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Published {date}'**
+  String publishedOn(String date);
+
+  /// No description provided for @finalResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Final result'**
+  String get finalResult;
+
+  /// No description provided for @attendancePercent.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance {percent}'**
+  String attendancePercent(String percent);
 
   /// No description provided for @subjects.
   ///
@@ -1280,11 +1652,89 @@ abstract class AppLocalizations {
   /// **'Subjects'**
   String get subjects;
 
-  /// No description provided for @teachersNote.
+  /// No description provided for @countedInFinalResult.
   ///
   /// In en, this message translates to:
-  /// **'Teacher’s note'**
-  String get teachersNote;
+  /// **'Counted in the final result'**
+  String get countedInFinalResult;
+
+  /// No description provided for @otherSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Other subjects'**
+  String get otherSubjects;
+
+  /// No description provided for @notCountedInFinalResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Not counted in the final result'**
+  String get notCountedInFinalResult;
+
+  /// No description provided for @highLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'High level'**
+  String get highLevel;
+
+  /// No description provided for @highLevelNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra level, not counted in the final result'**
+  String get highLevelNote;
+
+  /// No description provided for @activities.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get activities;
+
+  /// No description provided for @downloadReportCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Download report card (PDF)'**
+  String get downloadReportCard;
+
+  /// No description provided for @assessmentInitial.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial'**
+  String get assessmentInitial;
+
+  /// No description provided for @assessmentFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Final'**
+  String get assessmentFinal;
+
+  /// No description provided for @assessmentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get assessmentStatus;
+
+  /// No description provided for @gradeExceeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceeds Expectations'**
+  String get gradeExceeds;
+
+  /// No description provided for @gradeMeets.
+  ///
+  /// In en, this message translates to:
+  /// **'Meets Expectations'**
+  String get gradeMeets;
+
+  /// No description provided for @gradePartiallyMeets.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially Meets Expectations'**
+  String get gradePartiallyMeets;
+
+  /// No description provided for @gradeBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'Below Expectations'**
+  String get gradeBelow;
 
   /// No description provided for @present.
   ///
@@ -1334,41 +1784,77 @@ abstract class AppLocalizations {
   /// **'Next month'**
   String get nextMonth;
 
-  /// No description provided for @schoolYear.
+  /// No description provided for @attendanceWord.
   ///
   /// In en, this message translates to:
-  /// **'School year {years}'**
-  String schoolYear(String years);
+  /// **'attendance'**
+  String get attendanceWord;
 
-  /// No description provided for @percentPaid.
+  /// No description provided for @attendedOfDays.
   ///
   /// In en, this message translates to:
-  /// **'{percent} paid'**
-  String percentPaid(String percent);
+  /// **'{attended} of {total} school days'**
+  String attendedOfDays(int attended, int total);
+
+  /// No description provided for @excused.
+  ///
+  /// In en, this message translates to:
+  /// **'Excused'**
+  String get excused;
+
+  /// No description provided for @excusedOrMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'Excused / medical'**
+  String get excusedOrMedical;
+
+  /// No description provided for @excusedAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Excused absence'**
+  String get excusedAbsence;
+
+  /// No description provided for @arrivedLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived late'**
+  String get arrivedLate;
+
+  /// No description provided for @reasonIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String reasonIs(String reason);
+
+  /// No description provided for @noReasonGiven.
+  ///
+  /// In en, this message translates to:
+  /// **'No reason given'**
+  String get noReasonGiven;
+
+  /// No description provided for @holidayNoSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · no school'**
+  String holidayNoSchool(String name);
+
+  /// No description provided for @reply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get reply;
+
+  /// No description provided for @noAbsencesThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'No absences or late days this month.'**
+  String get noAbsencesThisMonth;
 
   /// No description provided for @remaining.
   ///
   /// In en, this message translates to:
   /// **'Remaining'**
   String get remaining;
-
-  /// No description provided for @paidAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Paid {amount}'**
-  String paidAmount(String amount);
-
-  /// No description provided for @totalAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Total {amount}'**
-  String totalAmount(String amount);
-
-  /// No description provided for @payAmount.
-  ///
-  /// In en, this message translates to:
-  /// **'Pay {amount}'**
-  String payAmount(String amount);
 
   /// No description provided for @egpAmount.
   ///
@@ -1382,41 +1868,347 @@ abstract class AppLocalizations {
   /// **'All fees paid'**
   String get allFeesPaid;
 
-  /// No description provided for @installments.
-  ///
-  /// In en, this message translates to:
-  /// **'Installments'**
-  String get installments;
-
   /// No description provided for @paid.
   ///
   /// In en, this message translates to:
   /// **'Paid'**
   String get paid;
 
-  /// No description provided for @due.
+  /// No description provided for @accountNumber.
   ///
   /// In en, this message translates to:
-  /// **'Due'**
-  String get due;
+  /// **'Account {number}'**
+  String accountNumber(String number);
 
-  /// No description provided for @receipts.
+  /// No description provided for @payFeesAmount.
   ///
   /// In en, this message translates to:
-  /// **'Receipts'**
-  String get receipts;
+  /// **'Pay fees · {amount}'**
+  String payFeesAmount(String amount);
 
-  /// No description provided for @pdf.
+  /// No description provided for @preview.
   ///
   /// In en, this message translates to:
-  /// **'PDF'**
-  String get pdf;
+  /// **'Preview'**
+  String get preview;
 
-  /// No description provided for @editProfile.
+  /// No description provided for @downloadPdf.
   ///
   /// In en, this message translates to:
-  /// **'Edit profile'**
-  String get editProfile;
+  /// **'Download PDF'**
+  String get downloadPdf;
+
+  /// No description provided for @allParents.
+  ///
+  /// In en, this message translates to:
+  /// **'All parents'**
+  String get allParents;
+
+  /// No description provided for @medicalExcuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical excuse'**
+  String get medicalExcuse;
+
+  /// No description provided for @submitExcuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit excuse'**
+  String get submitExcuse;
+
+  /// No description provided for @viewExcuse.
+  ///
+  /// In en, this message translates to:
+  /// **'View excuse'**
+  String get viewExcuse;
+
+  /// No description provided for @excuseStatusLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical excuse · {status}'**
+  String excuseStatusLine(String status);
+
+  /// No description provided for @excuseSubmitBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Excuse by {date}'**
+  String excuseSubmitBy(String date);
+
+  /// No description provided for @excuseUnderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get excuseUnderReview;
+
+  /// No description provided for @excuseInfoRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Information needed'**
+  String get excuseInfoRequired;
+
+  /// No description provided for @excuseAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get excuseAccepted;
+
+  /// No description provided for @excuseRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get excuseRejected;
+
+  /// No description provided for @excuseForAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'For the absence on {date}'**
+  String excuseForAbsence(String date);
+
+  /// No description provided for @excuseSubmitUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'You can send it until {date}.'**
+  String excuseSubmitUntil(String date);
+
+  /// No description provided for @excuseNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get excuseNote;
+
+  /// No description provided for @excuseNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Doctor visit — fever'**
+  String get excuseNoteHint;
+
+  /// No description provided for @excuseDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical documents'**
+  String get excuseDocuments;
+
+  /// No description provided for @excuseDocumentsRules.
+  ///
+  /// In en, this message translates to:
+  /// **'{types} · up to {megabytes} MB each · up to {count} files'**
+  String excuseDocumentsRules(String types, int megabytes, int count);
+
+  /// No description provided for @excuseDocumentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach at least one document.'**
+  String get excuseDocumentRequired;
+
+  /// No description provided for @excuseSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your medical excuse has been sent.'**
+  String get excuseSent;
+
+  /// No description provided for @excuseSubmittedByOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent by the child\'s other parent'**
+  String get excuseSubmittedByOther;
+
+  /// No description provided for @excuseRejectionReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Why it was rejected'**
+  String get excuseRejectionReason;
+
+  /// No description provided for @excuseInformationRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'What the school needs'**
+  String get excuseInformationRequest;
+
+  /// No description provided for @excuseAcceptedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The day now counts as medical leave.'**
+  String get excuseAcceptedNote;
+
+  /// No description provided for @addDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Add documents'**
+  String get addDocuments;
+
+  /// No description provided for @sendDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Send documents'**
+  String get sendDocuments;
+
+  /// No description provided for @documentsSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents sent. The school will review the excuse again.'**
+  String get documentsSent;
+
+  /// No description provided for @excuseHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get excuseHistory;
+
+  /// No description provided for @excuseStepSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Excuse sent'**
+  String get excuseStepSubmitted;
+
+  /// No description provided for @excuseStepInfoRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'The school asked for more'**
+  String get excuseStepInfoRequested;
+
+  /// No description provided for @excuseStepDocumentsAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents added'**
+  String get excuseStepDocumentsAdded;
+
+  /// No description provided for @excuseStepAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Excuse accepted'**
+  String get excuseStepAccepted;
+
+  /// No description provided for @excuseStepRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Excuse rejected'**
+  String get excuseStepRejected;
+
+  /// No description provided for @byParent.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent'**
+  String get byParent;
+
+  /// No description provided for @bySchool.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get bySchool;
+
+  /// No description provided for @feeStatement.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee statement'**
+  String get feeStatement;
+
+  /// No description provided for @feeStatementSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee statement saved'**
+  String get feeStatementSaved;
+
+  /// No description provided for @feeStatementNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t save the fee statement. Try again.'**
+  String get feeStatementNotSaved;
+
+  /// No description provided for @feeStatementFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t make the fee statement. Try again.'**
+  String get feeStatementFailed;
+
+  /// No description provided for @payFees.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay fees'**
+  String get payFees;
+
+  /// No description provided for @payFullAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay full amount'**
+  String get payFullAmount;
+
+  /// No description provided for @payInInstallments.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay in installments'**
+  String get payInInstallments;
+
+  /// No description provided for @amountPayableNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount payable now'**
+  String get amountPayableNow;
+
+  /// No description provided for @tickInstallments.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick the installments you want to pay'**
+  String get tickInstallments;
+
+  /// No description provided for @tickEarlierInstallmentsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'To preview or download the statement, tick the earlier unpaid installments too.'**
+  String get tickEarlierInstallmentsFirst;
+
+  /// No description provided for @dueOnAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date} · Account {account}'**
+  String dueOnAccount(String date, String account);
+
+  /// No description provided for @upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get upcoming;
+
+  /// No description provided for @overdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get overdue;
+
+  /// No description provided for @underSettlement.
+  ///
+  /// In en, this message translates to:
+  /// **'Under settlement'**
+  String get underSettlement;
+
+  /// No description provided for @paymentInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment in progress'**
+  String get paymentInProgress;
+
+  /// No description provided for @payOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay online'**
+  String get payOnline;
+
+  /// No description provided for @payOnlineAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay online · {amount}'**
+  String payOnlineAmount(String amount);
+
+  /// No description provided for @paymentBySkoolex.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment is processed through the Skoolex school system'**
+  String get paymentBySkoolex;
+
+  /// No description provided for @paymentPageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t open the payment page'**
+  String get paymentPageFailed;
 
   /// No description provided for @myChildren.
   ///
@@ -1430,17 +2222,323 @@ abstract class AppLocalizations {
   /// **'Add a child'**
   String get addAChild;
 
+  /// No description provided for @chooseChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a child'**
+  String get chooseChild;
+
+  /// No description provided for @allChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'All children'**
+  String get allChildren;
+
+  /// No description provided for @childDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Child details'**
+  String get childDetails;
+
+  /// No description provided for @childStudentInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get childStudentInfo;
+
+  /// No description provided for @childSchoolInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get childSchoolInfo;
+
+  /// No description provided for @childContactInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get childContactInfo;
+
+  /// No description provided for @father.
+  ///
+  /// In en, this message translates to:
+  /// **'Father'**
+  String get father;
+
+  /// No description provided for @mother.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother'**
+  String get mother;
+
+  /// No description provided for @guardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian'**
+  String get guardian;
+
+  /// No description provided for @studentCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Student code'**
+  String get studentCode;
+
+  /// No description provided for @nationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID'**
+  String get nationalId;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @age.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get age;
+
+  /// No description provided for @yearsOld.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 year} other{{count} years}}'**
+  String yearsOld(int count);
+
+  /// No description provided for @gender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get gender;
+
+  /// No description provided for @religion.
+  ///
+  /// In en, this message translates to:
+  /// **'Religion'**
+  String get religion;
+
+  /// No description provided for @nationality.
+  ///
+  /// In en, this message translates to:
+  /// **'Nationality'**
+  String get nationality;
+
+  /// No description provided for @grade.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade'**
+  String get grade;
+
+  /// No description provided for @schoolClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get schoolClass;
+
+  /// No description provided for @academicYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Academic year'**
+  String get academicYear;
+
+  /// No description provided for @enrolledOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolled on'**
+  String get enrolledOn;
+
+  /// No description provided for @previousSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous school'**
+  String get previousSchool;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @homePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Home phone'**
+  String get homePhone;
+
+  /// No description provided for @job.
+  ///
+  /// In en, this message translates to:
+  /// **'Job'**
+  String get job;
+
+  /// No description provided for @education.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get education;
+
+  /// No description provided for @childrenLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} linked'**
+  String childrenLinked(int count);
+
+  /// No description provided for @linkAnotherChild.
+  ///
+  /// In en, this message translates to:
+  /// **'Link another child'**
+  String get linkAnotherChild;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
 
-  /// No description provided for @chatNotifications.
+  /// No description provided for @notifications.
   ///
   /// In en, this message translates to:
-  /// **'Chat notifications'**
-  String get chatNotifications;
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @notificationKindsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what rings your phone. Everything still shows in the app.'**
+  String get notificationKindsHint;
+
+  /// No description provided for @notificationsOffNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off. Turn them on to choose which ones ring.'**
+  String get notificationsOffNote;
+
+  /// No description provided for @announcements.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements'**
+  String get announcements;
+
+  /// No description provided for @noAnnouncements.
+  ///
+  /// In en, this message translates to:
+  /// **'No announcements yet'**
+  String get noAnnouncements;
+
+  /// No description provided for @homework.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework'**
+  String get homework;
+
+  /// No description provided for @homeworkCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No homework} =1{1 homework} other{{count} homework}}'**
+  String homeworkCount(int count);
+
+  /// No description provided for @homeworkDueSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Due soon'**
+  String get homeworkDueSoon;
+
+  /// No description provided for @homeworkUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get homeworkUpcoming;
+
+  /// No description provided for @homeworkDueTodayFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today'**
+  String get homeworkDueTodayFilter;
+
+  /// No description provided for @homeworkPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get homeworkPast;
+
+  /// No description provided for @homeworkNoDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No due date'**
+  String get homeworkNoDueDate;
+
+  /// No description provided for @allSubjects.
+  ///
+  /// In en, this message translates to:
+  /// **'All subjects'**
+  String get allSubjects;
+
+  /// No description provided for @homeworkDueOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Due {date}'**
+  String homeworkDueOn(String date);
+
+  /// No description provided for @homeworkDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today'**
+  String get homeworkDueToday;
+
+  /// No description provided for @homeworkWasDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Was due {date}'**
+  String homeworkWasDue(String date);
+
+  /// No description provided for @homeworkGiven.
+  ///
+  /// In en, this message translates to:
+  /// **'Given {date}'**
+  String homeworkGiven(String date);
+
+  /// No description provided for @homeworkNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get homeworkNew;
+
+  /// No description provided for @noHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'No homework yet'**
+  String get noHomework;
+
+  /// No description provided for @noHomeworkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework from the school shows here.'**
+  String get noHomeworkHint;
+
+  /// No description provided for @noHomeworkFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'No homework here'**
+  String get noHomeworkFiltered;
+
+  /// No description provided for @noHomeworkFilteredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another filter or subject.'**
+  String get noHomeworkFilteredHint;
+
+  /// No description provided for @viewHomework.
+  ///
+  /// In en, this message translates to:
+  /// **'View homework'**
+  String get viewHomework;
+
+  /// No description provided for @messages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get messages;
 
   /// No description provided for @changePassword.
   ///
@@ -1460,41 +2558,455 @@ abstract class AppLocalizations {
   /// **'About Al Mahabbah'**
   String get aboutSchool;
 
-  /// No description provided for @markAllRead.
+  /// No description provided for @complaints.
   ///
   /// In en, this message translates to:
-  /// **'Mark all read'**
-  String get markAllRead;
+  /// **'Complaints'**
+  String get complaints;
 
-  /// No description provided for @allParents.
+  /// No description provided for @newComplaint.
   ///
   /// In en, this message translates to:
-  /// **'All parents'**
-  String get allParents;
+  /// **'New complaint'**
+  String get newComplaint;
 
-  /// No description provided for @yesterday.
+  /// No description provided for @complaintPrivacyNote.
   ///
   /// In en, this message translates to:
-  /// **'Yesterday'**
-  String get yesterday;
+  /// **'Only you and the school can see your complaint.'**
+  String get complaintPrivacyNote;
 
-  /// No description provided for @earlier.
+  /// No description provided for @complaintCategory.
   ///
   /// In en, this message translates to:
-  /// **'Earlier'**
-  String get earlier;
+  /// **'Category'**
+  String get complaintCategory;
 
-  /// No description provided for @unread.
+  /// No description provided for @chooseCategory.
   ///
   /// In en, this message translates to:
-  /// **'Unread'**
-  String get unread;
+  /// **'Choose a category'**
+  String get chooseCategory;
 
-  /// No description provided for @sendUsAMessage.
+  /// No description provided for @categoryRequired.
   ///
   /// In en, this message translates to:
-  /// **'Send us a message'**
-  String get sendUsAMessage;
+  /// **'The category field is required.'**
+  String get categoryRequired;
+
+  /// No description provided for @complaintAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get complaintAbout;
+
+  /// No description provided for @complaintGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get complaintGeneral;
+
+  /// No description provided for @complaintGeneralHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose General if it isn’t about one child.'**
+  String get complaintGeneralHint;
+
+  /// No description provided for @complaintDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get complaintDescription;
+
+  /// No description provided for @complaintDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us what happened, when and where'**
+  String get complaintDescriptionHint;
+
+  /// No description provided for @descriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'The description field is required.'**
+  String get descriptionRequired;
+
+  /// No description provided for @complaintAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments'**
+  String get complaintAttachments;
+
+  /// No description provided for @optionalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'(optional)'**
+  String get optionalNote;
+
+  /// No description provided for @addFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add file'**
+  String get addFile;
+
+  /// No description provided for @attachmentsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} / {max} files'**
+  String attachmentsCount(int count, int max);
+
+  /// No description provided for @attachmentFormats.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed formats: {types}.'**
+  String attachmentFormats(String types);
+
+  /// No description provided for @attachmentMaxFileSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum file size: {megabytes} MB per file.'**
+  String attachmentMaxFileSize(int megabytes);
+
+  /// No description provided for @attachmentMaxTotalSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum total size: {megabytes} MB.'**
+  String attachmentMaxTotalSize(int megabytes);
+
+  /// No description provided for @attachmentLimitsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{types} · Max {megabytes} MB per file · {total} MB total'**
+  String attachmentLimitsShort(String types, int megabytes, int total);
+
+  /// No description provided for @attachmentsRoomLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You can add 1 more · Max {megabytes} MB each} other{You can add {count} more · Max {megabytes} MB each}}'**
+  String attachmentsRoomLeft(int count, int megabytes);
+
+  /// No description provided for @attachmentsSpaceLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} MB left of {total} MB'**
+  String attachmentsSpaceLeft(String left, int total);
+
+  /// No description provided for @attachmentsMaxReached.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the maximum number of attachments ({max} files).'**
+  String attachmentsMaxReached(int max);
+
+  /// No description provided for @attachmentsTotalFull.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used the full {total} MB. Remove a file to add another.'**
+  String attachmentsTotalFull(int total);
+
+  /// No description provided for @attachmentTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Too large ({size} MB). Max size is {max} MB'**
+  String attachmentTooLarge(String size, int max);
+
+  /// No description provided for @attachmentTypeNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'File type not allowed. Allowed: {types}.'**
+  String attachmentTypeNotAllowed(String types);
+
+  /// No description provided for @attachmentOverTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Over the {total} MB total. {left} MB left.'**
+  String attachmentOverTotal(int total, String left);
+
+  /// No description provided for @attachmentOverTotalFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Over the {total} MB total.'**
+  String attachmentOverTotalFull(int total);
+
+  /// No description provided for @attachmentRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'This file could not be accepted'**
+  String get attachmentRejected;
+
+  /// No description provided for @attachmentUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading… {percent}%'**
+  String attachmentUploading(int percent);
+
+  /// No description provided for @attachPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo from the gallery'**
+  String get attachPhoto;
+
+  /// No description provided for @attachDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF or Word file'**
+  String get attachDocument;
+
+  /// No description provided for @couldNotOpenFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t open your photos or files. Please try again.'**
+  String get couldNotOpenFiles;
+
+  /// No description provided for @tooManyAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'You can attach up to {count} files.'**
+  String tooManyAttachments(int count);
+
+  /// No description provided for @attachmentNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed files are {types}, up to {megabytes} MB each.'**
+  String attachmentNotAllowed(String types, int megabytes);
+
+  /// No description provided for @removeAttachment.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name}'**
+  String removeAttachment(String name);
+
+  /// No description provided for @fileSizeKb.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} KB'**
+  String fileSizeKb(String size);
+
+  /// No description provided for @fileSizeMb.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} MB'**
+  String fileSizeMb(String size);
+
+  /// No description provided for @submitComplaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit complaint'**
+  String get submitComplaint;
+
+  /// No description provided for @complaintSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your complaint has been submitted.'**
+  String get complaintSubmitted;
+
+  /// No description provided for @complaintReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get complaintReference;
+
+  /// No description provided for @viewComplaint.
+  ///
+  /// In en, this message translates to:
+  /// **'View complaint'**
+  String get viewComplaint;
+
+  /// No description provided for @backToComplaints.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to complaints'**
+  String get backToComplaints;
+
+  /// No description provided for @complaintsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 complaint} other{{count} complaints}}'**
+  String complaintsCount(int count);
+
+  /// No description provided for @openCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} open'**
+  String openCount(int count);
+
+  /// No description provided for @filterOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get filterOpen;
+
+  /// No description provided for @filterClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get filterClosed;
+
+  /// No description provided for @noComplaintsHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No complaints here'**
+  String get noComplaintsHere;
+
+  /// No description provided for @noComplaintsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaints you submit will appear in this list.'**
+  String get noComplaintsSubtitle;
+
+  /// No description provided for @complaintsPageNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {lastPage} · {total} total'**
+  String complaintsPageNote(int page, int lastPage, int total);
+
+  /// No description provided for @submittedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted {date}'**
+  String submittedOn(String date);
+
+  /// No description provided for @lastUpdateOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Last update {date}'**
+  String lastUpdateOn(String date);
+
+  /// No description provided for @statusSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get statusSubmitted;
+
+  /// No description provided for @statusUnderReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get statusUnderReview;
+
+  /// No description provided for @statusAwaitingReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting your reply'**
+  String get statusAwaitingReply;
+
+  /// No description provided for @statusResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get statusResolved;
+
+  /// No description provided for @statusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get statusRejected;
+
+  /// No description provided for @complaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint'**
+  String get complaint;
+
+  /// No description provided for @complaintDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get complaintDetails;
+
+  /// No description provided for @submittedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get submittedAt;
+
+  /// No description provided for @lastUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last update'**
+  String get lastUpdate;
+
+  /// No description provided for @yourComplaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your complaint'**
+  String get yourComplaint;
+
+  /// No description provided for @statusHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Status history'**
+  String get statusHistory;
+
+  /// No description provided for @complaintUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get complaintUpdates;
+
+  /// No description provided for @schoolAdministration.
+  ///
+  /// In en, this message translates to:
+  /// **'School administration'**
+  String get schoolAdministration;
+
+  /// No description provided for @schoolInitials.
+  ///
+  /// In en, this message translates to:
+  /// **'AM'**
+  String get schoolInitials;
+
+  /// No description provided for @tapToOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to open'**
+  String get tapToOpen;
+
+  /// No description provided for @checkingFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking file…'**
+  String get checkingFile;
+
+  /// No description provided for @addAReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a reply'**
+  String get addAReply;
+
+  /// No description provided for @replyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write more details for the school'**
+  String get replyHint;
+
+  /// No description provided for @replySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your reply has been sent.'**
+  String get replySent;
+
+  /// No description provided for @attach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get attach;
+
+  /// No description provided for @sendReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Send reply'**
+  String get sendReply;
+
+  /// No description provided for @complaintClosedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This complaint is closed. You can submit a new complaint.'**
+  String get complaintClosedNote;
+
+  /// No description provided for @cantOpenFile.
+  ///
+  /// In en, this message translates to:
+  /// **'There’s no app on this phone that opens this file.'**
+  String get cantOpenFile;
 
   /// No description provided for @writeToUs.
   ///

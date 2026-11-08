@@ -18,6 +18,7 @@ import 'package:al_mahhaba_school/core/widgets/section_title.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/core/widgets/visitor_header.dart';
 import 'package:al_mahhaba_school/core/widgets/visitor_page.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/extensions/parent_context.dart';
 import 'package:al_mahhaba_school/features/contact/domain/entities/contact_info_entity.dart';
 import 'package:al_mahhaba_school/features/contact/presentation/view_model/contact_event.dart';
 import 'package:al_mahhaba_school/features/contact/presentation/view_model/contact_view_model.dart';
@@ -43,6 +44,8 @@ class ContactPage extends StatelessWidget {
           title: l10n.contactUs,
           subtitle: l10n.contactSubtitle,
         ),
+        // Also opened from Profile, where the parent is already signed in.
+        showLogin: context.watchParent() == null,
         children: const [_ContactBody()],
       ),
     );
@@ -126,7 +129,7 @@ class _ContactDetails extends StatelessWidget {
                 iconBackground: AppColors.goldSoft,
                 iconColor: AppColors.goldDeep,
                 label: l10n.writeToUs,
-                value: l10n.sendUsAMessage,
+                value: l10n.sendMessage,
                 valueIsLtr: false,
                 onTap: () => context.push(AppRoutes.contactMessage),
               ),

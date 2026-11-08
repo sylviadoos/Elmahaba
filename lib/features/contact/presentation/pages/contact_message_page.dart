@@ -7,6 +7,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/visitor_header.dart';
 import 'package:al_mahhaba_school/core/widgets/visitor_page.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/extensions/parent_context.dart';
 import 'package:al_mahhaba_school/features/contact/presentation/view_model/contact_message_event.dart';
 import 'package:al_mahhaba_school/features/contact/presentation/view_model/contact_message_view_model.dart';
 import 'package:al_mahhaba_school/features/contact/presentation/widgets/contact_message_form.dart';
@@ -24,9 +25,11 @@ class ContactMessagePage extends StatelessWidget {
       create: (_) => getIt<ContactMessageViewModel>(),
       child: VisitorPage(
         header: VisitorHeader(
-          title: l10n.sendUsAMessage,
+          title: l10n.sendMessage,
           subtitle: l10n.sendMessageSubtitle,
         ),
+        // Also opened from Profile, where the parent is already signed in.
+        showLogin: context.watchParent() == null,
         children: const [_ContactMessageBody()],
       ),
     );

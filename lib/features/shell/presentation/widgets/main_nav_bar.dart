@@ -1,8 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 
-import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
@@ -10,39 +10,40 @@ import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 
 enum MainTab { home, chat, results, attendance, fees }
 
-/// Floating rounded bottom bar of the parent app.
+/// Floating rounded bottom bar of the parent app. `ParentShellPage` keeps
+/// it in place over the tabs.
 class MainNavBar extends StatelessWidget {
-  const MainNavBar({super.key, required this.current, this.chatUnread = 0});
+  const MainNavBar({
+    super.key,
+    required this.current,
+    required this.onSelected,
+    this.chatUnread = 0,
+  });
 
   final MainTab current;
+
+  /// A tab other than [current] was tapped.
+  final ValueChanged<MainTab> onSelected;
 
   /// Shown as a badge on Chat.
   final int chatUnread;
 
-  /// Tabs replace each other; Chat opens on top (it has a back button).
-  void _open(BuildContext context, MainTab tab) {
-    if (tab == current) return;
-    switch (tab) {
-      case MainTab.home:
-        context.go(AppRoutes.home);
-      case MainTab.chat:
-        context.push(AppRoutes.chat);
-      case MainTab.results:
-        context.go(AppRoutes.results);
-      case MainTab.attendance:
-        context.go(AppRoutes.attendance);
-      case MainTab.fees:
-        context.go(AppRoutes.fees);
-    }
-  }
+  /// From the bottom of the screen to the bar.
+  static double bottomOffset(BuildContext context) =>
+      math.max(24.h, MediaQuery.paddingOf(context).bottom + 8);
+
+  /// Room under a tab's content, so its end scrolls above the bar.
+  static double contentPadding(BuildContext context) =>
+      bottomOffset(context) + 68.h + 24.h;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    // Chat in the middle.
     final items = [
       (MainTab.home, AppIcons.navHome, l10n.home),
-      (MainTab.chat, AppIcons.navChat, l10n.chat),
       (MainTab.results, AppIcons.navResults, l10n.results),
+      (MainTab.chat, AppIcons.navChat, l10n.chat),
       (MainTab.attendance, AppIcons.navAttendance, l10n.attendance),
       (MainTab.fees, AppIcons.navFees, l10n.fees),
     ];
@@ -76,7 +77,9 @@ class MainNavBar extends StatelessWidget {
                 label: label,
                 isActive: tab == current,
                 badge: tab == MainTab.chat ? chatUnread : 0,
-                onTap: () => _open(context, tab),
+                onTap: () {
+                  if (tab != current) onSelected(tab);
+                },
               ),
             ),
         ],

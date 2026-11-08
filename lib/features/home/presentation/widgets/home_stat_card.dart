@@ -71,13 +71,21 @@ class HomeStatCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Text(
-                value,
-                style: textTheme.titleLarge?.copyWith(
-                  fontSize: 24.sp,
-                  height: 1.2,
-                  fontWeight: FontWeight.w800,
-                  color: highlighted ? AppColors.white : AppColors.mahabbahRed,
+              // Shrinks rather than wraps, e.g. "2025-2026".
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  style: textTheme.titleLarge?.copyWith(
+                    fontSize: 24.sp,
+                    height: 1.2,
+                    fontWeight: FontWeight.w800,
+                    color: highlighted
+                        ? AppColors.white
+                        : AppColors.mahabbahRed,
+                  ),
                 ),
               ),
               Text(

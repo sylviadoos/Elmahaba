@@ -12,6 +12,7 @@ import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 import 'package:al_mahhaba_school/core/widgets/equal_height_grid.dart';
 import 'package:al_mahhaba_school/core/widgets/icon_box.dart';
+import 'package:al_mahhaba_school/core/widgets/language_button.dart';
 import 'package:al_mahhaba_school/features/news/presentation/view_model/news_event.dart';
 import 'package:al_mahhaba_school/features/news/presentation/view_model/news_view_model.dart';
 import 'package:al_mahhaba_school/features/news/presentation/widgets/news_preview_card.dart';
@@ -21,7 +22,8 @@ import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/visitor_page.dart';
 
 /// Visitor home: what the school offers, latest news and ways to get in
-/// touch, with links to About us, News and Contact.
+/// touch, with links to About us, News and Contact, and the language
+/// switch.
 class ExplorePage extends StatelessWidget {
   const ExplorePage({super.key});
 
@@ -64,14 +66,17 @@ class _ExploreHeader extends StatelessWidget {
                 width: 42.r,
                 height: 30.r,
               ),
-              Text(
-                l10n.schoolNameTwoLines,
-                style: textTheme.titleLarge?.copyWith(
-                  fontSize: 14.sp,
-                  height: 16 / 14,
-                  color: AppColors.white,
+              Expanded(
+                child: Text(
+                  l10n.schoolNameTwoLines,
+                  style: textTheme.titleLarge?.copyWith(
+                    fontSize: 14.sp,
+                    height: 16 / 14,
+                    color: AppColors.white,
+                  ),
                 ),
               ),
+              const LanguageButton(),
             ],
           ),
           Column(

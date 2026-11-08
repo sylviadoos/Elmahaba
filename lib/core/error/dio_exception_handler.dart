@@ -5,6 +5,9 @@ import 'package:al_mahhaba_school/core/network/api_keys.dart';
 import 'package:al_mahhaba_school/core/network/status_code.dart';
 
 abstract final class DioExceptionHandler {
+  /// `{"code": "unauthenticated", "message": "Please log in again."}`
+  static const _sessionEndedCode = 'unauthenticated';
+
   /// Converts a [DioException] into a typed [AppException], so the UI can
   /// react to the kind of error (e.g. 401 → go to login).
   static AppException handle(DioException e) {
@@ -20,15 +23,22 @@ abstract final class DioExceptionHandler {
 
       case DioExceptionType.badResponse:
         final statusCode = e.response?.statusCode;
-        final message = _messageFrom(e.response?.data);
+        final data = e.response?.data;
+        final message = _messageFrom(data);
+        final code = _codeFrom(data);
 
-        if (statusCode == StatusCode.expiredToken) {
+        // A 401 is an ended session unless the API names another reason,
+        // e.g. `invalid_credentials` for a wrong password on log in.
+        if (statusCode == StatusCode.expiredToken &&
+            (code == null || code == _sessionEndedCode)) {
           return UnauthorizedException(message: message);
         }
         return ServerException(
           message: message,
           statusCode: statusCode,
-          fieldErrors: _fieldErrorsFrom(e.response?.data),
+          code: code,
+          fieldErrors: _fieldErrorsFrom(data),
+          body: data is Map<String, dynamic> ? data : const {},
         );
 
       case DioExceptionType.transformTimeout:
@@ -45,6 +55,12 @@ abstract final class DioExceptionHandler {
       if (message is String && message.isNotEmpty) return message;
     }
     return null;
+  }
+
+  /// Reads `{"code": "invalid_phone"}`.
+  static String? _codeFrom(Object? data) {
+    final code = data is Map ? data[ApiKeys.code] : null;
+    return code is String && code.isNotEmpty ? code : null;
   }
 
   /// Reads `{"errors": {"email": ["…", "…"]}}` (validation errors), keeping

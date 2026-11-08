@@ -39,7 +39,48 @@ abstract final class AppColors {
   static const Color warning = Color(0xFFB45309);
   static const Color warningBg = Color(0xFFFDF0E1);
   static const Color error = Color(0xFFD92D20);
+
+  /// A form's error box (background, border) — used in the page designs,
+  /// not in colors.xml.
+  static const Color errorBg = Color(0xFFFDECEA);
+  static const Color errorBorder = Color(0xFFF5C2BD);
   static const Color info = Color(0xFF2557D6);
+
+  /// Light background for [info] — used in the page designs, not in
+  /// colors.xml.
+  static const Color infoBg = Color(0xFFE8EEFC);
+
+  /// A row's top line inside a card — used in the page designs, not in
+  /// colors.xml.
+  static const Color hairline = Color(0xFFF0F0F3);
+
+  /// A card's title strip (fee statement) — used in the page designs, not
+  /// in colors.xml.
+  static const Color paleSurface = Color(0xFFFAFAFB);
+
+  /// A ticked installment's background — used in the page designs, not in
+  /// colors.xml.
+  static const Color blushPale = Color(0xFFFFF7F7);
+
+  /// A password rule not met yet — used in the page designs, not in
+  /// colors.xml.
+  static const Color unmet = Color(0xFFC9CCD5);
+
+  /// A bottom sheet's drag handle, and the dim behind it — used in the page
+  /// designs, not in colors.xml.
+  static const Color handle = Color(0xFFD5D8E0);
+  static const Color scrim = Color(0x7A141620);
+
+  /// An installment under settlement — used in the page designs, not in
+  /// colors.xml.
+  static const Color settlement = Color(0xFF5B3CC4);
+  static const Color settlementBg = Color(0xFFECE8FB);
+
+  // 🔹 The school's grade scale (result colors), by share of the mark
+  static const Color gradeExceeds = Color(0xFF0B5ED7); // 85 – 100
+  static const Color gradeMeets = Color(0xFF1E7E34); // 65 – 85
+  static const Color gradePartiallyMeets = Color(0xFFEBCE2D); // 50 – 65
+  static const Color gradeBelow = Color(0xFFB91C1C); // below 50
 
   // 🔹 Dark mode (not in the design palette)
   static const Color darkBackground = Color(0xFF121417);

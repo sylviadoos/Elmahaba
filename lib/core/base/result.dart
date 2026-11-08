@@ -7,7 +7,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 ///
 /// ```dart
 /// Future<Result<User>> login(LoginRequest body) => Result.guard(() async {
-///   final json = await _api.post(ApiEndpoints.signin, data: body.toJson());
+///   final json = await _api.post(ApiEndpoints.login, data: body.toJson());
 ///   return User.fromJson(json);
 /// });
 /// ```
@@ -36,6 +36,26 @@ sealed class Result<T> {
       Failure<T>(:final exception) => failure(exception),
     };
   }
+
+  /// Converts the data of a [Success]; a [Failure] is passed on as is.
+  Result<R> map<R>(R Function(T data) convert) => switch (this) {
+    Success<T>(:final data) => Success(data: convert(data)),
+    Failure<T>(:final exception) => Failure(exception: exception),
+  };
+
+  /// Runs the next step with the data of a [Success]; a [Failure] skips it.
+  ///
+  /// ```dart
+  /// final verified = await verifyCode(code);
+  /// final session = await verified.andThen((token) => register(token));
+  /// ```
+  Future<Result<R>> andThen<R>(Future<Result<R>> Function(T data) next) =>
+      switch (this) {
+        Success<T>(:final data) => next(data),
+        Failure<T>(:final exception) => Future.value(
+          Failure(exception: exception),
+        ),
+      };
 }
 
 final class Success<T> extends Result<T> {

@@ -36,7 +36,9 @@ class AppTextField extends StatefulWidget {
     this.height = 54,
     this.minLines = 1,
     this.labelGap = 8,
+    this.labelWeight = FontWeight.w500,
     this.letterSpacing,
+    this.fillColor = AppColors.surface,
   });
 
   final String? label;
@@ -74,7 +76,13 @@ class AppTextField extends StatefulWidget {
   /// many lines tall and grows with the text; [height] is then ignored.
   final int minLines;
   final double labelGap;
+
+  /// Most designs label fields at 500; a few at 600.
+  final FontWeight labelWeight;
   final double? letterSpacing;
+
+  /// The box's color while not focused: grey, or white on a grey card.
+  final Color fillColor;
 
   @override
   State<AppTextField> createState() => _AppTextFieldState();
@@ -121,7 +129,7 @@ class _AppTextFieldState extends State<AppTextField> {
         bottom: multiline ? 14.h : 0,
       ),
       decoration: BoxDecoration(
-        color: focused ? AppColors.white : AppColors.surface,
+        color: focused ? AppColors.white : widget.fillColor,
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           color: hasError
@@ -233,7 +241,7 @@ class _AppTextFieldState extends State<AppTextField> {
                 child: Text(
                   widget.label!,
                   style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: widget.labelWeight,
                   ),
                 ),
               ),

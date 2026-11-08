@@ -8,6 +8,7 @@ import 'package:al_mahhaba_school/core/widgets/icon_box.dart';
 import 'package:al_mahhaba_school/core/widgets/principal_card.dart';
 import 'package:al_mahhaba_school/core/widgets/visitor_header.dart';
 import 'package:al_mahhaba_school/core/widgets/visitor_page.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/extensions/parent_context.dart';
 
 /// The school's vision, mission and legacy.
 class AboutPage extends StatelessWidget {
@@ -19,6 +20,8 @@ class AboutPage extends StatelessWidget {
 
     return VisitorPage(
       header: VisitorHeader(title: l10n.aboutUs, subtitle: l10n.aboutSubtitle),
+      // Also opened from Profile, where the parent is already signed in.
+      showLogin: context.watchParent() == null,
       children: const [
         _VisionCard(),
         _MissionSection(),

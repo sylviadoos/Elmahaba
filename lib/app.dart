@@ -10,6 +10,9 @@ import 'package:al_mahhaba_school/config/theme/app_theme.dart';
 import 'package:al_mahhaba_school/core/app_settings/locale_theme_cubit.dart';
 import 'package:al_mahhaba_school/core/app_settings/locale_theme_state.dart';
 import 'package:al_mahhaba_school/core/widgets/screen_util_scope.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 
 class AlMahhabaApp extends StatelessWidget {
   const AlMahhabaApp({super.key});
@@ -18,8 +21,16 @@ class AlMahhabaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Above MaterialApp so the theme's text sizes can use `.sp`.
     return ScreenUtilScope(
-      child: BlocProvider(
-        create: (_) => getIt<LocaleThemeCubit>(),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => getIt<LocaleThemeCubit>()),
+          // The signed-in parent and their children, shared by every page
+          // (headers, Profile, Add children). Created when first read.
+          BlocProvider(create: (_) => getIt<ParentViewModel>()),
+          BlocProvider(create: (_) => getIt<ChildrenViewModel>()),
+          // The badge on Chat, which the chat updates as it's read.
+          BlocProvider(create: (_) => getIt<ChatUnreadBloc>()),
+        ],
         child: BlocBuilder<LocaleThemeCubit, LocaleThemeState>(
           builder: (context, state) => MaterialApp.router(
             title: AppConfig.appName,

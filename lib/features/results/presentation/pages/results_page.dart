@@ -1,297 +1,166 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'package:al_mahhaba_school/config/theme/app_colors.dart';
+import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
-import 'package:al_mahhaba_school/core/widgets/icon_box.dart';
-import 'package:al_mahhaba_school/core/widgets/progress_bar.dart';
-import 'package:al_mahhaba_school/core/widgets/section_title.dart';
-import 'package:al_mahhaba_school/core/widgets/segmented_control.dart';
-import 'package:al_mahhaba_school/features/results/data/mock_results.dart';
-import 'package:al_mahhaba_school/features/shell/presentation/widgets/main_nav_bar.dart';
+import 'package:al_mahhaba_school/core/widgets/app_button.dart';
+import 'package:al_mahhaba_school/core/widgets/state_message.dart';
+import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
+import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
+import 'package:al_mahhaba_school/features/children/presentation/widgets/no_children_state.dart';
+import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart';
+import 'package:al_mahhaba_school/features/results/presentation/view_model/results_event.dart';
+import 'package:al_mahhaba_school/features/results/presentation/view_model/results_state.dart';
+import 'package:al_mahhaba_school/features/results/presentation/view_model/results_view_model.dart';
+import 'package:al_mahhaba_school/features/results/presentation/widgets/final_result_card.dart';
+import 'package:al_mahhaba_school/features/results/presentation/widgets/report_card_button.dart';
+import 'package:al_mahhaba_school/features/results/presentation/widgets/result_activities_card.dart';
+import 'package:al_mahhaba_school/features/results/presentation/widgets/result_info_card.dart';
+import 'package:al_mahhaba_school/features/results/presentation/widgets/result_subjects_section.dart';
+import 'package:al_mahhaba_school/features/results/presentation/widgets/results_skeleton.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/parent_tab_page.dart';
 
-/// Term results for the selected child: average, subjects and the
-/// teacher's note.
-class ResultsPage extends StatefulWidget {
+/// The selected child's latest result: the final result, every subject's
+/// mark (tap one for its parts) and the activities.
+class ResultsPage extends StatelessWidget {
   const ResultsPage({super.key});
 
   @override
-  State<ResultsPage> createState() => _ResultsPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<ResultsViewModel>(),
+      child: const _ResultsView(),
+    );
+  }
 }
 
-class _ResultsPageState extends State<ResultsPage> {
-  int _selectedChild = 0;
+class _ResultsView extends StatefulWidget {
+  const _ResultsView();
+
+  @override
+  State<_ResultsView> createState() => _ResultsViewState();
+}
+
+class _ResultsViewState extends State<_ResultsView> {
+  /// The subject shown open, by its section and its place in it; the first
+  /// counted subject at first.
+  (int, int)? _open = (0, 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadResult();
+  }
+
+  /// Whose result is shown.
+  int? _shownId;
+
+  /// The selected child's latest result; nothing to load without children.
+  void _loadResult() {
+    final child = context.read<ChildrenViewModel>().state.selectedChild;
+    if (child == null) return;
+    // Another child: their first subject opens.
+    if (child.studentId != _shownId && _shownId != null) {
+      setState(() => _open = (0, 0));
+    }
+    _shownId = child.studentId;
+    context.read<ResultsViewModel>().doAction(
+      LoadLatestResultEvent(child.studentId),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final results = mockTerm1Results[_selectedChild];
+    final childrenState = context.select(
+      (ChildrenViewModel viewModel) => viewModel.state.children,
+    );
+    final children = childrenState.data ?? const <ChildEntity>[];
 
-    return ParentTabPage(
-      title: l10n.results,
-      tab: MainTab.results,
-      selectedChild: _selectedChild,
-      onChildSelected: (index) => setState(() => _selectedChild = index),
+    return BlocListener<ChildrenViewModel, ChildrenState>(
+      // The children arrived or changed (a child linked, the list
+      // refreshed), or another one was picked, here or on another page.
+      listenWhen: (previous, current) =>
+          previous.children.data != current.children.data ||
+          current.showsOtherChildThan(previous),
+      listener: (context, state) => _loadResult(),
+      child: ParentTabPage(
+        title: context.l10n.results,
+        selectedChild: context.watchSelectedChildIndex(),
+        onChildSelected: (index) =>
+            context.selectChild(children[index].studentId),
+        children: [
+          if (children.isEmpty)
+            NoChildrenState(
+              children: childrenState,
+              loading: const ResultsSkeleton(),
+            )
+          else
+            BlocBuilder<ResultsViewModel, ResultsState>(
+              builder: (context, state) => state.when(
+                initial: () => const ResultsSkeleton(),
+                loading: () => const ResultsSkeleton(),
+                error: (exception) => StateMessage(
+                  icon: AppIcons.navResults,
+                  title: exception.localizedMessage(context),
+                  action: AppButton(
+                    label: context.l10n.tryAgain,
+                    expand: false,
+                    onPressed: _loadResult,
+                  ),
+                ),
+                success: (result) => result == null
+                    ? StateMessage(
+                        icon: AppIcons.navResults,
+                        title: context.l10n.noResultsYet,
+                      )
+                    : _result(context, result),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _result(BuildContext context, ResultDetailsEntity result) {
+    final l10n = context.l10n;
+    final sections = [
+      (l10n.subjects, l10n.countedInFinalResult, result.subjectsIncluded),
+      (
+        l10n.otherSubjects,
+        l10n.notCountedInFinalResult,
+        result.subjectsNotIncluded,
+      ),
+      (l10n.highLevel, l10n.highLevelNote, result.highLevel),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 18.h,
       children: [
-        SegmentedControl(
-          options: [
-            SegmentOption(l10n.term1),
-            SegmentOption(l10n.term2Soon, enabled: false),
-          ],
-          selected: 0,
-          onSelected: (_) {},
-        ),
-        _AverageCard(results),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 10.h,
-          children: [
-            SectionTitle(l10n.subjects),
-            for (final subject in results.subjects) _SubjectRow(subject),
-          ],
-        ),
-        _TeacherNote(results.teacherNote),
+        ResultInfoCard(result: result),
+        FinalResultCard(result: result),
+        for (final (section, (title, note, subjects)) in sections.indexed)
+          if (subjects.isNotEmpty)
+            ResultSubjectsSection(
+              title: title,
+              note: note,
+              subjects: subjects,
+              usesColors: result.usesColors,
+              openIndex: _open?.$1 == section ? _open?.$2 : null,
+              // Tapping the open one closes it.
+              onToggle: (index) => setState(
+                () =>
+                    _open = _open == (section, index) ? null : (section, index),
+              ),
+            ),
+        if (result.activities.isNotEmpty)
+          ResultActivitiesCard(activities: result.activities),
+        const ReportCardButton(),
       ],
-    );
-  }
-}
-
-String _percent(double value) => '${(value * 100).round()}%';
-
-class _AverageCard extends StatelessWidget {
-  const _AverageCard(this.results);
-
-  final TermResults results;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final textTheme = context.textTheme;
-
-    return Container(
-      padding: EdgeInsets.all(18.r),
-      decoration: BoxDecoration(
-        color: AppColors.blush,
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Row(
-        spacing: 16.w,
-        children: [
-          _AverageRing(results.average),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 4.h,
-              children: [
-                Text(
-                  l10n.term1Average,
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.slate),
-                ),
-                Text(
-                  results.level,
-                  style: textTheme.titleLarge?.copyWith(
-                    fontSize: 20.sp,
-                    height: 1.2,
-                    color: AppColors.mahabbahRed,
-                  ),
-                ),
-                TextButton.icon(
-                  // TODO: download the report card PDF.
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.actionRed,
-                    minimumSize: Size(0, 40.h),
-                    padding: EdgeInsets.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    textStyle: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  icon: AppSvgIcon(AppIcons.download, size: 16.r),
-                  label: Text(l10n.reportCardPdf),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Donut showing the average: red share, light rose remainder.
-class _AverageRing extends StatelessWidget {
-  const _AverageRing(this.value);
-
-  final double value;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox.square(
-      dimension: 84.r,
-      child: CustomPaint(
-        painter: _RingPainter(value),
-        child: Center(
-          child: Container(
-            width: 64.r,
-            height: 64.r,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: AppColors.white,
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              _percent(value),
-              style: context.textTheme.titleLarge?.copyWith(
-                fontSize: 19.sp,
-                height: 1,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RingPainter extends CustomPainter {
-  const _RingPainter(this.value);
-
-  final double value;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    canvas
-      ..drawOval(rect, Paint()..color = AppColors.rose)
-      ..drawArc(
-        rect,
-        -math.pi / 2,
-        2 * math.pi * value,
-        true,
-        Paint()..color = AppColors.actionRed,
-      );
-  }
-
-  @override
-  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
-      oldDelegate.value != value;
-}
-
-class _SubjectRow extends StatelessWidget {
-  const _SubjectRow(this.subject);
-
-  final SubjectResult subject;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
-    final bold = textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600);
-
-    return Container(
-      padding: EdgeInsets.all(12.r),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.line),
-      ),
-      child: Row(
-        spacing: 12.w,
-        children: [
-          Container(
-            width: 40.r,
-            height: 40.r,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.blush,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Text(
-              subject.short,
-              style: textTheme.bodyMedium?.copyWith(
-                height: 1,
-                fontWeight: FontWeight.w700,
-                color: AppColors.mahabbahRed,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 6.h,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(child: Text(subject.name, style: bold)),
-                    Text(
-                      '${subject.score}/${subject.maxScore}',
-                      textDirection: TextDirection.ltr,
-                      style: bold?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ],
-                ),
-                ProgressBar(value: subject.fraction),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TeacherNote extends StatelessWidget {
-  const _TeacherNote(this.note);
-
-  final String note;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18.r),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12.w,
-        children: [
-          IconBox(
-            AppIcons.navChat,
-            size: 38.r,
-            iconSize: 18.r,
-            radius: 12.r,
-            background: AppColors.white,
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 4.h,
-              children: [
-                Text(
-                  context.l10n.teachersNote,
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  note,
-                  style: textTheme.bodyMedium?.copyWith(color: AppColors.slate),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

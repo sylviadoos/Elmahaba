@@ -1,223 +1,265 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:al_mahhaba_school/config/theme/app_colors.dart';
+import 'package:al_mahhaba_school/config/di/injectable_config.dart';
+import 'package:al_mahhaba_school/config/routes/app_routes.dart';
+import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/dashed_border.dart';
+import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/equal_height_grid.dart';
-import 'package:al_mahhaba_school/core/widgets/section_title.dart';
-import 'package:al_mahhaba_school/features/attendance/data/mock_attendance.dart';
+import 'package:al_mahhaba_school/core/widgets/state_message.dart';
+import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/view_model/attendance_event.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/view_model/attendance_state.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/view_model/attendance_view_model.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/widgets/attendance_count_tile.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/widgets/attendance_events_section.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/widgets/attendance_skeleton.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/widgets/attendance_summary_card.dart';
 import 'package:al_mahhaba_school/features/attendance/presentation/widgets/month_calendar.dart';
-import 'package:al_mahhaba_school/features/shell/presentation/widgets/main_nav_bar.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/widgets/month_switcher.dart';
+import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
+import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
+import 'package:al_mahhaba_school/features/children/presentation/widgets/no_children_state.dart';
+import 'package:al_mahhaba_school/features/excuses/domain/entities/excusable_absence_entity.dart';
+import 'package:al_mahhaba_school/features/excuses/domain/entities/excuse_details_entity.dart';
+import 'package:al_mahhaba_school/features/excuses/domain/entities/excuse_rules_entity.dart';
+import 'package:al_mahhaba_school/features/excuses/presentation/excuse_args.dart';
+import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excusable_absences_event.dart';
+import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excusable_absences_view_model.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/parent_tab_page.dart';
 
-/// The month's attendance for the selected child: totals, calendar and
-/// what happened this month.
-class AttendancePage extends StatefulWidget {
+/// The selected child's attendance, a month at a time: the rate, the
+/// counts, the calendar and the days that weren't plain school days — with
+/// a medical excuse to send for an absence, or to follow.
+class AttendancePage extends StatelessWidget {
   const AttendancePage({super.key});
 
   @override
-  State<AttendancePage> createState() => _AttendancePageState();
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<AttendanceViewModel>()),
+        BlocProvider(create: (_) => getIt<ExcusableAbsencesViewModel>()),
+      ],
+      child: const _AttendanceView(),
+    );
+  }
 }
 
-class _AttendancePageState extends State<AttendancePage> {
-  int _selectedChild = 0;
+class _AttendanceView extends StatefulWidget {
+  const _AttendanceView();
+
+  @override
+  State<_AttendanceView> createState() => _AttendanceViewState();
+}
+
+class _AttendanceViewState extends State<_AttendanceView> {
+  /// The month shown — this one at first; there's nothing after it.
+  DateTime _month = _thisMonth();
+
+  static DateTime _thisMonth() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadChild();
+  }
+
+  /// The selected child's `studentId`; null without children.
+  int? get _childId =>
+      context.read<ChildrenViewModel>().state.selectedChild?.studentId;
+
+  /// The selected child's attendance in [_month]; nothing to load without
+  /// children.
+  void _loadMonth() {
+    final childId = _childId;
+    if (childId == null) return;
+    context.read<AttendanceViewModel>().doAction(
+      LoadAttendanceEvent(childId: childId, month: _month),
+    );
+  }
+
+  /// Which of the selected child's absences take an excuse.
+  void _loadExcuses() {
+    final childId = _childId;
+    if (childId == null) return;
+    context.read<ExcusableAbsencesViewModel>().doAction(
+      LoadExcusableAbsencesEvent(childId),
+    );
+  }
+
+  void _loadChild() {
+    _loadMonth();
+    _loadExcuses();
+  }
+
+  /// Once sent, it opens; either way the absences load again.
+  Future<void> _submitExcuse(
+    ExcusableAbsenceEntity absence,
+    ExcuseRulesEntity rules,
+  ) async {
+    final childId = _childId;
+    if (childId == null) return;
+    final sent = await context.push<ExcuseDetailsEntity>(
+      AppRoutes.newExcuse,
+      extra: NewExcuseArgs(childId: childId, absence: absence, rules: rules),
+    );
+    if (!mounted) return;
+    _loadExcuses();
+    if (sent != null) {
+      await _openExcuse(sent.id, shown: sent, rules: rules);
+    }
+  }
+
+  /// Where it stands may change there (documents added), so the absences
+  /// load again on the way back.
+  Future<void> _openExcuse(
+    int excuseId, {
+    ExcuseDetailsEntity? shown,
+    ExcuseRulesEntity? rules,
+  }) async {
+    final childId = _childId;
+    if (childId == null) return;
+    await context.push(
+      AppRoutes.excuseDetailsOf(childId, excuseId),
+      extra: ExcuseDetailsArgs(shown: shown, rules: rules),
+    );
+    if (mounted) _loadExcuses();
+  }
+
+  /// [step] months away: -1 back, 1 forward.
+  void _moveMonth(int step) {
+    setState(() => _month = DateTime(_month.year, _month.month + step));
+    _loadMonth();
+  }
+
+  void _previousMonth() => _moveMonth(-1);
+
+  /// Null on this month: there's nothing after it.
+  VoidCallback? get _nextMonth =>
+      _month.isBefore(_thisMonth()) ? () => _moveMonth(1) : null;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final month = mockAttendanceMonth;
-    final attendance = mockAttendance[_selectedChild];
-    final days = [
-      for (
-        var day = 1;
-        day <= DateUtils.getDaysInMonth(month.year, month.month);
-        day++
-      )
-        dayStatus(month, day, attendance),
-    ];
-    int count(DayStatus status) => days.where((d) => d == status).length;
+    final childrenState = context.select(
+      (ChildrenViewModel viewModel) => viewModel.state.children,
+    );
+    final children = childrenState.data ?? const <ChildEntity>[];
 
-    return ParentTabPage(
-      title: l10n.attendance,
-      tab: MainTab.attendance,
-      selectedChild: _selectedChild,
-      onChildSelected: (index) => setState(() => _selectedChild = index),
+    return BlocListener<ChildrenViewModel, ChildrenState>(
+      // The children arrived or changed (a child linked, the list
+      // refreshed), or another one was picked, here or on another page.
+      listenWhen: (previous, current) =>
+          previous.children.data != current.children.data ||
+          current.showsOtherChildThan(previous),
+      listener: (context, state) => _loadChild(),
+      child: ParentTabPage(
+        title: context.l10n.attendance,
+        selectedChild: context.watchSelectedChildIndex(),
+        onChildSelected: (index) =>
+            context.selectChild(children[index].studentId),
+        children: [
+          if (children.isEmpty)
+            NoChildrenState(
+              children: childrenState,
+              loading: const AttendanceSkeleton(),
+            )
+          else
+            BlocBuilder<AttendanceViewModel, AttendanceState>(
+              builder: (context, state) => state.when(
+                initial: () => const AttendanceSkeleton(),
+                loading: () => const AttendanceSkeleton(),
+                // The arrows stay, so a month that didn't load isn't a dead
+                // end.
+                error: (exception) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    MonthSwitcher(
+                      month: _month,
+                      onPrevious: _previousMonth,
+                      onNext: _nextMonth,
+                    ),
+                    StateMessage(
+                      icon: AppIcons.navAttendance,
+                      title: exception.localizedMessage(context),
+                      action: AppButton(
+                        label: context.l10n.tryAgain,
+                        expand: false,
+                        onPressed: _loadMonth,
+                      ),
+                    ),
+                  ],
+                ),
+                success: (attendance) => _attendance(context, attendance),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _attendance(BuildContext context, MonthAttendanceEntity attendance) {
+    final l10n = context.l10n;
+    final counts = attendance.counts;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 18.h,
       children: [
+        AttendanceSummaryCard(counts: counts),
         EqualHeightGrid(
-          columns: 3,
+          columns: 4,
           spacing: 10.w,
           children: [
-            _CountTile(
-              count: count(DayStatus.present),
+            AttendanceCountTile(
+              count: counts.presentDays,
               label: l10n.present,
-              style: _TileStyle.soft,
+              style: CountTileStyle.soft,
             ),
-            _CountTile(
-              count: count(DayStatus.absent),
+            AttendanceCountTile(
+              count: counts.absentDays,
               label: l10n.absent,
-              style: _TileStyle.solid,
+              style: CountTileStyle.solid,
             ),
-            _CountTile(
-              count: count(DayStatus.late),
+            AttendanceCountTile(
+              count: counts.lateDays,
               label: l10n.late,
-              style: _TileStyle.dashed,
+              style: CountTileStyle.dashed,
+            ),
+            AttendanceCountTile(
+              count: counts.excusedDays,
+              label: l10n.excused,
+              style: CountTileStyle.info,
             ),
           ],
         ),
-        MonthCalendar(month: month, days: days),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 10.h,
-          children: [
-            SectionTitle(l10n.thisMonth),
-            for (final event in attendance.events)
-              _EventRow(event: event, month: month),
-          ],
+        MonthCalendar(
+          attendance: attendance,
+          onPrevious: _previousMonth,
+          onNext: _nextMonth,
+        ),
+        BlocBuilder<ExcusableAbsencesViewModel, ExcusableAbsencesState>(
+          builder: (context, state) {
+            final excuses = state.data;
+            return AttendanceEventsSection(
+              attendance: attendance,
+              excuses: excuses,
+              onSubmitExcuse: (absence) =>
+                  _submitExcuse(absence, excuses!.rules),
+              onOpenExcuse: (excuseId) =>
+                  _openExcuse(excuseId, rules: excuses?.rules),
+            );
+          },
         ),
       ],
-    );
-  }
-}
-
-enum _TileStyle { soft, solid, dashed }
-
-class _CountTile extends StatelessWidget {
-  const _CountTile({
-    required this.count,
-    required this.label,
-    required this.style,
-  });
-
-  final int count;
-  final String label;
-  final _TileStyle style;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
-    final solid = style == _TileStyle.solid;
-    final radius = 16.r;
-
-    final tile = Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: switch (style) {
-          _TileStyle.soft => AppColors.blush,
-          _TileStyle.solid => AppColors.mahabbahRed,
-          _TileStyle.dashed => null,
-        },
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: Column(
-        spacing: 2.h,
-        children: [
-          Text(
-            '$count',
-            style: textTheme.titleLarge?.copyWith(
-              fontSize: 22.sp,
-              height: 1.2,
-              fontWeight: FontWeight.w800,
-              color: solid ? AppColors.white : AppColors.mahabbahRed,
-            ),
-          ),
-          Text(
-            label,
-            style: textTheme.bodySmall?.copyWith(
-              fontSize: 12.sp,
-              color: solid
-                  ? AppColors.white.withValues(alpha: 0.88)
-                  : AppColors.slate,
-            ),
-          ),
-        ],
-      ),
-    );
-
-    return style == _TileStyle.dashed
-        ? DashedBorder(radius: radius, child: tile)
-        : tile;
-  }
-}
-
-class _EventRow extends StatelessWidget {
-  const _EventRow({required this.event, required this.month});
-
-  final AttendanceEvent event;
-  final DateTime month;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final textTheme = context.textTheme;
-    final locale = Localizations.localeOf(context).toString();
-    final date = DateTime(month.year, month.month, event.day);
-    final title = switch (event.type) {
-      AttendanceEventType.absent => l10n.absent,
-      AttendanceEventType.late => l10n.late,
-      AttendanceEventType.holiday => l10n.officialHoliday,
-    };
-
-    return Container(
-      padding: EdgeInsets.all(12.r),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.line),
-      ),
-      child: Row(
-        spacing: 12.w,
-        children: [
-          Container(
-            width: 46.r,
-            height: 46.r,
-            decoration: BoxDecoration(
-              color: AppColors.blush,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  DateFormat('dd', locale).format(date),
-                  style: textTheme.bodyLarge?.copyWith(
-                    height: 18 / 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.mahabbahRed,
-                  ),
-                ),
-                Text(
-                  DateFormat.MMM(locale).format(date).toUpperCase(),
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 10.sp,
-                    height: 1.2,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.mahabbahRed,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 2.h,
-              children: [
-                Text(
-                  title,
-                  style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  event.detail,
-                  style: textTheme.bodySmall?.copyWith(color: AppColors.slate),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

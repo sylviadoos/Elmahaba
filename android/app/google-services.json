@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "757278004720",
+    "project_id": "el-mahaba-schools",
+    "storage_bucket": "el-mahaba-schools.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757278004720:android:e90c51d992bd2fa5aef935",
+        "android_client_info": {
+          "package_name": "com.almahabbahschools.parents"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDs9UjZhdrtTr7Tdf0kdUb1z_mcf7IzI3c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

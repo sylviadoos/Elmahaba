@@ -1,16 +1,16 @@
 import 'package:injectable/injectable.dart';
 
-import 'package:al_mahhaba_school/config/di/data_env.dart';
 import 'package:al_mahhaba_school/core/network/api_endpoints.dart';
 import 'package:al_mahhaba_school/core/network/api_keys.dart';
+import 'package:al_mahhaba_school/core/network/api_names.dart';
 import 'package:al_mahhaba_school/core/network/api_service.dart';
 import 'package:al_mahhaba_school/features/news/data/data_sources/news_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/news/data/models/news_details_model.dart';
 import 'package:al_mahhaba_school/features/news/data/models/news_model.dart';
 
-@LazySingleton(as: NewsRemoteDataSource, env: [DataEnv.api])
+@LazySingleton(as: NewsRemoteDataSource)
 class NewsRemoteDataSourceImpl implements NewsRemoteDataSource {
-  NewsRemoteDataSourceImpl(this._api);
+  NewsRemoteDataSourceImpl(@Named(ApiNames.website) this._api);
 
   final ApiService _api;
 

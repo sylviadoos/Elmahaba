@@ -21,10 +21,14 @@ class VisitorPage extends StatelessWidget {
     required this.children,
     this.spacing = 24,
     this.topPadding = 8,
+    this.showLogin = true,
   });
 
   final Widget header;
   final List<Widget> children;
+
+  /// False hides "Log in", e.g. when opened by a signed-in parent.
+  final bool showLogin;
 
   /// Gap between sections, in design pixels.
   final double spacing;
@@ -38,7 +42,7 @@ class VisitorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final buttonBottom = math.max(28.h, bottomInset + 12);
-    const showLogin = AppConfig.parentAccountEnabled;
+    final showLogin = AppConfig.parentAccountEnabled && this.showLogin;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,

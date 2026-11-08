@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
+import 'package:al_mahhaba_school/config/theme/app_page_transitions.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/constants/app_constants.dart';
 
@@ -57,6 +58,9 @@ abstract final class AppTheme {
       colorScheme: colorScheme,
       // Body font for every text style; headings are swapped in below.
       fontFamily: bodyFont,
+      // Arabic from the API (a result's title…) in Cairo in English too —
+      // Montserrat and Outfit have no Arabic letters.
+      fontFamilyFallback: const [AppFonts.cairo],
       scaffoldBackgroundColor: background,
       appBarTheme: AppBarTheme(
         centerTitle: true,
@@ -100,6 +104,19 @@ abstract final class AppTheme {
         side: const BorderSide(color: AppColors.mist, width: 1.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
       ),
+      switchTheme: SwitchThemeData(
+        thumbColor: const WidgetStatePropertyAll(AppColors.white),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          final color = states.contains(WidgetState.selected)
+              ? AppColors.actionRed
+              : AppColors.unmet;
+          return states.contains(WidgetState.disabled)
+              ? color.withValues(alpha: 0.5)
+              : color;
+        }),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
       inputDecorationTheme: InputDecorationThemeData(
         filled: true,
         fillColor: isDark ? colorScheme.surfaceContainerHigh : AppColors.white,
@@ -123,6 +140,7 @@ abstract final class AppTheme {
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
       ),
+      pageTransitionsTheme: AppPageTransitions.theme,
     );
 
     // Merged onto the theme's own text styles so they keep their colors.
