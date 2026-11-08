@@ -26,7 +26,9 @@ abstract final class AppConfig {
   /// The school system: parent account, children, results… (parent screens).
   static String get schoolBaseUrl => switch (environment) {
     Environment.dev =>
-      'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
+     // 'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
+      'http://192.168.0.106:8080/mariam_hany/almahaba314/Almahhaba-School-back-API/public/api/',
+
     Environment.staging => 'https://staging-api.example.com/api/',
     Environment.prod => 'https://api.example.com/api/',
   };
