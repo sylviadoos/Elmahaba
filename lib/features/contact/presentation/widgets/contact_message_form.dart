@@ -24,20 +24,29 @@ class ContactMessageForm extends StatefulWidget {
     required this.isSending,
     required this.serverErrors,
     required this.onSubmit,
+    this.firstName = '',
+    this.lastName = '',
+    this.phone = '',
   });
 
   final bool isSending;
   final Map<String, String> serverErrors;
   final ValueChanged<ContactMessageEntity> onSubmit;
 
+  /// What the fields start with (what's known of a signed-in parent); all
+  /// can be changed. [phone] as typed after +20, e.g. "1201234154".
+  final String firstName;
+  final String lastName;
+  final String phone;
+
   @override
   State<ContactMessageForm> createState() => _ContactMessageFormState();
 }
 
 class _ContactMessageFormState extends State<ContactMessageForm> {
-  final _firstName = TextEditingController();
-  final _lastName = TextEditingController();
-  final _phone = TextEditingController();
+  late final _firstName = TextEditingController(text: widget.firstName);
+  late final _lastName = TextEditingController(text: widget.lastName);
+  late final _phone = TextEditingController(text: widget.phone);
   final _email = TextEditingController();
   final _message = TextEditingController();
   EducationType? _educationType;

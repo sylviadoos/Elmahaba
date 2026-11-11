@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:open_filex/open_filex.dart';
 
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
@@ -12,6 +11,7 @@ import 'package:al_mahhaba_school/core/widgets/bloc_effect_listener.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_intent.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_file_opener.dart';
 import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
@@ -71,8 +71,8 @@ class _HomeworkViewState extends State<_HomeworkView> {
 
   void _onEffect(BuildContext context, HomeworkEffect effect) {
     switch (effect) {
-      case OpenHomeworkFileEffect(:final path):
-        _open(path);
+      case OpenHomeworkFileEffect(:final path, :final attachment):
+        context.openChatFile(path, attachment);
       case ShowHomeworkErrorEffect(:final exception):
         context.showSnackBar(
           exception.localizedMessage(context),
@@ -85,12 +85,6 @@ class _HomeworkViewState extends State<_HomeworkView> {
       case HomeworkChildPickedEffect(:final studentId):
         context.selectChild(studentId);
     }
-  }
-
-  Future<void> _open(String path) async {
-    final result = await OpenFilex.open(path);
-    if (!mounted || result.type == ResultType.done) return;
-    context.showSnackBar(context.l10n.cantOpenFile, isError: true);
   }
 
   @override

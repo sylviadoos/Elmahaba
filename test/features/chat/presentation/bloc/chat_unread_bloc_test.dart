@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -12,12 +14,21 @@ import '../../chat_mocks.mocks.dart';
 
 void main() {
   late MockGetChatUnreadCountUseCase getUnreadCount;
+  late StreamController<int> reads;
 
   setUpAll(() => provideResultDummy<int>());
 
-  setUp(() => getUnreadCount = MockGetChatUnreadCountUseCase());
+  setUp(() {
+    getUnreadCount = MockGetChatUnreadCountUseCase();
+    reads = StreamController.broadcast();
+    addTearDown(reads.close);
+  });
 
-  ChatUnreadBloc build() => ChatUnreadBloc(getUnreadCount);
+  ChatUnreadBloc build() {
+    final watchReads = MockWatchChatReadsUseCase();
+    when(watchReads()).thenAnswer((_) => reads.stream);
+    return ChatUnreadBloc(getUnreadCount, watchReads);
+  }
 
   test('starts at none', () => expect(build().state, 0));
 
@@ -48,5 +59,13 @@ void main() {
       ..add(const SetChatUnreadIntent(5))
       ..add(const ClearChatUnreadIntent()),
     expect: () => [5, 0],
+  );
+
+  blocTest<ChatUnreadBloc, int>(
+    'a read the school confirmed, even from a page closed meanwhile',
+    build: build,
+    seed: () => 3,
+    act: (_) => reads.add(1),
+    expect: () => [1],
   );
 }

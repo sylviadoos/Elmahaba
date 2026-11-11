@@ -41,6 +41,9 @@ class _ContactMessageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Signed in: what's known of them is filled in.
+    final parent = context.watchParent();
+
     return BlocConsumer<ContactMessageViewModel, ContactMessageState>(
       listenWhen: (_, state) => state.state == StateType.error,
       listener: (context, state) {
@@ -60,6 +63,9 @@ class _ContactMessageBody extends StatelessWidget {
         }
         final exception = state.exception;
         return ContactMessageForm(
+          firstName: parent?.firstName ?? '',
+          lastName: parent?.lastName ?? '',
+          phone: parent?.phoneAfterCountryCode ?? '',
           isSending: state.state == StateType.loading,
           serverErrors: exception is ServerException
               ? exception.fieldErrors

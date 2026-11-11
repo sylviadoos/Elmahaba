@@ -1,8 +1,11 @@
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_audience_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_audience_type.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/announcement_entity.dart';
+import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
+import 'package:al_mahhaba_school/features/home/domain/entities/dashboard_attendance_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/latest_items_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/latest_result_entity.dart';
+import 'package:al_mahhaba_school/features/home/domain/entities/message_counts_entity.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_due_status.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
 
@@ -59,3 +62,165 @@ LatestItemsEntity<T> latest<T>(List<T> items, {int? total, int unread = 0}) =>
       total: total ?? items.length,
       unread: unread,
     );
+
+/// A dashboard with the latest of each: an announcement and the homework
+/// not seen yet.
+ChildDashboardEntity dashboardWith({
+  List<AnnouncementEntity>? announcements,
+  List<HomeworkEntity>? homework,
+  List<LatestResultEntity>? results,
+  int absences = 1,
+}) => ChildDashboardEntity(
+  attendance: DashboardAttendanceEntity(
+    todayStatus: 'present',
+    allowedAbsenceDays: 4,
+    actualAbsenceDays: absences,
+    remainingAbsenceDays: 4 - absences,
+  ),
+  latestResult: termResult,
+  messages: const MessageCountsEntity(messages: 0, notices: 0, total: 0),
+  announcements: latest(announcements ?? [holiday, trip], unread: 1),
+  homework: latest(homework ?? [mathSheet], unread: 1),
+  results: latest(results ?? [termResult]),
+);
+
+/// The `data` of the API's example dashboard (one of its announcements and
+/// results left out).
+const dashboardJson = <String, dynamic>{
+  'child': {
+    'student_id': 9,
+    'name': 'Selena Mina Nagy mina',
+    'name_ar': 'سيلينا مينا ناجى',
+    'national_id': '••••0923',
+    'relationship': 'father',
+    'access': 'active',
+    'read_only_until': null,
+    'photo_url': null,
+    'grade': 'Second Primary',
+    'class': 'A',
+    'academic_year': '2026-2027',
+  },
+  'attendance': {
+    'today': 'absent',
+    'allowed_absence_days': 4,
+    'actual_absence_days': 1,
+    'remaining_absence_days': 3,
+    'exceeded_absence_days': 0,
+  },
+  'announcements': {
+    'items': [
+      {
+        'id': 3,
+        'title': 'تيسسستت',
+        'body': 'تتتتتتتتتتتتتتتتتتتتتانانان',
+        'published_at': '2026-11-05T13:11:55+00:00',
+        'expires_at': null,
+        'expired': false,
+        'edited': false,
+        'last_updated': null,
+        'attachments': [],
+        'scope': 'general',
+        'audience': {
+          'type': 'all',
+          'name': 'All parents',
+          'name_ar': 'كل أولياء الأمور',
+        },
+        'chat_key': 'event:47',
+        'is_read': true,
+      },
+      {
+        'id': 2,
+        'title': 'اجازه بمناسبه عيد الام',
+        'body': 'يوم السبت الموافق 7-11 اجازه بمناسبه عيد الام',
+        'published_at': '2026-11-05T10:07:13+00:00',
+        'expires_at': null,
+        'expired': false,
+        'edited': true,
+        'last_updated': '2026-11-05T11:22:24+00:00',
+        'attachments': [],
+        'scope': 'general',
+        'audience': {
+          'type': 'all',
+          'name': 'All parents',
+          'name_ar': 'كل أولياء الأمور',
+        },
+        'chat_key': 'event:38',
+        'is_read': true,
+      },
+    ],
+    'total': 3,
+    'unread': 0,
+  },
+  'homework': {
+    'items': [
+      {
+        'id': 2,
+        'title': 'teest',
+        'subject': 'Arabic',
+        'subject_id': 24,
+        'description': 'nnnnnnnnnnnnnnnnnnn',
+        'issue_date': '2026-11-09',
+        'due_date': '2026-11-12',
+        'edited': false,
+        'last_updated': null,
+        'attachments': [
+          {
+            'id': 12,
+            'file_name': 'SRS_IEEE830 (1).pdf',
+            'mime': 'application/pdf',
+            'size': 3014622,
+            'status': 'available',
+          },
+        ],
+        'due_status': 'upcoming',
+        'chat_key': 'event:55',
+        'is_read': true,
+      },
+    ],
+    'total': 1,
+    'unread': 0,
+  },
+  'results': {
+    'latest': {
+      'id': 280,
+      'title': 'تيسسستتت',
+      'academic_year': '2026-2027',
+      'result_type': 'value and color',
+      'published_at': '2026-11-04T17:48:00+00:00',
+    },
+    'items': [
+      {
+        'id': 280,
+        'title': 'تيسسستتت',
+        'academic_year': '2026-2027',
+        'result_type': 'value and color',
+        'published_at': '2026-11-04T17:48:00+00:00',
+        'publication_id': 46,
+        'chat_key': 'event:34',
+        'is_read': true,
+      },
+      {
+        'id': 222,
+        'title': 'الوان قط',
+        'academic_year': '2026-2027',
+        'result_type': 'color',
+        'published_at': '2026-11-03T12:01:00+00:00',
+        'publication_id': 44,
+        'chat_key': 'event:14',
+        'is_read': true,
+      },
+    ],
+    'total': 7,
+    'unread': 0,
+  },
+  'fees': {
+    'selection_status': 'UPCOMING',
+    'selected_installment': {
+      'fee_type': 'مصاريف التعليم والنشاط',
+      'label': 'قسط رابع',
+      'amount': 3000,
+      'due_date': '2027-02-01',
+    },
+  },
+  'messages': {'messages': 0, 'notices': 0, 'total': 0},
+};

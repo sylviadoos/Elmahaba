@@ -1300,6 +1300,16 @@ class MockNotificationService extends _i1.Mock
           as _i12.Stream<Map<String, dynamic>>);
 
   @override
+  _i12.Stream<Map<String, dynamic>> get onReceived =>
+      (super.noSuchMethod(
+            Invocation.getter(#onReceived),
+            returnValue: _i12.Stream<Map<String, dynamic>>.empty(),
+            returnValueForMissingStub:
+                _i12.Stream<Map<String, dynamic>>.empty(),
+          )
+          as _i12.Stream<Map<String, dynamic>>);
+
+  @override
   _i12.Future<void> init() =>
       (super.noSuchMethod(
             Invocation.method(#init, []),

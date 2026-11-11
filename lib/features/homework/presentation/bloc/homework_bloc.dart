@@ -10,6 +10,8 @@ import 'package:al_mahhaba_school/core/base/cancel_handle.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/download_chat_attachment_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/mark_chat_read_use_case.dart';
+import 'package:al_mahhaba_school/features/chat/domain/use_cases/preview_chat_attachment_use_case.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_image_loads.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_filter.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_page_entity.dart';
@@ -25,8 +27,12 @@ import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_s
 @injectable
 class HomeworkBloc
     extends BaseBloc<HomeworkIntent, HomeworkState, HomeworkEffect> {
-  HomeworkBloc(this._getHomework, this._markRead, this._downloadAttachment)
-    : super(const HomeworkState()) {
+  HomeworkBloc(
+    this._getHomework,
+    this._markRead,
+    this._downloadAttachment,
+    this._previewAttachment,
+  ) : super(const HomeworkState()) {
     on<HomeworkChildrenIntent>(_onChildren);
     on<ShowChildHomeworkIntent>((intent, emit) {
       emitEffect(HomeworkChildPickedEffect(intent.studentId));
@@ -49,11 +55,13 @@ class HomeworkBloc
     on<LoadMoreHomeworkIntent>(_onLoadMore);
     on<HomeworkSeenIntent>(_onSeen);
     on<OpenHomeworkFileIntent>(_onOpenFile);
+    on<LoadHomeworkImageIntent>(_onLoadImage);
   }
 
   final GetHomeworkUseCase _getHomework;
   final MarkChatReadUseCase _markRead;
   final DownloadChatAttachmentUseCase _downloadAttachment;
+  final PreviewChatAttachmentUseCase _previewAttachment;
 
   /// How long homework seen is gathered, to mark it read in one request.
   static const Duration _markDelay = Duration(milliseconds: 400);
@@ -65,6 +73,12 @@ class HomeworkBloc
   CancelHandle? _loading;
   CancelHandle? _loadingMore;
   CancelHandle? _downloading;
+
+  /// The photos shown in the homework.
+  late final ChatImageLoads _imageLoads = ChatImageLoads(
+    download: _downloadAttachment.call,
+    preview: _previewAttachment.call,
+  );
 
   /// The chat items marked read, or being marked, so none is sent twice.
   final Set<String> _marked = {};
@@ -78,6 +92,7 @@ class HomeworkBloc
     _loading?.cancel();
     _loadingMore?.cancel();
     _downloading?.cancel();
+    _imageLoads.cancelAll();
     // What was seen just before leaving is still marked read.
     _markTimer?.cancel();
     unawaited(_markSeen());
@@ -286,7 +301,8 @@ class HomeworkBloc
     final result = await _downloadAttachment(intent.attachment, cancel: cancel);
     emit(state.copyWith(downloadingId: () => null));
     result.when(
-      success: (path) => emitEffect(OpenHomeworkFileEffect(path)),
+      success: (path) =>
+          emitEffect(OpenHomeworkFileEffect(path, intent.attachment)),
       failure: (exception) {
         if (exception is! CancelledException) {
           emitEffect(ShowHomeworkErrorEffect(exception));
@@ -294,4 +310,17 @@ class HomeworkBloc
       },
     );
   }
+
+  /// Saves a photo on the phone (once: it's kept there by its id), to show
+  /// in the homework.
+  Future<void> _onLoadImage(
+    LoadHomeworkImageIntent intent,
+    Emitter<HomeworkState> emit,
+  ) => _imageLoads.load(
+    intent.attachment,
+    images: () => state.images,
+    emit: (images) => emit(state.copyWith(images: images)),
+    // The snack bar says so, and the page logs out.
+    onSignedOut: (exception) => emitEffect(ShowHomeworkErrorEffect(exception)),
+  );
 }

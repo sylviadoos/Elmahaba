@@ -22,9 +22,9 @@ class AttendanceRecordModel extends AttendanceRecordEntity {
     return AttendanceRecordModel(
       date: date,
       status: switch (json['status']) {
-        'present' => AttendanceStatus.present,
+        // Late is present: the child came (the app doesn't show "late").
+        'present' || 'late' => AttendanceStatus.present,
         'absent' => AttendanceStatus.absent,
-        'late' => AttendanceStatus.late,
         'excused' ||
         'medical_leave' ||
         'excused_or_medical' => AttendanceStatus.excused,

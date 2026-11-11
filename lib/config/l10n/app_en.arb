@@ -18,6 +18,7 @@
   "serverError": "Server error, please try again later!",
   "unexpectedError": "An unexpected error occurred",
   "expiredToken": "Session expired, please log in again",
+  "accountWithdrawn": "Your account is no longer available because the student is no longer enrolled at the school. Please contact the school.",
   "phoneNumberIsNotValid": "This phone number is not valid",
   "thisFieldIsRequired": "This field is required",
   "error": "Error",
@@ -260,49 +261,48 @@
       }
     }
   },
-  "daysPresentIn": "days present in {month}",
-  "@daysPresentIn": {
-    "placeholders": {
-      "month": {
-        "type": "String"
-      }
-    }
-  },
-  "ofTheYearPaid": "of the year paid",
   "needsYourAttention": "Needs your attention",
   "attendanceNotTaken": "Attendance not taken yet",
-  "absentLateCount": "{absentDays} absent · {lateDays} late",
-  "@absentLateCount": {
-    "placeholders": {
-      "absentDays": {
-        "type": "int"
-      },
-      "lateDays": {
-        "type": "int"
-      }
-    }
-  },
   "noResultsYet": "No results yet",
   "noFeesYet": "No fees yet",
-  "amountDueOn": "{amount} due {date}",
-  "@amountDueOn": {
+  "overdueInstallmentsCount": "{count, plural, =1{1 overdue installment} other{{count} overdue installments}}",
+  "@overdueInstallmentsCount": {
     "placeholders": {
-      "amount": {
-        "type": "String"
-      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feesDueOn": "Due {date}",
+  "@feesDueOn": {
+    "placeholders": {
       "date": {
         "type": "String"
       }
     }
   },
-  "amountOverdueSince": "{amount} overdue since {date}",
-  "@amountOverdueSince": {
+  "feesOverdueSince": "Overdue since {date}",
+  "@feesOverdueSince": {
     "placeholders": {
-      "amount": {
-        "type": "String"
-      },
       "date": {
         "type": "String"
+      }
+    }
+  },
+  "daysAbsent": "Days absent",
+  "absenceDaysLeft": "{count, plural, =0{No absence days left} =1{1 day left} other{{count} days left}}",
+  "@absenceDaysLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "absenceDaysOver": "{count, plural, =1{1 day over the limit} other{{count} days over the limit}}",
+  "@absenceDaysOver": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   },
@@ -364,7 +364,20 @@
   "highLevel": "High level",
   "highLevelNote": "Extra level, not counted in the final result",
   "activities": "Activities",
-  "downloadReportCard": "Download report card (PDF)",
+  "downloadCertificate": "Download certificate (PDF)",
+  "certificateSaved": "Certificate saved",
+  "certificateNotSaved": "Couldn’t save the certificate. Try again.",
+  "certificateFailed": "Couldn’t make the certificate. Try again.",
+  "monthlyResults": "Monthly",
+  "latestResult": "Latest result",
+  "classRank": "Rank {rank}",
+  "@classRank": {
+    "placeholders": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
   "assessmentInitial": "Initial",
   "assessmentFinal": "Final",
   "assessmentStatus": "Status",
@@ -374,9 +387,8 @@
   "gradeBelow": "Below Expectations",
   "present": "Present",
   "absent": "Absent",
-  "late": "Late",
   "officialHoliday": "Official holiday",
-  "friSatOff": "Fri & Sat off",
+  "friSatOff": "Weekend",
   "thisMonth": "This month",
   "previousMonth": "Previous month",
   "nextMonth": "Next month",
@@ -395,7 +407,6 @@
   "excused": "Excused",
   "excusedOrMedical": "Excused / medical",
   "excusedAbsence": "Excused absence",
-  "arrivedLate": "Arrived late",
   "reasonIs": "Reason: {reason}",
   "@reasonIs": {
     "placeholders": {
@@ -415,7 +426,6 @@
   },
   "reply": "Reply",
   "noAbsencesThisMonth": "No absences or late days this month.",
-  "remaining": "Remaining",
   "egpAmount": "EGP {amount}",
   "@egpAmount": {
     "placeholders": {
@@ -604,6 +614,24 @@
   "notificationsOffNote": "Notifications are off. Turn them on to choose which ones ring.",
   "announcements": "Announcements",
   "noAnnouncements": "No announcements yet",
+  "noAnnouncementsHint": "Announcements from the school show here.",
+  "announcementsCount": "{count, plural, =0{No announcements} =1{1 announcement} other{{count} announcements}}",
+  "@announcementsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "announcementEnded": "Ended",
+  "announcementUntil": "Until {date}",
+  "@announcementUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "homework": "Homework",
   "homeworkCount": "{count, plural, =0{No homework} =1{1 homework} other{{count} homework}}",
   "@homeworkCount": {
@@ -919,6 +947,8 @@
   "schoolAdministration": "School administration",
   "schoolInitials": "AM",
   "tapToOpen": "Tap to open",
+  "openInAnotherApp": "Open in another app",
+  "cantShowFile": "This file can’t be shown here.",
   "checkingFile": "Checking file…",
   "addAReply": "Add a reply",
   "replyHint": "Write more details for the school",
@@ -951,6 +981,15 @@
   "messageHint": "Write your message here…",
   "sendMessage": "Send message",
   "checkHighlightedFields": "Please check the highlighted fields.",
+  "loginLockedFor": "Too many wrong attempts. Try again in {time}.",
+  "@loginLockedFor": {
+    "description": "Under Log in while the number is locked; time counts down, e.g. 04:59.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "messageSentTitle": "Message sent!",
   "messageSentSubtitle": "Thank you! The school will get back to you soon.",
   "done": "Done"

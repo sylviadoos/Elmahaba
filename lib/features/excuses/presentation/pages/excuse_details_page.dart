@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:open_filex/open_filex.dart';
 
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
@@ -20,6 +19,13 @@ import 'package:al_mahhaba_school/core/widgets/app_loading.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_attachment_kind.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_file_opener.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_images_viewer.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_file_link.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_file_preview.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_image_grid.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/attachment_picker.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/complaint_labels.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/complaint_section.dart';
@@ -27,15 +33,17 @@ import 'package:al_mahhaba_school/features/excuses/domain/entities/excuse_detail
 import 'package:al_mahhaba_school/features/excuses/domain/entities/excuse_rules_entity.dart';
 import 'package:al_mahhaba_school/features/excuses/domain/entities/excuse_status.dart';
 import 'package:al_mahhaba_school/features/excuses/domain/excuses_error_codes.dart';
+import 'package:al_mahhaba_school/features/excuses/presentation/excuse_image_source.dart';
+import 'package:al_mahhaba_school/features/excuses/presentation/extensions/excuse_document_attachment.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/extensions/excuse_labels.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excuse_details_event.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excuse_details_state.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excuse_details_view_model.dart';
-import 'package:al_mahhaba_school/features/excuses/presentation/widgets/excuse_document_link.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/widgets/excuse_documents_field.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/widgets/excuse_history_step.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/widgets/excuse_notice.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/widgets/excuse_status_badge.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// A medical excuse: where it stands, the school's answer, the note and
 /// documents, adding documents when the school asks for them, and its
@@ -86,6 +94,16 @@ class _ExcuseDetailsViewState extends State<_ExcuseDetailsView> {
 
   /// "Send documents" was tapped without one.
   bool _tried = false;
+
+  /// The document tapped, opened once it's downloaded.
+  ChatAttachmentEntity? _opening;
+
+  void _open(ChatAttachmentEntity document) {
+    _opening = document;
+    context.read<ExcuseDetailsViewModel>().doAction(
+      DownloadExcuseDocumentEvent(document.asExcuseDocument),
+    );
+  }
 
   void _load({bool refresh = false}) => context
       .read<ExcuseDetailsViewModel>()
@@ -155,10 +173,10 @@ class _ExcuseDetailsViewState extends State<_ExcuseDetailsView> {
       );
       return;
     }
-    if (download.state != StateType.success) return;
-    final result = await OpenFilex.open(download.data!);
-    if (!context.mounted || result.type == ResultType.done) return;
-    context.showSnackBar(context.l10n.cantOpenFile, isError: true);
+    final opening = _opening;
+    if (download.state != StateType.success || opening == null) return;
+    // A PDF full screen here, like a photo; anything else in its app.
+    await context.openChatFile(download.data!, opening);
   }
 
   @override
@@ -270,11 +288,7 @@ class _ExcuseDetailsViewState extends State<_ExcuseDetailsView> {
       child: StateMessage(
         icon: AppIcons.navAttendance,
         title: exception.localizedMessage(context),
-        action: AppButton(
-          label: context.l10n.tryAgain,
-          expand: false,
-          onPressed: _load,
-        ),
+        action: RetryOrLogInButton(exception: exception, onRetry: _load),
       ),
     );
   }
@@ -292,6 +306,14 @@ class _ExcuseDetailsViewState extends State<_ExcuseDetailsView> {
     final note = excuse.note;
     final isAdding = state.adding.state == StateType.loading;
     final limits = _limits(excuse);
+    // Shown as the chat shows its files.
+    final documents = [
+      for (final document in excuse.documents) document.asAttachment,
+    ];
+    final photos = [
+      for (final document in documents)
+        if (document.isImage) document,
+    ];
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -369,18 +391,31 @@ class _ExcuseDetailsViewState extends State<_ExcuseDetailsView> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 8.h,
                   children: [
-                    for (final document in excuse.documents)
-                      ExcuseDocumentLink(
-                        document: document,
-                        isDownloading: state.downloadingId == document.id,
-                        onOpen: state.downloadingId == null
-                            ? () => context
-                                  .read<ExcuseDetailsViewModel>()
-                                  .doAction(
-                                    DownloadExcuseDocumentEvent(document),
-                                  )
-                            : null,
+                    // Photos show, opened full screen by a tap.
+                    if (photos.isNotEmpty)
+                      LayoutBuilder(
+                        builder: (_, constraints) => ChatImageGrid(
+                          source: const ExcuseImageSource(),
+                          images: photos,
+                          width: constraints.maxWidth,
+                        ),
                       ),
+                    // The other files: a PDF with its first page on top.
+                    for (final document in documents)
+                      if (!document.isImage)
+                        ChatFileLink(
+                          attachment: document,
+                          isDownloading: state.downloadingId == document.id,
+                          onOpen: state.downloadingId == null
+                              ? () => _open(document)
+                              : null,
+                          preview: document.isPdf
+                              ? ChatFilePreview(
+                                  source: const ExcuseImageSource(),
+                                  attachment: document,
+                                )
+                              : null,
+                        ),
                     // The school asked for more.
                     if (excuse.canAddDocuments && limits.maxFiles > 0) ...[
                       SizedBox(height: 8.h),
@@ -393,6 +428,10 @@ class _ExcuseDetailsViewState extends State<_ExcuseDetailsView> {
                             ? null
                             : (index) =>
                                   setState(() => _documents.removeAt(index)),
+                        onPreview: (index) => context.previewPickedPhotos(
+                          _documents,
+                          _documents[index],
+                        ),
                         errorText: _tried && _documents.isEmpty
                             ? l10n.excuseDocumentRequired
                             : null,

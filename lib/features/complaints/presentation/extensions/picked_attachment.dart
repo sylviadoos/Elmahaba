@@ -38,6 +38,10 @@ class PickedAttachment extends Equatable {
 
   bool get isValid => problem == null;
 
+  /// A photo, by its name: shown small rather than as its kind.
+  bool get isImage =>
+      const {'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'}.contains(extension);
+
   /// Lower case, e.g. "pdf"; empty when the name has none.
   String get extension {
     final dot = name.lastIndexOf('.');

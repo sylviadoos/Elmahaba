@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:al_mahhaba_school/config/app_config.dart';
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/app_settings/locale_theme_cubit.dart';
@@ -71,9 +73,6 @@ class _SettingsViewState extends State<_SettingsView> {
 
   void _loadNotifications() =>
       context.read<ProfileViewModel>().doAction(const LoadNotificationsEvent());
-
-  void _setNotifications(bool on) =>
-      context.read<ProfileViewModel>().doAction(SetNotificationsEvent(on: on));
 
   Future<void> _deleteAccount() async {
     final l10n = context.l10n;
@@ -144,7 +143,7 @@ class _SettingsViewState extends State<_SettingsView> {
           ),
         ),
         BlocListener<ProfileViewModel, ProfileState>(
-          // A change that wasn't saved: the switch went back.
+          // A change in the sheet that wasn't saved: its switch went back.
           listenWhen: (previous, current) =>
               previous.notifications != current.notifications &&
               current.notifications.state == StateType.error &&
@@ -217,17 +216,11 @@ class _SettingsViewState extends State<_SettingsView> {
                                 ? notifications.state == StateType.error
                                       ? _loadNotifications
                                       : null
-                                // Each kind, to turn on or off.
+                                // Turned on or off only in there, with
+                                // each kind.
                                 : () => NotificationPreferencesSheet.show(
                                     context,
                                   ),
-                            // On at first, as the school sets them.
-                            trailing: Switch(
-                              value: preferences?.pushEnabled ?? true,
-                              onChanged: preferences == null
-                                  ? null
-                                  : _setNotifications,
-                            ),
                           ),
                           SettingsRow(
                             icon: AppIcons.lock,
@@ -257,6 +250,14 @@ class _SettingsViewState extends State<_SettingsView> {
                           ),
                         ],
                       ),
+                      // Checks Sentry gets errors ("Debug + Sentry" runs
+                      // only; never in a release build).
+                      if (kDebugMode && AppConfig.sentryEnabled)
+                        ElevatedButton(
+                          onPressed: () =>
+                              throw StateError('This is test exception'),
+                          child: const Text('Verify Sentry Setup'),
+                        ),
                     ],
                   ),
                 ),

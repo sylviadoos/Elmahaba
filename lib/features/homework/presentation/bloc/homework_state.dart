@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'package:al_mahhaba_school/core/base/base_state.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_image_loads.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_filter.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_page_entity.dart';
@@ -17,6 +18,7 @@ class HomeworkState extends Equatable {
     this.homework = const BaseState.initial(),
     this.subjects = const [],
     this.downloadingId,
+    this.images = const {},
   });
 
   /// The parent's children.
@@ -43,6 +45,10 @@ class HomeworkState extends Equatable {
   /// The file downloading now.
   final int? downloadingId;
 
+  /// The photos shown in the homework, by attachment id. Several load at
+  /// once, apart from [downloadingId].
+  final ChatImages images;
+
   HomeworkPageEntity? get page => homework.data;
 
   /// Where the child shown is in [children]; -1 for none.
@@ -61,6 +67,7 @@ class HomeworkState extends Equatable {
     BaseState<HomeworkPageEntity>? homework,
     List<HomeworkSubjectEntity>? subjects,
     int? Function()? downloadingId,
+    ChatImages? images,
   }) => HomeworkState(
     children: children ?? this.children,
     isRequested: isRequested ?? this.isRequested,
@@ -70,6 +77,7 @@ class HomeworkState extends Equatable {
     homework: homework ?? this.homework,
     subjects: subjects ?? this.subjects,
     downloadingId: downloadingId != null ? downloadingId() : this.downloadingId,
+    images: images ?? this.images,
   );
 
   @override
@@ -82,5 +90,6 @@ class HomeworkState extends Equatable {
     homework,
     subjects,
     downloadingId,
+    images,
   ];
 }

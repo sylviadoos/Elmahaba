@@ -7,7 +7,7 @@ import 'package:al_mahhaba_school/core/extensions/double_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/progress_ring.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_counts_entity.dart';
 
-/// The month's attendance rate — late counts as attended — as a ring and
+/// The month's attendance rate as a ring and
 /// in words: "94.1% attendance · 16 of 17 school days".
 class AttendanceSummaryCard extends StatelessWidget {
   const AttendanceSummaryCard({super.key, required this.counts});
@@ -39,8 +39,8 @@ class AttendanceSummaryCard extends StatelessWidget {
               children: [
                 Text.rich(
                   TextSpan(
-                    // No days taken yet: no rate, rather than 0%.
-                    text: total > 0 ? '${(share * 100).oneDecimal}%' : '—',
+                    // A dash, not 0%: no day attended, or none taken yet.
+                    text: attended > 0 ? '${(share * 100).oneDecimal}%' : '-',
                     children: [
                       TextSpan(
                         text: ' ${l10n.attendanceWord}',

@@ -8,9 +8,11 @@ import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/attachment_labels.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/complaint_labels.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/picked_attachment.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/widgets/attachment_thumbnail.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/attachment_type_badge.dart';
 
-/// A file picked to send: its kind, name and size, and "Remove". While it
+/// A file picked to send: its kind (a photo, small), name and size, and
+/// "Remove". While it
 /// uploads, how far it got; one that won't be sent is red, with why.
 class AttachmentRow extends StatelessWidget {
   const AttachmentRow({
@@ -19,6 +21,7 @@ class AttachmentRow extends StatelessWidget {
     required this.bytesLeft,
     this.progress,
     required this.onRemove,
+    this.onPreview,
   });
 
   final PickedAttachment file;
@@ -31,6 +34,10 @@ class AttachmentRow extends StatelessWidget {
 
   /// Null while it can't be taken off (it's being sent).
   final VoidCallback? onRemove;
+
+  /// Shows a photo bigger, from its thumbnail; null where that isn't
+  /// offered.
+  final VoidCallback? onPreview;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +62,10 @@ class AttachmentRow extends StatelessWidget {
           Row(
             spacing: 10.w,
             children: [
-              AttachmentTypeBadge(file.extension),
+              if (file.isImage)
+                AttachmentThumbnail(file, onTap: onPreview)
+              else
+                AttachmentTypeBadge(file.extension),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

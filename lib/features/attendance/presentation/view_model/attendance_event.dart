@@ -13,3 +13,10 @@ final class LoadAttendanceEvent extends AttendanceEvent {
   /// Its first day.
   final DateTime month;
 }
+
+/// Asks the school again for the month shown, which stays shown until the
+/// answer comes: a day may have changed (an excuse accepted, attendance
+/// taken). After a failure, it's "Try again".
+final class RefreshAttendanceEvent extends AttendanceEvent {
+  const RefreshAttendanceEvent();
+}

@@ -104,6 +104,12 @@ class NotificationServiceImpl implements NotificationService {
   Stream<Map<String, dynamic>> get onTap => _taps.stream;
 
   @override
+  Stream<Map<String, dynamic>> get onReceived => _isPhone
+      // Broadcast, so listening here doesn't take it from _showWhileOpen.
+      ? FirebaseMessaging.onMessage.map((message) => message.data)
+      : const Stream.empty();
+
+  @override
   Future<void> deleteToken() async {
     // ignore: deprecated_member_use
     if (_isPhone) await _messaging.deleteToken();

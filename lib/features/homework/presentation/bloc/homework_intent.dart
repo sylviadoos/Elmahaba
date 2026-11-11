@@ -70,3 +70,12 @@ final class OpenHomeworkFileIntent extends HomeworkIntent {
 
   final ChatAttachmentEntity attachment;
 }
+
+/// A homework photo came on screen, or "Try again" on one that didn't
+/// load: it's saved on the phone to show. Nothing when it's saved or on
+/// its way already.
+final class LoadHomeworkImageIntent extends HomeworkIntent {
+  const LoadHomeworkImageIntent(this.attachment);
+
+  final ChatAttachmentEntity attachment;
+}

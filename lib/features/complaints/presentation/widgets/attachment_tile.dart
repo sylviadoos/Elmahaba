@@ -7,24 +7,27 @@ import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 import 'package:al_mahhaba_school/core/widgets/icon_box.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/complaint_labels.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/extensions/picked_attachment.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/widgets/attachment_thumbnail.dart';
 
-/// A file picked to send, its size, and a button to take it off.
+/// A file picked to send (a photo, small), its size, and a button to take
+/// it off.
 class AttachmentTile extends StatelessWidget {
   const AttachmentTile({
     super.key,
-    required this.fileName,
-    required this.size,
+    required this.file,
     required this.onRemove,
+    this.onPreview,
   });
 
-  /// e.g. "bus-photo.jpg".
-  final String fileName;
-
-  /// In bytes.
-  final int size;
+  final PickedAttachment file;
 
   /// Null while it can't be taken off (it's being sent).
   final VoidCallback? onRemove;
+
+  /// Shows a photo bigger, from its thumbnail; null where that isn't
+  /// offered.
+  final VoidCallback? onPreview;
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +43,16 @@ class AttachmentTile extends StatelessWidget {
       child: Row(
         spacing: 10.w,
         children: [
-          IconBox(AppIcons.file, size: 36.r, iconSize: 18.r, radius: 10.r),
+          if (file.isImage)
+            AttachmentThumbnail(file, onTap: onPreview)
+          else
+            IconBox(AppIcons.file, size: 36.r, iconSize: 18.r, radius: 10.r),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  fileName,
+                  file.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   // File names read left to right, also on an Arabic page.
@@ -56,7 +62,7 @@ class AttachmentTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  size.fileSizeLabel(context),
+                  file.size.fileSizeLabel(context),
                   style: textTheme.bodySmall?.copyWith(
                     fontSize: 12.sp,
                     height: 16 / 12,
@@ -68,7 +74,7 @@ class AttachmentTile extends StatelessWidget {
           ),
           IconButton(
             onPressed: onRemove,
-            tooltip: context.l10n.removeAttachment(fileName),
+            tooltip: context.l10n.removeAttachment(file.name),
             style: IconButton.styleFrom(
               fixedSize: Size.square(40.r),
               padding: EdgeInsets.zero,

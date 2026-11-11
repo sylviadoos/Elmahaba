@@ -1,15 +1,18 @@
 import 'package:equatable/equatable.dart';
 
-/// The next fees installment to pay.
+/// The fees installment Home shows: the next one to pay.
 class NextInstallmentEntity extends Equatable {
   const NextInstallmentEntity({
+    required this.feeType,
     required this.label,
     required this.amount,
     this.dueDate,
-    required this.displayStatus,
   });
 
-  /// As the school wrote it, e.g. "قسط ثانى".
+  /// What it's for, e.g. "مصاريف التعليم والنشاط".
+  final String feeType;
+
+  /// As the school wrote it, e.g. "قسط رابع".
   final String label;
 
   /// In EGP.
@@ -18,9 +21,6 @@ class NextInstallmentEntity extends Equatable {
   /// null when the API doesn't give one.
   final DateTime? dueDate;
 
-  /// e.g. "OVERDUE".
-  final String displayStatus;
-
   @override
-  List<Object?> get props => [label, amount, dueDate, displayStatus];
+  List<Object?> get props => [feeType, label, amount, dueDate];
 }

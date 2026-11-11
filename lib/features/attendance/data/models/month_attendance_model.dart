@@ -14,7 +14,34 @@ class MonthAttendanceModel extends MonthAttendanceEntity {
     required super.counts,
     required super.records,
     required super.holidays,
+    required super.weekendWeekdays,
   });
+
+  /// The school's weekly days off, from `disabled_weekdays` ([5, 7] for a
+  /// school closed Friday and Sunday) or, failing that, from the days
+  /// `weekly_holidays` marks disabled. The two say the same thing.
+  ///
+  /// Sent neither way — an older server — the Egyptian weekend stands in,
+  /// as the app assumed before the school could set it. An empty list is
+  /// the school saying it has no weekly day off, and is kept.
+  static Set<int> _weekendFrom(Map<String, dynamic> json) {
+    final disabled = json['disabled_weekdays'];
+    if (disabled is List) {
+      return {
+        for (final weekday in disabled)
+          if (weekday is int) weekday,
+      };
+    }
+    final weekly = json['weekly_holidays'];
+    if (weekly is List) {
+      return {
+        for (final holiday in jsonObjects(weekly))
+          if (holiday['disabled'] != false)
+            if (holiday['weekday'] case final int weekday) weekday,
+      };
+    }
+    return const {DateTime.friday, DateTime.saturday};
+  }
 
   /// [month] is the one asked for, used if the response doesn't say.
   factory MonthAttendanceModel.fromJson(
@@ -36,5 +63,6 @@ class MonthAttendanceModel extends MonthAttendanceEntity {
       for (final holiday in jsonObjects(json['holidays']))
         ?HolidayModel.fromJson(holiday),
     ],
+    weekendWeekdays: _weekendFrom(json),
   );
 }

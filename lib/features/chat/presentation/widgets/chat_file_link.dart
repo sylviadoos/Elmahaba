@@ -6,11 +6,13 @@ import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_attachment_kind.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/complaint_labels.dart';
 
-/// A file sent in the chat: its name and size, opened by tapping it; a
-/// spinner while it downloads. Light on a school card, see-through on the
-/// parent's red bubble ([onRed]).
+/// A file sent in the chat: a PDF's first page on top ([preview]), its
+/// type ("PDF") in a badge, its name and size, and a download arrow;
+/// opened by tapping it, a spinner in the badge while it downloads. Light
+/// on a school card, see-through on the parent's red bubble ([onRed]).
 class ChatFileLink extends StatelessWidget {
   const ChatFileLink({
     super.key,
@@ -18,10 +20,14 @@ class ChatFileLink extends StatelessWidget {
     required this.isDownloading,
     required this.onOpen,
     this.onRed = false,
+    this.preview,
   });
 
   final ChatAttachmentEntity attachment;
   final bool isDownloading;
+
+  /// Over the name, part of the card (a PDF's first page); null for none.
+  final Widget? preview;
 
   /// Null while another file downloads.
   final VoidCallback? onOpen;
@@ -32,6 +38,7 @@ class ChatFileLink extends StatelessWidget {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
     final foreground = onRed ? AppColors.white : AppColors.mahabbahRed;
+    final type = attachment.typeLabel;
     final meta = attachment.isAvailable
         ? '${attachment.size.fileSizeLabel(context)} · ${l10n.tapToOpen}'
         : l10n.checkingFile;
@@ -48,52 +55,93 @@ class ChatFileLink extends StatelessWidget {
       child: InkWell(
         borderRadius: radius,
         onTap: attachment.isAvailable && !isDownloading ? onOpen : null,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-          child: Row(
-            spacing: 10.w,
-            children: [
-              if (isDownloading)
-                SizedBox.square(
-                  dimension: 18.r,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: foreground,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ?preview,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+              child: Row(
+                spacing: 10.w,
+                children: [
+                  Container(
+                    width: 38.r,
+                    height: 38.r,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: onRed
+                          ? AppColors.white.withValues(alpha: 0.2)
+                          : AppColors.blush,
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: isDownloading
+                        ? SizedBox.square(
+                            dimension: 18.r,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: foreground,
+                            ),
+                          )
+                        : type.isEmpty
+                        ? AppSvgIcon(
+                            AppIcons.file,
+                            size: 18.r,
+                            color: foreground,
+                          )
+                        : Text(
+                            type,
+                            maxLines: 1,
+                            textDirection: TextDirection.ltr,
+                            style: textTheme.labelSmall?.copyWith(
+                              fontSize: 10.sp,
+                              height: 1.2,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.3,
+                              color: foreground,
+                            ),
+                          ),
                   ),
-                )
-              else
-                AppSvgIcon(AppIcons.file, size: 18.r, color: foreground),
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      attachment.fileName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      // File names read left to right, also on an Arabic
-                      // page.
-                      textDirection: TextDirection.ltr,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: onRed ? AppColors.white : AppColors.ink,
-                      ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 2.h,
+                      children: [
+                        Text(
+                          attachment.fileName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          // File names read left to right, also on an Arabic
+                          // page.
+                          textDirection: TextDirection.ltr,
+                          style: textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: onRed ? AppColors.white : AppColors.ink,
+                          ),
+                        ),
+                        Text(
+                          meta,
+                          style: textTheme.bodySmall?.copyWith(
+                            fontSize: 11.sp,
+                            height: 15 / 11,
+                            color: onRed
+                                ? AppColors.white.withValues(alpha: 0.85)
+                                : AppColors.slate,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      meta,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontSize: 11.sp,
-                        height: 15 / 11,
-                        color: onRed
-                            ? AppColors.white.withValues(alpha: 0.85)
-                            : AppColors.slate,
-                      ),
+                  ),
+                  if (attachment.isAvailable && !isDownloading)
+                    AppSvgIcon(
+                      AppIcons.download,
+                      size: 18.r,
+                      color: foreground,
                     ),
-                  ],
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

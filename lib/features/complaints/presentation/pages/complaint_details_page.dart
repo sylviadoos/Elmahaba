@@ -16,7 +16,6 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/extensions/string_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_back_button.dart';
-import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
@@ -39,6 +38,7 @@ import 'package:al_mahhaba_school/features/complaints/presentation/widgets/compl
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/complaint_status_step.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/complaint_update.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/settings_button.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// One complaint: its details, what was sent, how its status changed, the
 /// school's updates, and a reply when the school asks for one.
@@ -329,11 +329,7 @@ class _ComplaintDetailsViewState extends State<_ComplaintDetailsView> {
         : StateMessage(
             icon: AppIcons.complaint,
             title: exception.localizedMessage(context),
-            action: AppButton(
-              label: context.l10n.tryAgain,
-              expand: false,
-              onPressed: _load,
-            ),
+            action: RetryOrLogInButton(exception: exception, onRetry: _load),
           );
   }
 

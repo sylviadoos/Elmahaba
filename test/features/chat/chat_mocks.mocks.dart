@@ -27,8 +27,12 @@ import 'package:al_mahhaba_school/features/chat/domain/use_cases/get_chat_use_ca
     as _i2;
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/mark_chat_read_use_case.dart'
     as _i13;
+import 'package:al_mahhaba_school/features/chat/domain/use_cases/preview_chat_attachment_use_case.dart'
+    as _i17;
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/send_chat_message_use_case.dart'
     as _i9;
+import 'package:al_mahhaba_school/features/chat/domain/use_cases/watch_chat_reads_use_case.dart'
+    as _i18;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i7;
 
@@ -212,4 +216,47 @@ class MockGetChatUnreadCountUseCase extends _i1.Mock
             ),
           )
           as _i3.Future<_i4.Result<int>>);
+}
+
+/// A class which mocks [PreviewChatAttachmentUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockPreviewChatAttachmentUseCase extends _i1.Mock
+    implements _i17.PreviewChatAttachmentUseCase {
+  @override
+  _i3.Future<_i4.Result<String>> call(
+    _i15.ChatAttachmentEntity? attachment, {
+    _i6.CancelHandle? cancel,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [attachment], {#cancel: cancel}),
+            returnValue: _i3.Future<_i4.Result<String>>.value(
+              _i7.dummyValue<_i4.Result<String>>(
+                this,
+                Invocation.method(#call, [attachment], {#cancel: cancel}),
+              ),
+            ),
+            returnValueForMissingStub: _i3.Future<_i4.Result<String>>.value(
+              _i7.dummyValue<_i4.Result<String>>(
+                this,
+                Invocation.method(#call, [attachment], {#cancel: cancel}),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Result<String>>);
+}
+
+/// A class which mocks [WatchChatReadsUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockWatchChatReadsUseCase extends _i1.Mock
+    implements _i18.WatchChatReadsUseCase {
+  @override
+  _i3.Stream<int> call() =>
+      (super.noSuchMethod(
+            Invocation.method(#call, []),
+            returnValue: _i3.Stream<int>.empty(),
+            returnValueForMissingStub: _i3.Stream<int>.empty(),
+          )
+          as _i3.Stream<int>);
 }

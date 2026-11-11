@@ -9,6 +9,7 @@ class LatestResultEntity extends Equatable {
     required this.resultType,
     this.publishedAt,
     this.isRead = true,
+    this.chatKey,
   });
 
   final int id;
@@ -25,8 +26,13 @@ class LatestResultEntity extends Equatable {
   /// null when the API doesn't give one.
   final DateTime? publishedAt;
 
-  /// Whether the parent saw it in the chat; true when the API doesn't say.
+  /// Whether the parent has seen it; true when the API doesn't say.
   final bool isRead;
+
+  /// Its item in the chat, which is what [isRead] is about: marking that
+  /// read is how the result stops being new. Null when the school made no
+  /// chat item for it, and then nothing can mark it read.
+  final String? chatKey;
 
   @override
   List<Object?> get props => [
@@ -36,5 +42,6 @@ class LatestResultEntity extends Equatable {
     resultType,
     publishedAt,
     isRead,
+    chatKey,
   ];
 }

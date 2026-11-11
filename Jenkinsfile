@@ -37,7 +37,7 @@ pipeline {
         choice(
             name: 'ENV',
             choices: ['dev', 'staging', 'prod'],
-            description: 'dev = office servers (192.168.0.219). staging and prod URLs are still placeholders in app_config.dart'
+            description: 'dev = office servers (192.168.0.219, office network only). staging = live servers, with logs. prod = live servers (almahabbahschools.com), no logs'
         )
 
         booleanParam(

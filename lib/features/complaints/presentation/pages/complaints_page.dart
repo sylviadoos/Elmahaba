@@ -14,13 +14,14 @@ import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_back_button.dart';
-import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 import 'package:al_mahhaba_school/core/widgets/load_more_indicator.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/complaints/domain/entities/complaint_entity.dart';
 import 'package:al_mahhaba_school/features/complaints/domain/entities/complaints_page_entity.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_intent.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/view_model/my_complaints_event.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/view_model/my_complaints_state.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/view_model/my_complaints_view_model.dart';
@@ -29,6 +30,7 @@ import 'package:al_mahhaba_school/features/complaints/presentation/widgets/compl
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/no_complaints_message.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/status_filter_chip.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/settings_button.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// The parent's complaints, newest first: all, the open or the closed ones.
 /// More load as the list scrolls; "New complaint" files another.
@@ -106,135 +108,147 @@ class _ComplaintsViewState extends State<_ComplaintsView> with RouteAware {
       MediaQuery.paddingOf(context).bottom + 12,
     );
 
-    return BlocConsumer<MyComplaintsViewModel, MyComplaintsState>(
-      // The next page failed; the ones loaded stay.
-      listenWhen: (_, state) =>
-          state.state == StateType.error && state.data != null,
-      listener: (context, state) => context.showSnackBar(
-        state.exception!.localizedMessage(context),
-        isError: true,
+    return BlocListener<MyComplaintsViewModel, MyComplaintsState>(
+      // They're on screen, so the dot on the Complaints button goes.
+      listenWhen: (previous, current) =>
+          current.state == StateType.success && current.data != previous.data,
+      listener: (context, state) => context.read<ComplaintUpdatesBloc>().add(
+        ComplaintsSeenIntent(state.data!),
       ),
-      builder: (context, state) {
-        final loaded = state.data;
+      child: BlocConsumer<MyComplaintsViewModel, MyComplaintsState>(
+        // The next page failed; the ones loaded stay.
+        listenWhen: (_, state) =>
+            state.state == StateType.error && state.data != null,
+        listener: (context, state) => context.showSnackBar(
+          state.exception!.localizedMessage(context),
+          isError: true,
+        ),
+        builder: (context, state) {
+          final loaded = state.data;
 
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle.light,
-          child: Scaffold(
-            body: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    RedHeader(
-                      horizontalPadding: 16,
-                      bottomPadding: 40,
-                      watermarkTop: 20,
-                      watermarkSize: const Size(200, 143),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: 12.h,
-                        children: [
-                          Row(
-                            spacing: 10.w,
-                            children: [
-                              const AppBackButton(
-                                fallbackRoute: AppRoutes.home,
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      l10n.complaints,
-                                      style: textTheme.headlineMedium?.copyWith(
-                                        fontSize: 24.sp,
-                                        height: 28 / 24,
-                                        letterSpacing: 0,
-                                        color: AppColors.white,
-                                      ),
-                                    ),
-                                    if (loaded != null)
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle.light,
+            child: Scaffold(
+              body: Stack(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      RedHeader(
+                        horizontalPadding: 16,
+                        bottomPadding: 40,
+                        watermarkTop: 20,
+                        watermarkSize: const Size(200, 143),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: 12.h,
+                          children: [
+                            Row(
+                              spacing: 10.w,
+                              children: [
+                                const AppBackButton(
+                                  fallbackRoute: AppRoutes.home,
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
                                       Text(
-                                        _counts(context, loaded),
-                                        style: textTheme.bodySmall?.copyWith(
-                                          color: AppColors.white.withValues(
-                                            alpha: 0.88,
+                                        l10n.complaints,
+                                        style: textTheme.headlineMedium
+                                            ?.copyWith(
+                                              fontSize: 24.sp,
+                                              height: 28 / 24,
+                                              letterSpacing: 0,
+                                              color: AppColors.white,
+                                            ),
+                                      ),
+                                      if (loaded != null)
+                                        Text(
+                                          _counts(context, loaded),
+                                          style: textTheme.bodySmall?.copyWith(
+                                            color: AppColors.white.withValues(
+                                              alpha: 0.88,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const SettingsButton(),
-                            ],
-                          ),
-                          Wrap(
-                            spacing: 8.w,
-                            runSpacing: 8.h,
-                            children: [
-                              for (final (open, label) in [
-                                (null, l10n.filterAll),
-                                (true, l10n.filterOpen),
-                                (false, l10n.filterClosed),
-                              ])
-                                StatusFilterChip(
-                                  label: label,
-                                  isSelected: _open == open,
-                                  onTap: () => setState(() => _open = open),
-                                ),
-                            ],
+                                const SettingsButton(),
+                              ],
+                            ),
+                            Wrap(
+                              spacing: 8.w,
+                              runSpacing: 8.h,
+                              children: [
+                                for (final (open, label) in [
+                                  (null, l10n.filterAll),
+                                  (true, l10n.filterOpen),
+                                  (false, l10n.filterClosed),
+                                ])
+                                  StatusFilterChip(
+                                    label: label,
+                                    isSelected: _open == open,
+                                    onTap: () => setState(() => _open = open),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: loaded == null
+                            ? _firstPage(context, state)
+                            : _list(context, state, loaded, buttonBottom),
+                      ),
+                    ],
+                  ),
+                  Positioned(
+                    left: 20.w,
+                    right: 20.w,
+                    bottom: buttonBottom,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.mahabbahRed.withValues(
+                              alpha: 0.28,
+                            ),
+                            offset: Offset(0, 14.h),
+                            blurRadius: 30.r,
                           ),
                         ],
                       ),
-                    ),
-                    Expanded(
-                      child: loaded == null
-                          ? _firstPage(context, state)
-                          : _list(context, state, loaded, buttonBottom),
-                    ),
-                  ],
-                ),
-                Positioned(
-                  left: 20.w,
-                  right: 20.w,
-                  bottom: buttonBottom,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.mahabbahRed.withValues(alpha: 0.28),
-                          offset: Offset(0, 14.h),
-                          blurRadius: 30.r,
+                      child: ElevatedButton.icon(
+                        onPressed: _newComplaint,
+                        icon: AppSvgIcon(
+                          AppIcons.plus,
+                          size: 18.r,
+                          color: AppColors.white,
                         ),
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      onPressed: _newComplaint,
-                      icon: AppSvgIcon(
-                        AppIcons.plus,
-                        size: 18.r,
-                        color: AppColors.white,
-                      ),
-                      label: Text(l10n.newComplaint),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size.fromHeight(56.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.r),
-                        ),
-                        textStyle: textTheme.labelLarge?.copyWith(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
+                        label: Text(l10n.newComplaint),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size.fromHeight(56.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.r),
+                          ),
+                          textStyle: textTheme.labelLarge?.copyWith(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -259,11 +273,7 @@ class _ComplaintsViewState extends State<_ComplaintsView> with RouteAware {
           : StateMessage(
               icon: AppIcons.complaint,
               title: exception.localizedMessage(context),
-              action: AppButton(
-                label: context.l10n.tryAgain,
-                expand: false,
-                onPressed: _load,
-              ),
+              action: RetryOrLogInButton(exception: exception, onRetry: _load),
             ),
     );
   }

@@ -11,7 +11,6 @@ import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_loading.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
@@ -24,6 +23,7 @@ import 'package:al_mahhaba_school/features/children/presentation/view_model/chil
 import 'package:al_mahhaba_school/features/children/presentation/view_model/child_details_view_model.dart';
 import 'package:al_mahhaba_school/features/children/presentation/widgets/child_details_header.dart';
 import 'package:al_mahhaba_school/features/children/presentation/widgets/child_info_section.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// One of the parent's children, as the school has them: student,
 /// school, contact, father, mother and guardian. Opened from Profile.
@@ -109,10 +109,9 @@ class _ChildDetailsView extends StatelessWidget {
       child: StateMessage(
         icon: AppIcons.user,
         title: exception.localizedMessage(context),
-        action: AppButton(
-          label: context.l10n.tryAgain,
-          expand: false,
-          onPressed: () => _load(context),
+        action: RetryOrLogInButton(
+          exception: exception,
+          onRetry: () => _load(context),
         ),
       ),
     );

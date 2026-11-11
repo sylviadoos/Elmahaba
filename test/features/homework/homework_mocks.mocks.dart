@@ -14,6 +14,8 @@ import 'package:al_mahhaba_school/features/chat/domain/use_cases/download_chat_a
     as _i10;
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/mark_chat_read_use_case.dart'
     as _i9;
+import 'package:al_mahhaba_school/features/chat/domain/use_cases/preview_chat_attachment_use_case.dart'
+    as _i12;
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_filter.dart'
     as _i6;
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_page_entity.dart'
@@ -127,6 +129,34 @@ class MockMarkChatReadUseCase extends _i1.Mock
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadChatAttachmentUseCase extends _i1.Mock
     implements _i10.DownloadChatAttachmentUseCase {
+  @override
+  _i3.Future<_i4.Result<String>> call(
+    _i11.ChatAttachmentEntity? attachment, {
+    _i7.CancelHandle? cancel,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [attachment], {#cancel: cancel}),
+            returnValue: _i3.Future<_i4.Result<String>>.value(
+              _i8.dummyValue<_i4.Result<String>>(
+                this,
+                Invocation.method(#call, [attachment], {#cancel: cancel}),
+              ),
+            ),
+            returnValueForMissingStub: _i3.Future<_i4.Result<String>>.value(
+              _i8.dummyValue<_i4.Result<String>>(
+                this,
+                Invocation.method(#call, [attachment], {#cancel: cancel}),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Result<String>>);
+}
+
+/// A class which mocks [PreviewChatAttachmentUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockPreviewChatAttachmentUseCase extends _i1.Mock
+    implements _i12.PreviewChatAttachmentUseCase {
   @override
   _i3.Future<_i4.Result<String>> call(
     _i11.ChatAttachmentEntity? attachment, {

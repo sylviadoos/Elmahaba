@@ -5,6 +5,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_state.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_images_viewer.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_labels.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_composer.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_recipients.dart';
@@ -86,6 +87,8 @@ class ChatMessageBox extends StatelessWidget {
               : null,
           onRemoveAttachment: (index) =>
               bloc.add(RemoveAttachmentIntent(index)),
+          onPreviewAttachment: (index) =>
+              context.previewPickedPhotos(attachments, attachments[index]),
           onSend: state.canSendMessage
               ? () => bloc.add(const SendMessageIntent())
               : null,

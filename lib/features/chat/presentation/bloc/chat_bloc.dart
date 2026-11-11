@@ -16,8 +16,10 @@ import 'package:al_mahhaba_school/features/chat/domain/use_cases/download_chat_a
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/get_cached_chat_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/get_chat_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/mark_chat_read_use_case.dart';
+import 'package:al_mahhaba_school/features/chat/domain/use_cases/preview_chat_attachment_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/send_chat_message_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_effect.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_image_loads.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_state.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
@@ -36,6 +38,7 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     this._sendMessage,
     this._markRead,
     this._downloadAttachment,
+    this._previewAttachment,
   ) : super(const ChatState()) {
     on<ChildrenChangedIntent>(_onChildrenChanged);
     on<SelectedChildChangedIntent>((intent, emit) {
@@ -51,6 +54,7 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
       return _show(intent.studentId, emit);
     });
     on<RetryChatIntent>((_, emit) => _show(state.studentId, emit));
+    on<RefreshChatIntent>(_onRefresh);
     on<LoadOlderChatIntent>(_onLoadOlder);
     on<ItemSeenIntent>(_onItemSeen);
     on<PickRecipientIntent>(_onPickRecipient);
@@ -61,6 +65,7 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     on<RemoveAttachmentIntent>(_onRemoveAttachment);
     on<SendMessageIntent>(_onSend);
     on<OpenAttachmentIntent>(_onOpenAttachment);
+    on<LoadImageIntent>(_onLoadImage);
   }
 
   final GetChatUseCase _getChat;
@@ -68,6 +73,7 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
   final SendChatMessageUseCase _sendMessage;
   final MarkChatReadUseCase _markRead;
   final DownloadChatAttachmentUseCase _downloadAttachment;
+  final PreviewChatAttachmentUseCase _previewAttachment;
 
   /// How long items seen are gathered, to mark them read in one request.
   static const Duration _markDelay = Duration(milliseconds: 400);
@@ -80,6 +86,13 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
   CancelHandle? _older;
   CancelHandle? _sending;
   CancelHandle? _downloading;
+  CancelHandle? _refreshing;
+
+  /// The photos shown in the chat.
+  late final ChatImageLoads _imageLoads = ChatImageLoads(
+    download: _downloadAttachment.call,
+    preview: _previewAttachment.call,
+  );
 
   /// The items marked read, or being marked, so none is sent twice.
   final Set<String> _marked = {};
@@ -98,6 +111,8 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     _older?.cancel();
     _sending?.cancel();
     _downloading?.cancel();
+    _refreshing?.cancel();
+    _imageLoads.cancelAll();
     // What was seen just before leaving is still marked read.
     _markTimer?.cancel();
     unawaited(_markSeen());
@@ -163,6 +178,34 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
         if (cached != null) return emitEffect(ShowErrorEffect(exception));
         emit(state.showing(BaseState.error(exception)));
       },
+    );
+  }
+
+  /// The newest items again, joined to what's shown (older ones loaded
+  /// while scrolling stay). Only while the chat shows and isn't loading;
+  /// one at a time. Dropped when another child is picked meanwhile, and
+  /// when it doesn't load: what's shown stays, no snack bar.
+  Future<void> _onRefresh(
+    RefreshChatIntent intent,
+    Emitter<ChatState> emit,
+  ) async {
+    if (!state.isRequested ||
+        state.chat.state != StateType.success ||
+        state.chat.data == null ||
+        _refreshing != null) {
+      return;
+    }
+    final load = _loads;
+    final cancel = _refreshing = CancelHandle();
+    final result = await _getChat(studentId: state.studentId, cancel: cancel);
+    _refreshing = null;
+    if (load != _loads) return;
+    final shown = state.chat.data;
+    if (shown == null) return;
+    result.when(
+      success: (newest) =>
+          emit(state.showing(BaseState.success(newest.after(shown)))),
+      failure: (exception) => debugPrint('Refreshing the chat: $exception'),
     );
   }
 
@@ -396,7 +439,7 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     final result = await _downloadAttachment(intent.attachment, cancel: cancel);
     emit(state.copyWith(downloadingId: () => null));
     result.when(
-      success: (path) => emitEffect(OpenFileEffect(path)),
+      success: (path) => emitEffect(OpenFileEffect(path, intent.attachment)),
       failure: (exception) {
         if (exception is! CancelledException) {
           emitEffect(ShowErrorEffect(exception));
@@ -404,6 +447,17 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
       },
     );
   }
+
+  /// Saves a photo on the phone (once: it's kept there by its id), to show
+  /// in the chat.
+  Future<void> _onLoadImage(LoadImageIntent intent, Emitter<ChatState> emit) =>
+      _imageLoads.load(
+        intent.attachment,
+        images: () => state.images,
+        emit: (images) => emit(state.copyWith(images: images)),
+        // The snack bar says so, and the page logs out.
+        onSignedOut: (exception) => emitEffect(ShowErrorEffect(exception)),
+      );
 
   /// A new try: the notes about the last one go.
   ChatState get _withoutNotes => state.copyWith(sendError: () => null);

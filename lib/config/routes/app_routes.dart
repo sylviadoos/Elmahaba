@@ -23,11 +23,20 @@ abstract final class AppRoutes {
   static const String addChildren = '/add-children';
   static const String home = '/home';
   static const String chat = '/chat';
+
+  /// With the photos as `extra` (a `ChatImagesArgs`).
+  static const String chatImages = '/chat/images';
+
+  /// With the file as `extra` (a `ChatPdfArgs`).
+  static const String chatPdf = '/chat/pdf';
   static const String results = '/results';
   static const String attendance = '/attendance';
 
   /// With the child to show first as `extra` (an `int` student id).
   static const String homework = '/homework';
+
+  /// With the child to show first as `extra` (an `int` student id).
+  static const String announcements = '/announcements';
   static const String fees = '/fees';
   static const String feesPay = '/fees/pay';
   static const String feesCheckout = '/fees/pay/checkout';

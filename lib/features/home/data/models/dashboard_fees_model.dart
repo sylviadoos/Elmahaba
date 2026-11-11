@@ -1,27 +1,37 @@
+import 'package:al_mahhaba_school/features/fees/data/models/installment_status_json.dart';
 import 'package:al_mahhaba_school/features/home/data/models/next_installment_model.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/dashboard_fees_entity.dart';
 
 class DashboardFeesModel extends DashboardFeesEntity {
   const DashboardFeesModel({
-    required super.totalAmount,
-    required super.paidAmount,
-    required super.remainingBalance,
-    super.nextInstallment,
+    required super.status,
+    super.installment,
+    super.overdueCount,
+    super.overdueTotal,
   });
 
-  /// { "payment_summary": { "total_amount": 19000, … },
-  ///   "next_installment": {…} or null } — with a `payment_summary`.
+  /// { "selection_status": "OVERDUE", "selected_installment": {…} or null,
+  ///   "overdue_installments": [{ "amount": 5000, … }, …],
+  ///   "overdue_count": 2, "overdue_total": 7000 }. Without the count or the
+  /// total, they're worked out from the installments.
   factory DashboardFeesModel.fromJson(Map<String, dynamic> json) {
-    final summary = json['payment_summary'] as Map<String, dynamic>;
-
+    final overdue = [
+      for (final installment
+          in json['overdue_installments'] as List<dynamic>? ?? const [])
+        if (installment is Map<String, dynamic>) installment,
+    ];
     return DashboardFeesModel(
-      totalAmount: (summary['total_amount'] as num?)?.toDouble() ?? 0,
-      paidAmount: (summary['paid_amount'] as num?)?.toDouble() ?? 0,
-      remainingBalance: (summary['remaining_balance'] as num?)?.toDouble() ?? 0,
-      nextInstallment: switch (json['next_installment']) {
-        final Map<String, dynamic> next => NextInstallmentModel.fromJson(next),
+      status: installmentStatusFromJson(json['selection_status']),
+      installment: switch (json['selected_installment']) {
+        final Map<String, dynamic> installment => NextInstallmentModel.fromJson(
+          installment,
+        ),
         _ => null,
       },
+      overdueCount: json['overdue_count'] as int? ?? overdue.length,
+      overdueTotal:
+          json['overdue_total'] as num? ??
+          overdue.fold<num>(0, (sum, i) => sum + (i['amount'] as num? ?? 0)),
     );
   }
 }

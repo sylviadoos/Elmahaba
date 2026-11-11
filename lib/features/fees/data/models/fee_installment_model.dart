@@ -1,6 +1,6 @@
 import 'package:al_mahhaba_school/core/utils/json_values.dart';
+import 'package:al_mahhaba_school/features/fees/data/models/installment_status_json.dart';
 import 'package:al_mahhaba_school/features/fees/domain/entities/fee_installment_entity.dart';
-import 'package:al_mahhaba_school/features/fees/domain/entities/installment_status.dart';
 
 class FeeInstallmentModel extends FeeInstallmentEntity {
   const FeeInstallmentModel({
@@ -34,14 +34,7 @@ class FeeInstallmentModel extends FeeInstallmentEntity {
       dueDate: DateTime.tryParse(json['due_date'] as String? ?? ''),
       bankAccount: json['bank_account'] as String? ?? '',
       amount: jsonDouble(json['amount']),
-      status: switch (json['status']) {
-        'PAID' => InstallmentStatus.paid,
-        'OVERDUE' => InstallmentStatus.overdue,
-        'UPCOMING' => InstallmentStatus.upcoming,
-        'UNDER_PROCESSING' => InstallmentStatus.processing,
-        'UNDER_SETTLEMENT' => InstallmentStatus.underSettlement,
-        _ => InstallmentStatus.unknown,
-      },
+      status: installmentStatusFromJson(json['status']),
       statusLabel: jsonText(json['status_label']),
       canPay: (json['can_pay'] as bool? ?? false) && payKey.isNotEmpty,
       payKey: payKey,

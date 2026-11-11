@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:open_filex/open_filex.dart';
 
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
+import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/bloc_effect_listener.dart';
+import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_effect.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_intent.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_file_opener.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_bottom_bar.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_header.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_page_header.dart';
@@ -89,8 +91,8 @@ class _ChatViewState extends State<_ChatView> {
         _scrollToNewest();
       case FocusComposerEffect():
         _messageFocus.requestFocus();
-      case OpenFileEffect(:final path):
-        _open(path);
+      case OpenFileEffect(:final path, :final attachment):
+        context.openChatFile(path, attachment);
       case ShowErrorEffect(:final exception):
         context.showSnackBar(
           exception.localizedMessage(context),
@@ -115,12 +117,6 @@ class _ChatViewState extends State<_ChatView> {
     );
   }
 
-  Future<void> _open(String path) async {
-    final result = await OpenFilex.open(path);
-    if (!mounted || result.type == ResultType.done) return;
-    context.showSnackBar(context.l10n.cantOpenFile, isError: true);
-  }
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
@@ -142,36 +138,44 @@ class _ChatViewState extends State<_ChatView> {
       ],
       child: BlocEffectListener<ChatBloc, ChatEffect>(
         listener: _onEffect,
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle.light,
-          child: Scaffold(
-            backgroundColor: AppColors.surface,
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  // The header lies over the list's top and slides away as
-                  // it scrolls: the list keeps its size.
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        top: ChatHeader.collapsedHeight(context),
-                        child: ChatTimeline(
-                          scroll: _scroll,
-                          overlap: ChatHeader.collapseExtent,
+        // The school's answers show as they come: a notification while the
+        // chat is open, the app back to the front, back from a page opened
+        // over it.
+        child: PageRefresher(
+          path: AppRoutes.chat,
+          onRefresh: () =>
+              context.read<ChatBloc>().add(const RefreshChatIntent()),
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle.light,
+            child: Scaffold(
+              backgroundColor: AppColors.surface,
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    // The header lies over the list's top and slides away as
+                    // it scrolls: the list keeps its size.
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          top: ChatHeader.collapsedHeight(context),
+                          child: ChatTimeline(
+                            scroll: _scroll,
+                            overlap: ChatHeader.collapseExtent,
+                          ),
                         ),
-                      ),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: ChatPageHeader(scroll: _scroll),
-                      ),
-                    ],
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: ChatPageHeader(scroll: _scroll),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                ChatBottomBar(controller: _message, focusNode: _messageFocus),
-              ],
+                  ChatBottomBar(controller: _message, focusNode: _messageFocus),
+                ],
+              ),
             ),
           ),
         ),

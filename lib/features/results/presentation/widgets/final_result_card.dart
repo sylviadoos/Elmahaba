@@ -10,7 +10,8 @@ import 'package:al_mahhaba_school/core/widgets/progress_ring.dart';
 import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart';
 
 /// The final result out of the counted subjects' maximum — as a ring and in
-/// numbers — and the attendance.
+/// numbers — the attendance, and the rank in the class when there's one (a
+/// month's).
 class FinalResultCard extends StatelessWidget {
   const FinalResultCard({super.key, required this.result});
 
@@ -26,6 +27,7 @@ class FinalResultCard extends StatelessWidget {
         ? (finalResult / finalMax).clamp(0.0, 1.0)
         : 0.0;
     final attendance = result.attendancePercentage;
+    final rank = result.rank;
 
     return Container(
       padding: EdgeInsets.all(18.r),
@@ -41,7 +43,8 @@ class FinalResultCard extends StatelessWidget {
             size: 92,
             holeSize: 72,
             child: Text(
-              '${(share * 100).oneDecimal}%',
+              // A dash, not 0%: no mark yet, or none earned.
+              share > 0 ? '${(share * 100).oneDecimal}%' : '-',
               textDirection: TextDirection.ltr,
               style: textTheme.titleLarge?.copyWith(
                 fontSize: 19.sp,
@@ -84,39 +87,64 @@ class FinalResultCard extends StatelessWidget {
                     color: AppColors.mahabbahRed,
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 4.h,
-                  ),
-                  decoration: const ShapeDecoration(
-                    color: AppColors.white,
-                    shape: StadiumBorder(),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 6.w,
-                    children: [
-                      AppSvgIcon(
-                        AppIcons.calendarPresent,
-                        size: 13.r,
-                        color: AppColors.mahabbahRed,
+                Wrap(
+                  spacing: 6.w,
+                  runSpacing: 6.h,
+                  children: [
+                    _Pill(
+                      icon: AppIcons.calendarPresent,
+                      label: l10n.attendancePercent(
+                        // A dash, not 0%, as on Attendance.
+                        attendance == null || attendance <= 0
+                            ? '-'
+                            : '${attendance.oneDecimal}%',
                       ),
-                      Text(
-                        l10n.attendancePercent(
-                          attendance == null
-                              ? '—'
-                              : '${attendance.oneDecimal}%',
-                        ),
-                        style: textTheme.bodySmall?.copyWith(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    ),
+                    if (rank != null)
+                      _Pill(
+                        icon: AppIcons.navResults,
+                        label: l10n.classRank(rank),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// White pill under the final result: an icon and a short fact.
+class _Pill extends StatelessWidget {
+  const _Pill({required this.icon, required this.label});
+
+  final String icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: const ShapeDecoration(
+        color: AppColors.white,
+        shape: StadiumBorder(),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6.w,
+        children: [
+          AppSvgIcon(icon, size: 13.r, color: AppColors.mahabbahRed),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.bodySmall?.copyWith(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

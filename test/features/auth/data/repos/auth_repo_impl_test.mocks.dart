@@ -44,6 +44,8 @@ import 'package:al_mahhaba_school/features/children/data/models/child_model.dart
     as _i19;
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart'
     as _i20;
+import 'package:al_mahhaba_school/features/complaints/data/data_sources/complaints_local_data_source.dart'
+    as _i23;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i17;
 
@@ -379,4 +381,46 @@ class MockChatLocalDataSource extends _i1.Mock
     Invocation.method(#clear, []),
     returnValueForMissingStub: null,
   );
+}
+
+/// A class which mocks [ComplaintsLocalDataSource].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockComplaintsLocalDataSource extends _i1.Mock
+    implements _i23.ComplaintsLocalDataSource {
+  @override
+  _i6.Future<void> saveSeenUpdate(DateTime? updatedAt) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveSeenUpdate, [updatedAt]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  Map<int, DateTime> getOwnUpdates() =>
+      (super.noSuchMethod(
+            Invocation.method(#getOwnUpdates, []),
+            returnValue: <int, DateTime>{},
+            returnValueForMissingStub: <int, DateTime>{},
+          )
+          as Map<int, DateTime>);
+
+  @override
+  _i6.Future<void> saveOwnUpdates(Map<int, DateTime>? updates) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveOwnUpdates, [updates]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
+  _i6.Future<void> clearSeenUpdate() =>
+      (super.noSuchMethod(
+            Invocation.method(#clearSeenUpdate, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
 }

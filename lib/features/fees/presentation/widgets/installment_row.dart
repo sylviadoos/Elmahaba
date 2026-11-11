@@ -10,7 +10,9 @@ import 'package:al_mahhaba_school/features/fees/domain/entities/installment_stat
 import 'package:al_mahhaba_school/features/fees/presentation/extensions/money_text.dart';
 
 /// An installment to tick for paying now. Only one the school says can be
-/// paid can be ticked; a paid one shows ticked in grey, the others locked.
+/// paid can be ticked; a paid one shows ticked in grey. The others are
+/// locked: greyed out, the box faded, so they don't look tickable; the
+/// status says why.
 class InstallmentRow extends StatelessWidget {
   const InstallmentRow({
     super.key,
@@ -31,6 +33,7 @@ class InstallmentRow extends StatelessWidget {
     final textTheme = context.textTheme;
     final canPick = installment.canPay;
     final isPaid = installment.status == InstallmentStatus.paid;
+    final isLocked = !canPick && !isPaid;
     final ticked = isPaid || (canPick && isPicked);
     final highlighted = canPick && isPicked;
     final dueDate = installment.dueDate;
@@ -81,7 +84,11 @@ class InstallmentRow extends StatelessWidget {
     };
 
     return Material(
-      color: highlighted ? AppColors.blushPale : AppColors.white,
+      color: highlighted
+          ? AppColors.blushPale
+          : isLocked
+          ? AppColors.surface
+          : AppColors.white,
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
@@ -106,9 +113,15 @@ class InstallmentRow extends StatelessWidget {
                     onChanged: canPick
                         ? (value) => onPickedChanged(value ?? false)
                         : null,
-                    // Paid: ticked in grey, it's done.
+                    // Paid: ticked in grey, it's done. Locked: a faded
+                    // box, filled grey.
                     fillColor: isPaid
                         ? const WidgetStatePropertyAll(AppColors.mist)
+                        : isLocked
+                        ? const WidgetStatePropertyAll(AppColors.line)
+                        : null,
+                    side: isLocked
+                        ? const BorderSide(color: AppColors.unmet, width: 1.5)
                         : null,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -130,6 +143,7 @@ class InstallmentRow extends StatelessWidget {
                             textDirection: installment.feeName.textDirection,
                             style: textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w700,
+                              color: isLocked ? AppColors.slate : null,
                             ),
                           ),
                         ),
@@ -139,6 +153,7 @@ class InstallmentRow extends StatelessWidget {
                             fontSize: 15.sp,
                             height: 1.25,
                             fontWeight: FontWeight.w700,
+                            color: isLocked ? AppColors.slate : null,
                           ),
                         ),
                       ],
@@ -149,7 +164,7 @@ class InstallmentRow extends StatelessWidget {
                       style: textTheme.bodySmall?.copyWith(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.ink,
+                        color: isLocked ? AppColors.slate : AppColors.ink,
                       ),
                     ),
                     Text(

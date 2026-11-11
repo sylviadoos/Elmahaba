@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_status.dart';
 
-/// A school day that wasn't a plain "present": absent, late or excused.
+/// A school day as recorded: present, absent or excused.
 class AttendanceRecordEntity extends Equatable {
   const AttendanceRecordEntity({
     required this.date,

@@ -8,6 +8,12 @@ abstract final class DioExceptionHandler {
   /// `{"code": "unauthenticated", "message": "Please log in again."}`
   static const _sessionEndedCode = 'unauthenticated';
 
+  /// `{"code": "account_withdrawn", "message": "…", "school_contact": {…}}`
+  /// — the child left the school, so the account is closed. It can answer
+  /// any request, not only log in, so the parent is signed out wherever
+  /// they are in the app.
+  static const _accountWithdrawnCode = 'account_withdrawn';
+
   /// Converts a [DioException] into a typed [AppException], so the UI can
   /// react to the kind of error (e.g. 401 → go to login).
   static AppException handle(DioException e) {
@@ -27,6 +33,14 @@ abstract final class DioExceptionHandler {
         final message = _messageFrom(data);
         final code = _codeFrom(data);
 
+        // Whatever the status: the account is gone, not just the session.
+        if (code == _accountWithdrawnCode) {
+          return UnauthorizedException(
+            message: message,
+            statusCode: statusCode,
+            isAccountWithdrawn: true,
+          );
+        }
         // A 401 is an ended session unless the API names another reason,
         // e.g. `invalid_credentials` for a wrong password on log in.
         if (statusCode == StatusCode.expiredToken &&

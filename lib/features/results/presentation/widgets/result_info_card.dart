@@ -52,17 +52,24 @@ class ResultInfoCard extends StatelessWidget {
                     style: caption?.copyWith(fontWeight: FontWeight.w600),
                   ),
                 ),
-              const Spacer(),
-              if (publishedAt != null)
-                Text(
-                  l10n.publishedOn(
-                    DateFormat(
-                      'd MMM y',
-                      Localizations.localeOf(context).toString(),
-                    ).format(publishedAt.toLocal()),
-                  ),
-                  style: caption,
-                ),
+              // At the end, cut short rather than overflow on a narrow
+              // phone.
+              Expanded(
+                child: publishedAt == null
+                    ? const SizedBox.shrink()
+                    : Text(
+                        l10n.publishedOn(
+                          DateFormat(
+                            'd MMM y',
+                            Localizations.localeOf(context).toString(),
+                          ).format(publishedAt.toLocal()),
+                        ),
+                        textAlign: TextAlign.end,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: caption,
+                      ),
+              ),
             ],
           ),
           // The school's words: right to left when Arabic, in either language.

@@ -16,6 +16,12 @@ abstract interface class NotificationService {
   /// the app included. One listener; taps before it wait for it.
   Stream<Map<String, dynamic>> get onTap;
 
+  /// The `data` of each notification that arrives while the app is open,
+  /// whether or not the parent taps it. A push says nothing about how much
+  /// is unread, so what listens asks the server. Nothing arrives here
+  /// while the app is away: ask again on coming back.
+  Stream<Map<String, dynamic>> get onReceived;
+
   /// Stops pushes to this phone, e.g. on log out; [getToken] then makes a
   /// new token.
   Future<void> deleteToken();

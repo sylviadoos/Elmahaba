@@ -24,6 +24,7 @@ import 'package:al_mahhaba_school/features/fees/presentation/widgets/fee_stateme
 import 'package:al_mahhaba_school/features/fees/presentation/widgets/fees_skeleton.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/widgets/student_summary_card.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/parent_tab_page.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// The selected child's fee statement: who it's for, the fees, the totals,
 /// and paying them.
@@ -105,10 +106,9 @@ class _FeesViewState extends State<_FeesView> {
                 error: (exception) => StateMessage(
                   icon: AppIcons.navFees,
                   title: exception.localizedMessage(context),
-                  action: AppButton(
-                    label: context.l10n.tryAgain,
-                    expand: false,
-                    onPressed: _loadStatement,
+                  action: RetryOrLogInButton(
+                    exception: exception,
+                    onRetry: _loadStatement,
                   ),
                 ),
                 success: (statement) => _statement(context, statement),

@@ -5,13 +5,17 @@ import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_attachment_kind.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_image_grid.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/extensions/homework_labels.dart';
+import 'package:al_mahhaba_school/features/homework/presentation/homework_image_source.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/widgets/homework_due_badge.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/widgets/homework_file_link.dart';
 
 /// One homework: its subject ("New" while unread), title and what to do,
-/// when it's due and when it was given, and its files.
+/// when it's due and when it was given, its photos (opened full screen)
+/// and its files.
 class HomeworkCard extends StatelessWidget {
   const HomeworkCard(this.homework, {super.key});
 
@@ -24,6 +28,11 @@ class HomeworkCard extends StatelessWidget {
     final direction = homework.textDirection;
     final align = context.isRtl ? TextAlign.right : TextAlign.left;
     final given = homework.issueDate?.homeworkDayLabel(context);
+    // Photos show in the card; other files are links to open.
+    final images = [
+      for (final attachment in homework.attachments)
+        if (attachment.isImage) attachment,
+    ];
     final note = textTheme.bodySmall?.copyWith(
       fontSize: 12.sp,
       height: 16 / 12,
@@ -100,8 +109,16 @@ class HomeworkCard extends StatelessWidget {
                   ),
               ],
             ),
+            if (images.isNotEmpty)
+              LayoutBuilder(
+                builder: (_, constraints) => ChatImageGrid(
+                  source: const HomeworkImageSource(),
+                  images: images,
+                  width: constraints.maxWidth,
+                ),
+              ),
             for (final attachment in homework.attachments)
-              HomeworkFileLink(attachment),
+              if (!attachment.isImage) HomeworkFileLink(attachment),
           ],
         ),
       ),

@@ -15,7 +15,7 @@ import 'package:al_mahhaba_school/features/excuses/domain/entities/excusable_abs
 import 'package:al_mahhaba_school/features/excuses/domain/entities/excusable_absences_entity.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/extensions/excuse_labels.dart';
 
-/// "This month": the absences, late days and holidays, latest first. An
+/// "This month": the absences and holidays, latest first. An
 /// absence a medical excuse can be sent for has "Submit excuse"; one that
 /// has an excuse shows where it stands, with "View excuse".
 class AttendanceEventsSection extends StatelessWidget {
@@ -107,13 +107,6 @@ class AttendanceEventsSection extends StatelessWidget {
         onAction:
             onAction ??
             (reason == null ? () => context.push(AppRoutes.chat) : null),
-      ),
-      AttendanceStatus.late => AttendanceEventRow(
-        date: record.date,
-        title: l10n.late,
-        detail: reason ?? l10n.arrivedLate,
-        background: AppColors.blush,
-        foreground: AppColors.mahabbahRed,
       ),
       AttendanceStatus.excused => AttendanceEventRow(
         date: record.date,

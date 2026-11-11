@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_loading.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_state.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_items_list.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// The middle of the chat: loading, why it didn't load (with "Try again"),
 /// "No messages yet", or the items.
@@ -44,10 +44,9 @@ class ChatTimeline extends StatelessWidget {
             top: overlap,
             icon: AppIcons.navChat,
             title: exception.localizedMessage(context),
-            action: AppButton(
-              label: l10n.tryAgain,
-              expand: false,
-              onPressed: () =>
+            action: RetryOrLogInButton(
+              exception: exception,
+              onRetry: () =>
                   context.read<ChatBloc>().add(const RetryChatIntent()),
             ),
           );

@@ -1,9 +1,11 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:al_mahhaba_school/config/app_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_route_observer.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
+import 'package:al_mahhaba_school/config/routes/home_on_back.dart';
+import 'package:al_mahhaba_school/core/analytics/public_content.dart';
 import 'package:al_mahhaba_school/features/attendance/presentation/pages/attendance_page.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/presentation/pages/add_children_page.dart';
@@ -16,6 +18,10 @@ import 'package:al_mahhaba_school/features/auth/presentation/pages/otp_page.dart
 import 'package:al_mahhaba_school/features/auth/presentation/pages/register_page.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/reset_code_page.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/auth_state.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/chat_images_args.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/chat_pdf_args.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/pages/chat_image_viewer_page.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/pages/chat_pdf_viewer_page.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/pages/chat_page.dart';
 import 'package:al_mahhaba_school/features/complaints/domain/entities/complaint_entity.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/pages/complaint_details_page.dart';
@@ -28,6 +34,7 @@ import 'package:al_mahhaba_school/features/fees/presentation/pages/fee_statement
 import 'package:al_mahhaba_school/features/fees/presentation/pages/fees_page.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/pages/pay_fees_page.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/pdf/fee_statement_pdf_file.dart';
+import 'package:al_mahhaba_school/features/announcements/presentation/pages/announcements_page.dart';
 import 'package:al_mahhaba_school/features/home/presentation/pages/home_page.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/pages/homework_page.dart';
 import 'package:al_mahhaba_school/features/news/domain/entities/news_entity.dart';
@@ -62,6 +69,7 @@ const Set<String> _parentRoutes = {
   AppRoutes.results,
   AppRoutes.attendance,
   AppRoutes.homework,
+  AppRoutes.announcements,
   AppRoutes.fees,
   AppRoutes.feesPay,
   AppRoutes.feesCheckout,
@@ -98,38 +106,41 @@ final GoRouter appRouter = GoRouter(
   routes: [
     GoRoute(
       path: AppRoutes.splash,
-      builder: (context, state) => const SplashPage(),
+      // The school's own pages: shown as they are in session recordings.
+      builder: (context, state) => const PublicContent(child: SplashPage()),
     ),
     GoRoute(
       path: AppRoutes.onboarding,
-      builder: (context, state) => const OnboardingPage(),
+      builder: (context, state) => const PublicContent(child: OnboardingPage()),
     ),
     GoRoute(
       path: AppRoutes.explore,
-      builder: (context, state) => const ExplorePage(),
+      builder: (context, state) => const PublicContent(child: ExplorePage()),
     ),
     GoRoute(
       path: AppRoutes.about,
-      builder: (context, state) => const AboutPage(),
+      builder: (context, state) => const PublicContent(child: AboutPage()),
     ),
     GoRoute(
       path: AppRoutes.news,
-      builder: (context, state) => const NewsPage(),
+      builder: (context, state) => const PublicContent(child: NewsPage()),
     ),
     GoRoute(
       path: AppRoutes.newsArticle,
-      builder: (context, state) => NewsArticlePage(
-        slug: state.pathParameters['slug']!,
-        // Passed from the news list; missing when opened from a link.
-        preview: switch (state.extra) {
-          final NewsEntity news => news,
-          _ => null,
-        },
+      builder: (context, state) => PublicContent(
+        child: NewsArticlePage(
+          slug: state.pathParameters['slug']!,
+          // Passed from the news list; missing when opened from a link.
+          preview: switch (state.extra) {
+            final NewsEntity news => news,
+            _ => null,
+          },
+        ),
       ),
     ),
     GoRoute(
       path: AppRoutes.contact,
-      builder: (context, state) => const ContactPage(),
+      builder: (context, state) => const PublicContent(child: ContactPage()),
     ),
     GoRoute(
       path: AppRoutes.contactMessage,
@@ -181,7 +192,7 @@ final GoRouter appRouter = GoRouter(
         );
       },
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.addChildren,
       builder: (context, state) => const AddChildrenPage(),
     ),
@@ -224,11 +235,39 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.chat,
       builder: (context, state) => const ChatPage(),
     ),
     GoRoute(
+      path: AppRoutes.chatImages,
+      // Needs the photos the chat saved; opened any other way, go there.
+      redirect: (context, state) => switch (state.extra) {
+        ChatImagesArgs(:final images) when images.isNotEmpty => null,
+        _ => AppRoutes.chat,
+      },
+      // Fades in over the chat as the photo flies to full screen.
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: ChatImageViewerPage(args: state.extra! as ChatImagesArgs),
+        transitionsBuilder: (_, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.chatPdf,
+      // Needs the file the chat saved; opened any other way, go there.
+      redirect: (context, state) =>
+          state.extra is ChatPdfArgs ? null : AppRoutes.chat,
+      // Fades in, like a photo.
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: ChatPdfViewerPage(args: state.extra! as ChatPdfArgs),
+        transitionsBuilder: (_, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+    ),
+    _parentPage(
       path: AppRoutes.homework,
       builder: (context, state) => HomeworkPage(
         // The child the chat showed; the first child opened any other way.
@@ -238,7 +277,17 @@ final GoRouter appRouter = GoRouter(
         },
       ),
     ),
-    GoRoute(
+    _parentPage(
+      path: AppRoutes.announcements,
+      builder: (context, state) => AnnouncementsPage(
+        // The child Home showed; the one every page shows any other way.
+        studentId: switch (state.extra) {
+          final int studentId => studentId,
+          _ => null,
+        },
+      ),
+    ),
+    _parentPage(
       path: AppRoutes.feesPay,
       // Needs the statement Fees showed; opened any other way, start there.
       redirect: (context, state) =>
@@ -246,7 +295,7 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           PayFeesPage(statement: state.extra! as FeeStatementEntity),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.feesCheckout,
       // Needs the payment Pay fees started; opened any other way, go to
       // Fees.
@@ -255,7 +304,7 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           CheckoutPage(checkout: state.extra! as CheckoutEntity),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.feeStatementPreview,
       // Needs the PDF Fees made; opened any other way, go to Fees.
       redirect: (context, state) =>
@@ -263,11 +312,11 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           FeeStatementPreviewPage(file: state.extra! as FeeStatementPdfFile),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.settings,
       builder: (context, state) => const SettingsPage(),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.profile,
       builder: (context, state) => ProfilePage(
         // Passed from Settings, which loaded it; missing when opened from a
@@ -278,11 +327,11 @@ final GoRouter appRouter = GoRouter(
         },
       ),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.changePassword,
       builder: (context, state) => const ChangePasswordPage(),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.childDetails,
       builder: (context, state) => ChildDetailsPage(
         // A bad id is the server's "not found".
@@ -294,16 +343,16 @@ final GoRouter appRouter = GoRouter(
         },
       ),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.complaints,
       builder: (context, state) => const ComplaintsPage(),
     ),
     // Before the details, which would take "new" for an id.
-    GoRoute(
+    _parentPage(
       path: AppRoutes.newComplaint,
       builder: (context, state) => const NewComplaintPage(),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.complaintDetails,
       builder: (context, state) => ComplaintDetailsPage(
         // A bad id is the server's "not found".
@@ -316,7 +365,7 @@ final GoRouter appRouter = GoRouter(
         },
       ),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.newExcuse,
       // Needs the absence Attendance picked; opened any other way, go there.
       redirect: (context, state) =>
@@ -324,7 +373,7 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           NewExcusePage(args: state.extra! as NewExcuseArgs),
     ),
-    GoRoute(
+    _parentPage(
       path: AppRoutes.excuseDetails,
       builder: (context, state) {
         // Passed from Attendance; missing when opened from a link.
@@ -342,4 +391,16 @@ final GoRouter appRouter = GoRouter(
       },
     ),
   ],
+);
+
+/// A page the parent opens over the tabs. Back from it goes Home, not
+/// through every page they opened on the way there ([HomeOnBack]).
+GoRoute _parentPage({
+  required String path,
+  required Widget Function(BuildContext context, GoRouterState state) builder,
+  GoRouterRedirect? redirect,
+}) => GoRoute(
+  path: path,
+  redirect: redirect,
+  builder: (context, state) => HomeOnBack(child: builder(context, state)),
 );

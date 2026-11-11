@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -8,6 +9,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/login_page.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_event.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/login_locked_notice.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_event.dart';
 
 import '../../../../helpers/form_helpers.dart';
@@ -99,6 +101,90 @@ void main() {
     expect(find.text('Wrong mobile number or password.'), findsOneWidget);
     expect(find.byType(LoginPage), findsOneWidget);
     verifyNever(harness.parentViewModel.doAction(any));
+  });
+
+  group('too many wrong passwords', () {
+    void locked({Object? retryAfter = 300}) =>
+        when(harness.login(any)).thenAnswer(
+          (_) async => Failure(
+            exception: ServerException(
+              statusCode: 429,
+              code: AuthErrorCodes.loginLocked,
+              message: 'Too many incorrect attempts. Try again in 15 minutes.',
+              body: {
+                'status': 'error',
+                'code': AuthErrorCodes.loginLocked,
+                'retry_after': ?retryAfter,
+              },
+            ),
+          ),
+        );
+
+    Finder button() => find.ancestor(
+      of: find.text(l10n.login),
+      matching: find.byType(ElevatedButton),
+    );
+
+    bool loginEnabled(WidgetTester tester) =>
+        tester.widget<ElevatedButton>(button()).onPressed != null;
+
+    testWidgets('the time left counts down, Log in off until it ends', (
+      tester,
+    ) async {
+      locked();
+      await harness.pump(tester, AppRoutes.login, const LoginPage());
+      await fillIn(tester);
+      await logIn(tester);
+
+      // Not the school's fixed "in 15 minutes". (Logging in took a second.)
+      expect(find.textContaining('15 minutes'), findsNothing);
+      expect(find.textContaining('04:59'), findsOneWidget);
+      expect(loginEnabled(tester), isFalse);
+
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.textContaining('04:58'), findsOneWidget);
+      await tester.pump(const Duration(minutes: 4, seconds: 57));
+      expect(find.textContaining('00:01'), findsOneWidget);
+      verify(harness.login(any)).called(1);
+
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(LoginLockedNotice), findsNothing);
+      expect(loginEnabled(tester), isTrue);
+    });
+
+    testWidgets('another number: not locked', (tester) async {
+      locked();
+      await harness.pump(tester, AppRoutes.login, const LoginPage());
+      await fillIn(tester);
+      await logIn(tester);
+      await tester.enterText(
+        textFieldLabeled(l10n.mobileNumber),
+        '01112345678',
+      );
+      await tester.pump();
+
+      expect(find.byType(LoginLockedNotice), findsNothing);
+      expect(loginEnabled(tester), isTrue);
+
+      // The locked one again: still counting.
+      await tester.enterText(textFieldLabeled(l10n.mobileNumber), phone);
+      await tester.pump();
+      expect(find.byType(LoginLockedNotice), findsOneWidget);
+      await tester.pump(const Duration(minutes: 5));
+    });
+
+    testWidgets('the school didn\'t say how long: its message', (tester) async {
+      locked(retryAfter: null);
+      await harness.pump(tester, AppRoutes.login, const LoginPage());
+      await fillIn(tester);
+      await logIn(tester);
+
+      expect(
+        find.text('Too many incorrect attempts. Try again in 15 minutes.'),
+        findsOneWidget,
+      );
+      expect(find.byType(LoginLockedNotice), findsNothing);
+    });
   });
 
   testWidgets('invalid_phone: its message under the mobile', (tester) async {

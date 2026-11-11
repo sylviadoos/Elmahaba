@@ -22,6 +22,11 @@ abstract final class AppImages {
       '${AppAssets.images}/logo_mark_watermark.svg';
   static const String logoMarkRed = '${AppAssets.images}/logo_mark_red.svg';
   static const String logoMarkWhite = '${AppAssets.images}/logo_mark_white.svg';
+
+  /// The monthly examination certificate, blank (1491 × 1055, from the
+  /// school's A4 landscape PDF): the app writes the marks on it.
+  static const String monthlyCertificate =
+      '${AppAssets.images}/monthly_certificate.jpg';
   static const String newsBeeDegree = '${AppAssets.images}/news_bee_degree.jpg';
   static const String newsBirthdays = '${AppAssets.images}/news_birthdays.jpg';
   static const String sparkle = '${AppAssets.images}/sparkle.svg';

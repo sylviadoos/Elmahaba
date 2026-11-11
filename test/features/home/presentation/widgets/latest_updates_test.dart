@@ -1,61 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mockito/mockito.dart';
 
 import 'package:al_mahhaba_school/config/l10n/translations/app_localizations.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
-import 'package:al_mahhaba_school/core/base/result.dart';
-import 'package:al_mahhaba_school/core/error/app_exception.dart';
-import 'package:al_mahhaba_school/features/home/domain/entities/announcement_entity.dart';
-import 'package:al_mahhaba_school/features/home/domain/entities/latest_items_entity.dart';
-import 'package:al_mahhaba_school/features/home/domain/entities/latest_result_entity.dart';
-import 'package:al_mahhaba_school/features/home/presentation/bloc/latest_updates_bloc.dart';
-import 'package:al_mahhaba_school/features/home/presentation/bloc/latest_updates_intent.dart';
+import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_updates.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
 
-import '../../../../helpers/result_dummy.dart';
 import '../../../../helpers/stub_routes.dart';
 import '../../../../helpers/test_app.dart';
 import '../../home_fixtures.dart';
-import '../../home_mocks.mocks.dart';
 
 final en = lookupAppLocalizations(const Locale('en'));
 final ar = lookupAppLocalizations(const Locale('ar'));
 
 void main() {
-  late MockGetLatestAnnouncementsUseCase getAnnouncements;
-  late MockGetLatestHomeworkUseCase getHomework;
-  late MockGetLatestResultsUseCase getResults;
   late Map<String, Object?> extras;
 
-  setUpAll(() {
-    provideResultDummy<LatestItemsEntity<AnnouncementEntity>>();
-    provideResultDummy<LatestItemsEntity<HomeworkEntity>>();
-    provideResultDummy<LatestItemsEntity<LatestResultEntity>>();
-  });
+  setUp(() => extras = {});
 
-  setUp(() {
-    extras = {};
-    getAnnouncements = MockGetLatestAnnouncementsUseCase();
-    getHomework = MockGetLatestHomeworkUseCase();
-    getResults = MockGetLatestResultsUseCase();
-    when(getAnnouncements(any)).thenAnswer(
-      (_) async => Success(data: latest([holiday, trip], unread: 1)),
-    );
-    when(
-      getHomework(any),
-    ).thenAnswer((_) async => Success(data: latest([mathSheet], unread: 1)));
-    when(
-      getResults(any),
-    ).thenAnswer((_) async => Success(data: latest([termResult])));
-  });
-
-  /// Home's latest for child 1208 on a [size] phone in [locale].
+  /// Home's latest for child 1208, from [dashboard], on a [size] phone in
+  /// [locale].
   Future<void> pump(
     WidgetTester tester, {
+    ChildDashboardEntity? dashboard,
     Locale locale = const Locale('en'),
     Size size = const Size(390, 844),
   }) async {
@@ -64,9 +33,6 @@ void main() {
       ..devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 
-    final bloc = LatestUpdatesBloc(getAnnouncements, getHomework, getResults)
-      ..add(const ShowChildUpdatesIntent(1208));
-    addTearDown(bloc.close);
     final router = GoRouter(
       routes: [
         GoRoute(
@@ -74,15 +40,15 @@ void main() {
           builder: (_, _) => Scaffold(
             body: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
-              child: BlocProvider.value(
-                value: bloc,
-                child: const LatestUpdates(),
+              child: LatestUpdates(
+                dashboard: dashboard ?? dashboardWith(),
+                childId: 1208,
               ),
             ),
           ),
         ),
         ...stubRoutes([
-          AppRoutes.chat,
+          AppRoutes.announcements,
           AppRoutes.homework,
           AppRoutes.results,
         ], extras: extras),
@@ -114,43 +80,25 @@ void main() {
   });
 
   testWidgets('says when there are none yet', (tester) async {
-    when(
-      getHomework(any),
-    ).thenAnswer((_) async => Success(data: latest(<HomeworkEntity>[])));
-
-    await pump(tester);
+    await pump(tester, dashboard: dashboardWith(homework: <HomeworkEntity>[]));
 
     expect(find.text(en.noHomework), findsOneWidget);
     expect(find.text(holiday.title), findsOneWidget);
   });
 
-  testWidgets('"Try again" loads again what failed', (tester) async {
-    var calls = 0;
-    when(getResults(any)).thenAnswer(
-      (_) async => calls++ == 0
-          ? const Failure(exception: UnknownException())
-          : Success(data: latest([termResult])),
-    );
-
-    await pump(tester);
-    expect(find.text(termResult.title), findsNothing);
-
-    await tester.tap(find.text(en.tryAgain));
-    await tester.pump();
-    await tester.pump();
-
-    expect(find.text(en.tryAgain), findsNothing);
-    expect(find.text(termResult.title), findsOneWidget);
-  });
-
-  testWidgets('opens the chat, the child\'s homework and the results', (
-    tester,
-  ) async {
+  testWidgets('opens the child\'s announcements and homework, and the '
+      'results', (tester) async {
     await pump(tester);
 
     await tester.tap(find.text(holiday.title));
     await tester.pumpAndSettle();
-    expect(find.text(AppRoutes.chat), findsOneWidget);
+    expect(find.text(AppRoutes.announcements), findsOneWidget);
+    expect(extras[AppRoutes.announcements], 1208);
+
+    await pump(tester);
+    await tester.tap(find.text(en.seeAll).first);
+    await tester.pumpAndSettle();
+    expect(find.text(AppRoutes.announcements), findsOneWidget);
 
     await pump(tester);
     await tester.tap(find.text(mathSheet.title));

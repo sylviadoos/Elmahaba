@@ -9,6 +9,7 @@ import 'package:al_mahhaba_school/features/auth/data/models/auth_session_model.d
 import 'package:al_mahhaba_school/features/auth/data/models/change_password_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/complete_register_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/login_request_model.dart';
+import 'package:al_mahhaba_school/features/auth/data/models/parent_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/register_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/reset_password_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/auth_session_entity.dart';
@@ -24,6 +25,7 @@ import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.d
 import 'package:al_mahhaba_school/features/auth/domain/repos/auth_repo.dart';
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_data_source.dart';
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart';
+import 'package:al_mahhaba_school/features/complaints/data/data_sources/complaints_local_data_source.dart';
 
 @LazySingleton(as: AuthRepo)
 class AuthRepoImpl implements AuthRepo {
@@ -33,6 +35,7 @@ class AuthRepoImpl implements AuthRepo {
     this._phoneVerification,
     this._childrenLocalDataSource,
     this._chatLocalDataSource,
+    this._complaintsLocalDataSource,
   );
 
   final AuthRemoteDataSource _remoteDataSource;
@@ -44,6 +47,10 @@ class AuthRepoImpl implements AuthRepo {
 
   /// The chats kept in memory are forgotten with it.
   final ChatLocalDataSource _chatLocalDataSource;
+
+  /// How far they had read their complaints goes with it: the next
+  /// parent's complaints aren't this one's.
+  final ComplaintsLocalDataSource _complaintsLocalDataSource;
 
   @override
   Future<Result<RegisterEligibilityEntity>> checkPhone(
@@ -62,7 +69,7 @@ class AuthRepoImpl implements AuthRepo {
             client: await _localDataSource.clientInfo(),
           ),
         );
-        return _signedIn(session);
+        return _signedIn(session, phone: request.phone);
       });
 
   @override
@@ -126,9 +133,11 @@ class AuthRepoImpl implements AuthRepo {
     try {
       await _remoteDataSource.checkSession();
       return SessionStatus.active;
-    } on UnauthorizedException {
+    } on UnauthorizedException catch (exception) {
       await _forgetSession();
-      return SessionStatus.ended;
+      return exception.isAccountWithdrawn
+          ? SessionStatus.withdrawn
+          : SessionStatus.ended;
     }
   });
 
@@ -139,10 +148,16 @@ class AuthRepoImpl implements AuthRepo {
   Future<ParentEntity?> getSavedParent() => _localDataSource.getSavedParent();
 
   /// Keeps the session's token, so later requests send it, and its parent
-  /// and children, so pages show them without calling the API.
-  Future<AuthSessionEntity> _signedIn(AuthSessionModel session) async {
+  /// (with the [phone] logged in with, which the API masks) and children,
+  /// so pages show them without calling the API.
+  Future<AuthSessionEntity> _signedIn(
+    AuthSessionModel session, {
+    required String phone,
+  }) async {
     await _localDataSource.saveToken(session.accessToken);
-    await _localDataSource.saveParent(session.parent);
+    await _localDataSource.saveParent(
+      ParentModel.fromEntity(session.parent).withFullPhone(phone),
+    );
     await _childrenLocalDataSource.saveChildren(session.children);
     return session;
   }
@@ -152,5 +167,6 @@ class AuthRepoImpl implements AuthRepo {
     await _localDataSource.clearToken();
     await _localDataSource.clearParent();
     await _childrenLocalDataSource.clearChildren();
+    await _complaintsLocalDataSource.clearSeenUpdate();
   }
 }

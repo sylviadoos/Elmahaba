@@ -58,6 +58,10 @@ import 'package:al_mahhaba_school/features/children/presentation/view_model/chil
     as _i3;
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart'
     as _i28;
+import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart'
+    as _i32;
+import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_intent.dart'
+    as _i33;
 import 'package:flutter_bloc/flutter_bloc.dart' as _i27;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i9;
@@ -556,6 +560,15 @@ class MockChatUnreadBloc extends _i1.Mock implements _i30.ChatUnreadBloc {
           as _i5.Stream<int>);
 
   @override
+  _i5.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
   void add(_i31.ChatUnreadIntent? event) => super.noSuchMethod(
     Invocation.method(#add, [event]),
     returnValueForMissingStub: null,
@@ -600,6 +613,102 @@ class MockChatUnreadBloc extends _i1.Mock implements _i30.ChatUnreadBloc {
   );
 
   @override
+  void onChange(_i27.Change<int>? change) => super.noSuchMethod(
+    Invocation.method(#onChange, [change]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void addError(Object? error, [StackTrace? stackTrace]) => super.noSuchMethod(
+    Invocation.method(#addError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onError(Object? error, StackTrace? stackTrace) => super.noSuchMethod(
+    Invocation.method(#onError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+}
+
+/// A class which mocks [ComplaintUpdatesBloc].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockComplaintUpdatesBloc extends _i1.Mock
+    implements _i32.ComplaintUpdatesBloc {
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(
+            Invocation.getter(#isClosed),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  bool get state =>
+      (super.noSuchMethod(
+            Invocation.getter(#state),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  _i5.Stream<bool> get stream =>
+      (super.noSuchMethod(
+            Invocation.getter(#stream),
+            returnValue: _i5.Stream<bool>.empty(),
+            returnValueForMissingStub: _i5.Stream<bool>.empty(),
+          )
+          as _i5.Stream<bool>);
+
+  @override
+  void add(_i33.ComplaintUpdatesIntent? event) => super.noSuchMethod(
+    Invocation.method(#add, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onEvent(_i33.ComplaintUpdatesIntent? event) => super.noSuchMethod(
+    Invocation.method(#onEvent, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void emit(bool? state) => super.noSuchMethod(
+    Invocation.method(#emit, [state]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void on<E extends _i33.ComplaintUpdatesIntent>(
+    _i27.EventHandler<E, bool>? handler, {
+    _i27.EventTransformer<E>? transformer,
+  }) => super.noSuchMethod(
+    Invocation.method(#on, [handler], {#transformer: transformer}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onTransition(
+    _i27.Transition<_i33.ComplaintUpdatesIntent, bool>? transition,
+  ) => super.noSuchMethod(
+    Invocation.method(#onTransition, [transition]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onDone(
+    _i33.ComplaintUpdatesIntent? event, [
+    Object? error,
+    StackTrace? stackTrace,
+  ]) => super.noSuchMethod(
+    Invocation.method(#onDone, [event, error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
   _i5.Future<void> close() =>
       (super.noSuchMethod(
             Invocation.method(#close, []),
@@ -609,7 +718,7 @@ class MockChatUnreadBloc extends _i1.Mock implements _i30.ChatUnreadBloc {
           as _i5.Future<void>);
 
   @override
-  void onChange(_i27.Change<int>? change) => super.noSuchMethod(
+  void onChange(_i27.Change<bool>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );

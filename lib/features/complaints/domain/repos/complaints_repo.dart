@@ -34,6 +34,19 @@ abstract interface class ComplaintsRepo {
     UploadProgressCallback? onProgress,
   });
 
+  /// Whether the school has changed a complaint since the parent last had
+  /// their complaints on screen — the dot on the Complaints button. The
+  /// API counts no unread replies, so this asks for the first page and
+  /// compares; a parent who hasn't opened their complaints on this phone
+  /// yet has anything there to read. Their own changes ([sendComplaint],
+  /// [sendReply]) don't count, only the school's after them.
+  Future<Result<bool>> hasNewComplaintUpdates();
+
+  /// Remembers that the parent has seen the complaints up to
+  /// [updatedAt] — `ComplaintsPageEntity.newestUpdate` of what was shown.
+  /// Null (none of them says when it changed) leaves it as it was.
+  Future<void> markComplaintsSeen(DateTime? updatedAt);
+
   /// Saves [attachment] on the phone; the result is where.
   Future<Result<String>> downloadAttachment(
     int complaintId,

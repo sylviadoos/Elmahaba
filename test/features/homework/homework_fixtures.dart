@@ -37,6 +37,14 @@ const exerciseFile = ChatAttachmentEntity(
   isAvailable: true,
 );
 
+const exercisePhoto = ChatAttachmentEntity(
+  id: 89,
+  fileName: 'ex1-board.jpg',
+  mimeType: 'image/jpeg',
+  size: 98000,
+  isAvailable: true,
+);
+
 const math = HomeworkSubjectEntity(id: 3, name: 'Math');
 const arabic = HomeworkSubjectEntity(id: 5, name: 'Arabic');
 

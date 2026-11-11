@@ -7,22 +7,12 @@
 import 'dart:async' as _i3;
 
 import 'package:al_mahhaba_school/core/base/result.dart' as _i4;
-import 'package:al_mahhaba_school/features/home/domain/entities/announcement_entity.dart'
-    as _i6;
-import 'package:al_mahhaba_school/features/home/domain/entities/latest_items_entity.dart'
+import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart'
     as _i5;
-import 'package:al_mahhaba_school/features/home/domain/entities/latest_result_entity.dart'
-    as _i11;
-import 'package:al_mahhaba_school/features/home/domain/use_cases/get_latest_announcements_use_case.dart'
+import 'package:al_mahhaba_school/features/home/domain/use_cases/get_child_dashboard_use_case.dart'
     as _i2;
-import 'package:al_mahhaba_school/features/home/domain/use_cases/get_latest_homework_use_case.dart'
-    as _i8;
-import 'package:al_mahhaba_school/features/home/domain/use_cases/get_latest_results_use_case.dart'
-    as _i10;
-import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart'
-    as _i9;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i7;
+import 'package:mockito/src/dummies.dart' as _i6;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -39,99 +29,28 @@ import 'package:mockito/src/dummies.dart' as _i7;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-/// A class which mocks [GetLatestAnnouncementsUseCase].
+/// A class which mocks [GetChildDashboardUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetLatestAnnouncementsUseCase extends _i1.Mock
-    implements _i2.GetLatestAnnouncementsUseCase {
+class MockGetChildDashboardUseCase extends _i1.Mock
+    implements _i2.GetChildDashboardUseCase {
   @override
-  _i3.Future<_i4.Result<_i5.LatestItemsEntity<_i6.AnnouncementEntity>>> call(
-    int? childId,
-  ) =>
+  _i3.Future<_i4.Result<_i5.ChildDashboardEntity>> call(int? childId) =>
       (super.noSuchMethod(
             Invocation.method(#call, [childId]),
-            returnValue:
-                _i3.Future<
-                  _i4.Result<_i5.LatestItemsEntity<_i6.AnnouncementEntity>>
-                >.value(
-                  _i7.dummyValue<
-                    _i4.Result<_i5.LatestItemsEntity<_i6.AnnouncementEntity>>
-                  >(this, Invocation.method(#call, [childId])),
-                ),
+            returnValue: _i3.Future<_i4.Result<_i5.ChildDashboardEntity>>.value(
+              _i6.dummyValue<_i4.Result<_i5.ChildDashboardEntity>>(
+                this,
+                Invocation.method(#call, [childId]),
+              ),
+            ),
             returnValueForMissingStub:
-                _i3.Future<
-                  _i4.Result<_i5.LatestItemsEntity<_i6.AnnouncementEntity>>
-                >.value(
-                  _i7.dummyValue<
-                    _i4.Result<_i5.LatestItemsEntity<_i6.AnnouncementEntity>>
-                  >(this, Invocation.method(#call, [childId])),
+                _i3.Future<_i4.Result<_i5.ChildDashboardEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i5.ChildDashboardEntity>>(
+                    this,
+                    Invocation.method(#call, [childId]),
+                  ),
                 ),
           )
-          as _i3.Future<
-            _i4.Result<_i5.LatestItemsEntity<_i6.AnnouncementEntity>>
-          >);
-}
-
-/// A class which mocks [GetLatestHomeworkUseCase].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockGetLatestHomeworkUseCase extends _i1.Mock
-    implements _i8.GetLatestHomeworkUseCase {
-  @override
-  _i3.Future<_i4.Result<_i5.LatestItemsEntity<_i9.HomeworkEntity>>> call(
-    int? childId,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#call, [childId]),
-            returnValue:
-                _i3.Future<
-                  _i4.Result<_i5.LatestItemsEntity<_i9.HomeworkEntity>>
-                >.value(
-                  _i7.dummyValue<
-                    _i4.Result<_i5.LatestItemsEntity<_i9.HomeworkEntity>>
-                  >(this, Invocation.method(#call, [childId])),
-                ),
-            returnValueForMissingStub:
-                _i3.Future<
-                  _i4.Result<_i5.LatestItemsEntity<_i9.HomeworkEntity>>
-                >.value(
-                  _i7.dummyValue<
-                    _i4.Result<_i5.LatestItemsEntity<_i9.HomeworkEntity>>
-                  >(this, Invocation.method(#call, [childId])),
-                ),
-          )
-          as _i3.Future<_i4.Result<_i5.LatestItemsEntity<_i9.HomeworkEntity>>>);
-}
-
-/// A class which mocks [GetLatestResultsUseCase].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockGetLatestResultsUseCase extends _i1.Mock
-    implements _i10.GetLatestResultsUseCase {
-  @override
-  _i3.Future<_i4.Result<_i5.LatestItemsEntity<_i11.LatestResultEntity>>> call(
-    int? childId,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#call, [childId]),
-            returnValue:
-                _i3.Future<
-                  _i4.Result<_i5.LatestItemsEntity<_i11.LatestResultEntity>>
-                >.value(
-                  _i7.dummyValue<
-                    _i4.Result<_i5.LatestItemsEntity<_i11.LatestResultEntity>>
-                  >(this, Invocation.method(#call, [childId])),
-                ),
-            returnValueForMissingStub:
-                _i3.Future<
-                  _i4.Result<_i5.LatestItemsEntity<_i11.LatestResultEntity>>
-                >.value(
-                  _i7.dummyValue<
-                    _i4.Result<_i5.LatestItemsEntity<_i11.LatestResultEntity>>
-                  >(this, Invocation.method(#call, [childId])),
-                ),
-          )
-          as _i3.Future<
-            _i4.Result<_i5.LatestItemsEntity<_i11.LatestResultEntity>>
-          >);
+          as _i3.Future<_i4.Result<_i5.ChildDashboardEntity>>);
 }

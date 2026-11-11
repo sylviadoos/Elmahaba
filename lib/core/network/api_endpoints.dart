@@ -11,6 +11,9 @@ abstract final class ApiEndpoints {
 
   // School system — AppConfig.schoolBaseUrl (ApiNames.school).
 
+  /// GET: whether parents can log in now (`enabled`).
+  static const String appStatus = 'mobile/app-status';
+
   static const String login = 'mobile/login';
   static const String session = 'v1/parent/auth/session';
   static const String changePassword = 'v1/parent/auth/change-password';
@@ -37,19 +40,23 @@ abstract final class ApiEndpoints {
   static const String linkChild = 'v1/parent/children/link';
   static String childDetails(int childId) =>
       'v1/parent/children/$childId/details';
+
+  /// GET: everything Home shows — attendance, fees, messages, and the
+  /// newest announcements, homework and results.
   static String childDashboard(int childId) =>
       'v1/parent/children/$childId/dashboard';
   static String childResult(int childId, int resultId) =>
       'v1/parent/children/$childId/results/$resultId';
 
-  /// GET: the newest 3, newest first, with how many there are and how
-  /// many the parent hasn't seen.
-  static String childAnnouncementsLatest(int childId) =>
-      'v1/parent/children/$childId/announcements/latest';
-  static String childHomeworkLatest(int childId) =>
-      'v1/parent/children/$childId/homework/latest';
-  static String childResultsLatest(int childId) =>
-      'v1/parent/children/$childId/results/latest';
+  /// GET, with `?template=monthly`: the published sheets, and the
+  /// certificate they make.
+  static String childResultSheets(int childId) =>
+      'v1/parent/children/$childId/result-sheets';
+
+  /// GET, with `?page=1&per_page=10`: the school's announcements to the
+  /// child's parents, newest first.
+  static String childAnnouncements(int childId) =>
+      'v1/parent/children/$childId/announcements';
 
   /// With `?month=2026-10`.
   static String childAttendance(int childId) =>

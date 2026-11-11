@@ -41,3 +41,12 @@ final class DownloadExcuseDocumentEvent extends ExcuseDetailsEvent {
 
   final ExcuseDocumentEntity document;
 }
+
+/// A document came on screen, or "Try again" on one that didn't load: its
+/// picture (the photo, a PDF's first page) is saved on the phone to show.
+/// Nothing when it's saved or on its way already.
+final class LoadExcuseImageEvent extends ExcuseDetailsEvent {
+  const LoadExcuseImageEvent(this.document);
+
+  final ExcuseDocumentEntity document;
+}

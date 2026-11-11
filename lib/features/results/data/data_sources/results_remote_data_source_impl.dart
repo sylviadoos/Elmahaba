@@ -5,6 +5,7 @@ import 'package:al_mahhaba_school/core/network/api_keys.dart';
 import 'package:al_mahhaba_school/core/network/api_names.dart';
 import 'package:al_mahhaba_school/core/network/api_service.dart';
 import 'package:al_mahhaba_school/features/results/data/data_sources/results_remote_data_source.dart';
+import 'package:al_mahhaba_school/features/results/data/models/monthly_results_model.dart';
 import 'package:al_mahhaba_school/features/results/data/models/result_details_model.dart';
 
 @LazySingleton(as: ResultsRemoteDataSource)
@@ -26,5 +27,18 @@ class ResultsRemoteDataSourceImpl implements ResultsRemoteDataSource {
     return ResultDetailsModel.fromJson(
       json[ApiKeys.data] as Map<String, dynamic>,
     );
+  }
+
+  @override
+  Future<MonthlyResultsModel> getMonthlyResults(int childId) async {
+    // { "status": "success", "data": [ …sheet… ], "meta": { … },
+    //   "certificate": { … } }
+    final json =
+        await _api.get(
+              ApiEndpoints.childResultSheets(childId),
+              queryParameters: {'template': 'monthly'},
+            )
+            as Map<String, dynamic>;
+    return MonthlyResultsModel.fromJson(json);
   }
 }

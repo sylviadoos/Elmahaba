@@ -8,6 +8,7 @@ import 'dart:async' as _i5;
 
 import 'package:al_mahhaba_school/core/base/cancel_handle.dart' as _i6;
 import 'package:al_mahhaba_school/core/base/upload_progress.dart' as _i8;
+import 'package:al_mahhaba_school/core/pdf/pdf_previewer.dart' as _i13;
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_data_source.dart'
     as _i11;
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_remote_data_source.dart'
@@ -195,4 +196,28 @@ class MockChatLocalDataSource extends _i1.Mock
     Invocation.method(#clear, []),
     returnValueForMissingStub: null,
   );
+}
+
+/// A class which mocks [PdfPreviewer].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockPdfPreviewer extends _i1.Mock implements _i13.PdfPreviewer {
+  @override
+  _i5.Future<String> firstPage(String? pdfPath) =>
+      (super.noSuchMethod(
+            Invocation.method(#firstPage, [pdfPath]),
+            returnValue: _i5.Future<String>.value(
+              _i10.dummyValue<String>(
+                this,
+                Invocation.method(#firstPage, [pdfPath]),
+              ),
+            ),
+            returnValueForMissingStub: _i5.Future<String>.value(
+              _i10.dummyValue<String>(
+                this,
+                Invocation.method(#firstPage, [pdfPath]),
+              ),
+            ),
+          )
+          as _i5.Future<String>);
 }

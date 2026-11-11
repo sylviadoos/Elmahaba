@@ -19,7 +19,8 @@ sealed class AppException implements Exception {
     return message ??
         switch (this) {
           ServerException() => l10n.serverError,
-          UnauthorizedException() => l10n.expiredToken,
+          UnauthorizedException(:final isAccountWithdrawn) =>
+            isAccountWithdrawn ? l10n.accountWithdrawn : l10n.expiredToken,
           PhoneVerificationException() => l10n.phoneVerificationFailed,
           NetworkException() => l10n.noInternet,
           CancelledException() => l10n.cancelled,
@@ -54,10 +55,20 @@ final class ServerException extends AppException {
   final Map<String, dynamic> body;
 }
 
-/// 401 — the session is missing or expired.
+/// The parent isn't signed in any more: the session is missing or expired,
+/// or the account itself is closed ([isAccountWithdrawn]). Either way the
+/// app forgets the session and opens Log in.
 final class UnauthorizedException extends AppException {
-  const UnauthorizedException({super.message})
-    : super(statusCode: StatusCode.expiredToken);
+  const UnauthorizedException({
+    super.message,
+    super.statusCode = StatusCode.expiredToken,
+    this.isAccountWithdrawn = false,
+  });
+
+  /// The child was withdrawn from the school, so the account is no longer
+  /// available (`account_withdrawn`). Logging in again won't work — only
+  /// the school can open it — so the parent is told to contact them.
+  final bool isAccountWithdrawn;
 }
 
 /// Sending or checking an SMS code failed (Firebase phone auth). [code] is

@@ -69,6 +69,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expiredToken => 'Session expired, please log in again';
 
   @override
+  String get accountWithdrawn =>
+      'Your account is no longer available because the student is no longer enrolled at the school. Please contact the school.';
+
+  @override
   String get phoneNumberIsNotValid => 'This phone number is not valid';
 
   @override
@@ -720,23 +724,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String daysPresentIn(String month) {
-    return 'days present in $month';
-  }
-
-  @override
-  String get ofTheYearPaid => 'of the year paid';
-
-  @override
   String get needsYourAttention => 'Needs your attention';
 
   @override
   String get attendanceNotTaken => 'Attendance not taken yet';
-
-  @override
-  String absentLateCount(int absentDays, int lateDays) {
-    return '$absentDays absent · $lateDays late';
-  }
 
   @override
   String get noResultsYet => 'No results yet';
@@ -745,13 +736,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noFeesYet => 'No fees yet';
 
   @override
-  String amountDueOn(String amount, String date) {
-    return '$amount due $date';
+  String overdueInstallmentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count overdue installments',
+      one: '1 overdue installment',
+    );
+    return '$_temp0';
   }
 
   @override
-  String amountOverdueSince(String amount, String date) {
-    return '$amount overdue since $date';
+  String feesDueOn(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String feesOverdueSince(String date) {
+    return 'Overdue since $date';
+  }
+
+  @override
+  String get daysAbsent => 'Days absent';
+
+  @override
+  String absenceDaysLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days left',
+      one: '1 day left',
+      zero: 'No absence days left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String absenceDaysOver(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days over the limit',
+      one: '1 day over the limit',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -866,7 +894,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get activities => 'Activities';
 
   @override
-  String get downloadReportCard => 'Download report card (PDF)';
+  String get downloadCertificate => 'Download certificate (PDF)';
+
+  @override
+  String get certificateSaved => 'Certificate saved';
+
+  @override
+  String get certificateNotSaved => 'Couldn’t save the certificate. Try again.';
+
+  @override
+  String get certificateFailed => 'Couldn’t make the certificate. Try again.';
+
+  @override
+  String get monthlyResults => 'Monthly';
+
+  @override
+  String get latestResult => 'Latest result';
+
+  @override
+  String classRank(int rank) {
+    return 'Rank $rank';
+  }
 
   @override
   String get assessmentInitial => 'Initial';
@@ -896,13 +944,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get absent => 'Absent';
 
   @override
-  String get late => 'Late';
-
-  @override
   String get officialHoliday => 'Official holiday';
 
   @override
-  String get friSatOff => 'Fri & Sat off';
+  String get friSatOff => 'Weekend';
 
   @override
   String get thisMonth => 'This month';
@@ -931,9 +976,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get excusedAbsence => 'Excused absence';
 
   @override
-  String get arrivedLate => 'Arrived late';
-
-  @override
   String reasonIs(String reason) {
     return 'Reason: $reason';
   }
@@ -951,9 +993,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAbsencesThisMonth => 'No absences or late days this month.';
-
-  @override
-  String get remaining => 'Remaining';
 
   @override
   String egpAmount(String amount) {
@@ -1276,6 +1315,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAnnouncements => 'No announcements yet';
+
+  @override
+  String get noAnnouncementsHint => 'Announcements from the school show here.';
+
+  @override
+  String announcementsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count announcements',
+      one: '1 announcement',
+      zero: 'No announcements',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get announcementEnded => 'Ended';
+
+  @override
+  String announcementUntil(String date) {
+    return 'Until $date';
+  }
 
   @override
   String get homework => 'Homework';
@@ -1625,6 +1687,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapToOpen => 'Tap to open';
 
   @override
+  String get openInAnotherApp => 'Open in another app';
+
+  @override
+  String get cantShowFile => 'This file can’t be shown here.';
+
+  @override
   String get checkingFile => 'Checking file…';
 
   @override
@@ -1721,6 +1789,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkHighlightedFields => 'Please check the highlighted fields.';
+
+  @override
+  String loginLockedFor(String time) {
+    return 'Too many wrong attempts. Try again in $time.';
+  }
 
   @override
   String get messageSentTitle => 'Message sent!';

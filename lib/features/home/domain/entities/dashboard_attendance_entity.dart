@@ -1,18 +1,37 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_counts_entity.dart';
-
-/// A child's attendance on Home: today's, and this month's counts.
+/// A child's attendance on Home: today's, and the days they may be absent
+/// this year.
 class DashboardAttendanceEntity extends Equatable {
   const DashboardAttendanceEntity({
     this.todayStatus,
-    required this.monthCounts,
+    this.allowedAbsenceDays = 0,
+    this.actualAbsenceDays = 0,
+    this.remainingAbsenceDays = 0,
+    this.exceededAbsenceDays = 0,
   });
 
-  /// e.g. "present"; null until today's attendance is taken.
+  /// e.g. "absent"; null until today's attendance is taken.
   final String? todayStatus;
-  final AttendanceCountsEntity monthCounts;
+
+  /// How many days the school allows; 0 when it sets no limit.
+  final int allowedAbsenceDays;
+
+  /// How many the child was absent.
+  final int actualAbsenceDays;
+
+  /// How many are left before the limit.
+  final int remainingAbsenceDays;
+
+  /// How many past the limit.
+  final int exceededAbsenceDays;
 
   @override
-  List<Object?> get props => [todayStatus, monthCounts];
+  List<Object?> get props => [
+    todayStatus,
+    allowedAbsenceDays,
+    actualAbsenceDays,
+    remainingAbsenceDays,
+    exceededAbsenceDays,
+  ];
 }

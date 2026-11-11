@@ -2,18 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
-import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 import 'package:al_mahhaba_school/core/widgets/icon_box.dart';
-import 'package:al_mahhaba_school/core/widgets/skeleton.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/latest_items_entity.dart';
 
 /// The newest few of one thing on Home (announcements, homework or
 /// results): its icon and [title], how many are new and "See all", then a
-/// row per item ([row]), [emptyText] when there are none, or "Try again"
-/// when they couldn't load.
+/// row per item ([row]), or [emptyText] when there are none.
 class LatestCard<T> extends StatelessWidget {
   const LatestCard({
     super.key,
@@ -23,21 +20,17 @@ class LatestCard<T> extends StatelessWidget {
     required this.row,
     required this.emptyText,
     required this.onSeeAll,
-    required this.onRetry,
   });
 
   final String title;
   final String icon;
-  final BaseState<LatestItemsEntity<T>> latest;
+  final LatestItemsEntity<T> latest;
   final Widget Function(T item) row;
   final String emptyText;
   final VoidCallback onSeeAll;
-  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final unread = latest.data?.unread ?? 0;
-
     return Material(
       color: AppColors.white,
       clipBehavior: Clip.antiAlias,
@@ -48,34 +41,27 @@ class LatestCard<T> extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _Header(title: title, icon: icon, unread: unread, onSeeAll: onSeeAll),
-          const Divider(height: 1, thickness: 1, color: AppColors.hairline),
-          latest.when(
-            initial: () => const _Loading(),
-            loading: () => const _Loading(),
-            error: (exception) => _Message(
-              text: exception.localizedMessage(context),
-              onRetry: onRetry,
-            ),
-            success: (latest) => latest.items.isEmpty
-                ? _Message(text: emptyText)
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final (index, item) in latest.items.indexed) ...[
-                        if (index > 0)
-                          Divider(
-                            height: 1,
-                            thickness: 1,
-                            indent: 14.w,
-                            endIndent: 14.w,
-                            color: AppColors.hairline,
-                          ),
-                        row(item),
-                      ],
-                    ],
-                  ),
+          _Header(
+            title: title,
+            icon: icon,
+            unread: latest.unread,
+            onSeeAll: onSeeAll,
           ),
+          const Divider(height: 1, thickness: 1, color: AppColors.hairline),
+          if (latest.items.isEmpty)
+            _Message(text: emptyText)
+          else
+            for (final (index, item) in latest.items.indexed) ...[
+              if (index > 0)
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  indent: 14.w,
+                  endIndent: 14.w,
+                  color: AppColors.hairline,
+                ),
+              row(item),
+            ],
         ],
       ),
     );
@@ -177,77 +163,22 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// Two rows' shape while they load.
-class _Loading extends StatelessWidget {
-  const _Loading();
-
-  @override
-  Widget build(BuildContext context) {
-    Widget row() => Padding(
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 8.h,
-        children: [
-          SkeletonBar(width: 170.w, height: 11.h),
-          SkeletonBar(width: 110.w, height: 9.h),
-        ],
-      ),
-    );
-
-    return SkeletonPulse(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [row(), row()],
-      ),
-    );
-  }
-}
-
-/// None yet, or why they couldn't load with "Try again".
+/// None yet.
 class _Message extends StatelessWidget {
-  const _Message({required this.text, this.onRetry});
+  const _Message({required this.text});
 
   final String text;
-  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
-    final onRetry = this.onRetry;
-
     return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(
-        14.w,
-        onRetry == null ? 14.h : 6.h,
-        6.w,
-        onRetry == null ? 14.h : 6.h,
-      ),
-      child: Row(
-        spacing: 8.w,
-        children: [
-          Expanded(
-            child: Text(
-              text,
-              style: textTheme.bodySmall?.copyWith(
-                fontSize: 13.sp,
-                color: AppColors.slate,
-              ),
-            ),
-          ),
-          if (onRetry != null)
-            TextButton(
-              onPressed: onRetry,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.mahabbahRed,
-                textStyle: textTheme.bodySmall?.copyWith(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              child: Text(context.l10n.tryAgain),
-            ),
-        ],
+      padding: EdgeInsetsDirectional.fromSTEB(14.w, 14.h, 6.w, 14.h),
+      child: Text(
+        text,
+        style: context.textTheme.bodySmall?.copyWith(
+          fontSize: 13.sp,
+          color: AppColors.slate,
+        ),
       ),
     );
   }

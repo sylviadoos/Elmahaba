@@ -36,4 +36,12 @@ abstract interface class ExcusesRepo {
     int excuseId,
     ExcuseDocumentEntity document,
   );
+
+  /// Saves [document] (a PDF) on the phone and its first page as a picture
+  /// beside it, to show in place of it; the picture's path.
+  Future<Result<String>> previewDocument(
+    int childId,
+    int excuseId,
+    ExcuseDocumentEntity document,
+  );
 }

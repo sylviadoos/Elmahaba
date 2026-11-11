@@ -24,6 +24,10 @@ abstract final class AuthErrorCodes {
   /// Resetting the password of a number with no account.
   static const String accountNotFound = 'account_not_found';
 
+  /// Logging in: too many wrong passwords, so the number is locked for a
+  /// while (429); the body's `retry_after` is the seconds left.
+  static const String loginLocked = 'login_locked';
+
   /// Changing the password: the current one typed is wrong.
   static const String currentPasswordIncorrect = 'current_password_incorrect';
 

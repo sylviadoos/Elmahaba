@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/widgets/app_back_button.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
 import 'package:al_mahhaba_school/features/children/presentation/widgets/child_picker.dart';
@@ -11,8 +13,8 @@ import 'package:al_mahhaba_school/features/complaints/presentation/widgets/compl
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/settings_button.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/main_nav_bar.dart';
 
-/// Frame of the Results / Attendance / Fees tabs: red header with the
-/// [title], Profile and Complaints, and the child picker, and scrolling
+/// Frame of the Results / Attendance / Fees tabs: red header with back
+/// (to Home), the [title], Profile and Complaints, and the child picker, and scrolling
 /// [children]. The nav bar is
 /// `ParentShellPage`'s, over it.
 ///
@@ -51,26 +53,25 @@ class ParentTabPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 12.h,
                 children: [
-                  Padding(
-                    padding: EdgeInsetsDirectional.only(start: 4.w),
-                    child: Row(
-                      spacing: 8.w,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: context.textTheme.headlineMedium?.copyWith(
-                              fontSize: 26.sp,
-                              height: 44 / 26,
-                              letterSpacing: 0,
-                              color: AppColors.white,
-                            ),
+                  Row(
+                    spacing: 8.w,
+                    children: [
+                      // A tab is the first page of its own: back is Home.
+                      const AppBackButton(fallbackRoute: AppRoutes.home),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: context.textTheme.headlineMedium?.copyWith(
+                            fontSize: 26.sp,
+                            height: 44 / 26,
+                            letterSpacing: 0,
+                            color: AppColors.white,
                           ),
                         ),
-                        const SettingsButton(),
-                        const ComplaintsButton(),
-                      ],
-                    ),
+                      ),
+                      const SettingsButton(),
+                      const ComplaintsButton(),
+                    ],
                   ),
                   if (parentChildren.isNotEmpty)
                     ChildPicker(

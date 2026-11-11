@@ -8,6 +8,8 @@
   MockSpec<MarkChatReadUseCase>(),
   MockSpec<DownloadChatAttachmentUseCase>(),
   MockSpec<GetChatUnreadCountUseCase>(),
+  MockSpec<PreviewChatAttachmentUseCase>(),
+  MockSpec<WatchChatReadsUseCase>(),
 ])
 import 'package:mockito/annotations.dart';
 
@@ -16,4 +18,6 @@ import 'package:al_mahhaba_school/features/chat/domain/use_cases/get_cached_chat
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/get_chat_unread_count_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/get_chat_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/mark_chat_read_use_case.dart';
+import 'package:al_mahhaba_school/features/chat/domain/use_cases/preview_chat_attachment_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/send_chat_message_use_case.dart';
+import 'package:al_mahhaba_school/features/chat/domain/use_cases/watch_chat_reads_use_case.dart';

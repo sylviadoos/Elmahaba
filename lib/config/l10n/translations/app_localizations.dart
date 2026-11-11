@@ -212,6 +212,12 @@ abstract class AppLocalizations {
   /// **'Session expired, please log in again'**
   String get expiredToken;
 
+  /// No description provided for @accountWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is no longer available because the student is no longer enrolled at the school. Please contact the school.'**
+  String get accountWithdrawn;
+
   /// No description provided for @phoneNumberIsNotValid.
   ///
   /// In en, this message translates to:
@@ -1430,18 +1436,6 @@ abstract class AppLocalizations {
   /// **'{count} new'**
   String newCount(int count);
 
-  /// No description provided for @daysPresentIn.
-  ///
-  /// In en, this message translates to:
-  /// **'days present in {month}'**
-  String daysPresentIn(String month);
-
-  /// No description provided for @ofTheYearPaid.
-  ///
-  /// In en, this message translates to:
-  /// **'of the year paid'**
-  String get ofTheYearPaid;
-
   /// No description provided for @needsYourAttention.
   ///
   /// In en, this message translates to:
@@ -1453,12 +1447,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Attendance not taken yet'**
   String get attendanceNotTaken;
-
-  /// No description provided for @absentLateCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{absentDays} absent · {lateDays} late'**
-  String absentLateCount(int absentDays, int lateDays);
 
   /// No description provided for @noResultsYet.
   ///
@@ -1472,17 +1460,41 @@ abstract class AppLocalizations {
   /// **'No fees yet'**
   String get noFeesYet;
 
-  /// No description provided for @amountDueOn.
+  /// No description provided for @overdueInstallmentsCount.
   ///
   /// In en, this message translates to:
-  /// **'{amount} due {date}'**
-  String amountDueOn(String amount, String date);
+  /// **'{count, plural, =1{1 overdue installment} other{{count} overdue installments}}'**
+  String overdueInstallmentsCount(int count);
 
-  /// No description provided for @amountOverdueSince.
+  /// No description provided for @feesDueOn.
   ///
   /// In en, this message translates to:
-  /// **'{amount} overdue since {date}'**
-  String amountOverdueSince(String amount, String date);
+  /// **'Due {date}'**
+  String feesDueOn(String date);
+
+  /// No description provided for @feesOverdueSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue since {date}'**
+  String feesOverdueSince(String date);
+
+  /// No description provided for @daysAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Days absent'**
+  String get daysAbsent;
+
+  /// No description provided for @absenceDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No absence days left} =1{1 day left} other{{count} days left}}'**
+  String absenceDaysLeft(int count);
+
+  /// No description provided for @absenceDaysOver.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day over the limit} other{{count} days over the limit}}'**
+  String absenceDaysOver(int count);
 
   /// No description provided for @messagesAndNotices.
   ///
@@ -1688,11 +1700,47 @@ abstract class AppLocalizations {
   /// **'Activities'**
   String get activities;
 
-  /// No description provided for @downloadReportCard.
+  /// No description provided for @downloadCertificate.
   ///
   /// In en, this message translates to:
-  /// **'Download report card (PDF)'**
-  String get downloadReportCard;
+  /// **'Download certificate (PDF)'**
+  String get downloadCertificate;
+
+  /// No description provided for @certificateSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate saved'**
+  String get certificateSaved;
+
+  /// No description provided for @certificateNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t save the certificate. Try again.'**
+  String get certificateNotSaved;
+
+  /// No description provided for @certificateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t make the certificate. Try again.'**
+  String get certificateFailed;
+
+  /// No description provided for @monthlyResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get monthlyResults;
+
+  /// No description provided for @latestResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest result'**
+  String get latestResult;
+
+  /// No description provided for @classRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Rank {rank}'**
+  String classRank(int rank);
 
   /// No description provided for @assessmentInitial.
   ///
@@ -1748,12 +1796,6 @@ abstract class AppLocalizations {
   /// **'Absent'**
   String get absent;
 
-  /// No description provided for @late.
-  ///
-  /// In en, this message translates to:
-  /// **'Late'**
-  String get late;
-
   /// No description provided for @officialHoliday.
   ///
   /// In en, this message translates to:
@@ -1763,7 +1805,7 @@ abstract class AppLocalizations {
   /// No description provided for @friSatOff.
   ///
   /// In en, this message translates to:
-  /// **'Fri & Sat off'**
+  /// **'Weekend'**
   String get friSatOff;
 
   /// No description provided for @thisMonth.
@@ -1814,12 +1856,6 @@ abstract class AppLocalizations {
   /// **'Excused absence'**
   String get excusedAbsence;
 
-  /// No description provided for @arrivedLate.
-  ///
-  /// In en, this message translates to:
-  /// **'Arrived late'**
-  String get arrivedLate;
-
   /// No description provided for @reasonIs.
   ///
   /// In en, this message translates to:
@@ -1849,12 +1885,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No absences or late days this month.'**
   String get noAbsencesThisMonth;
-
-  /// No description provided for @remaining.
-  ///
-  /// In en, this message translates to:
-  /// **'Remaining'**
-  String get remaining;
 
   /// No description provided for @egpAmount.
   ///
@@ -2426,6 +2456,30 @@ abstract class AppLocalizations {
   /// **'No announcements yet'**
   String get noAnnouncements;
 
+  /// No description provided for @noAnnouncementsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcements from the school show here.'**
+  String get noAnnouncementsHint;
+
+  /// No description provided for @announcementsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No announcements} =1{1 announcement} other{{count} announcements}}'**
+  String announcementsCount(int count);
+
+  /// No description provided for @announcementEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get announcementEnded;
+
+  /// No description provided for @announcementUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {date}'**
+  String announcementUntil(String date);
+
   /// No description provided for @homework.
   ///
   /// In en, this message translates to:
@@ -2960,6 +3014,18 @@ abstract class AppLocalizations {
   /// **'Tap to open'**
   String get tapToOpen;
 
+  /// No description provided for @openInAnotherApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in another app'**
+  String get openInAnotherApp;
+
+  /// No description provided for @cantShowFile.
+  ///
+  /// In en, this message translates to:
+  /// **'This file can’t be shown here.'**
+  String get cantShowFile;
+
   /// No description provided for @checkingFile.
   ///
   /// In en, this message translates to:
@@ -3151,6 +3217,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please check the highlighted fields.'**
   String get checkHighlightedFields;
+
+  /// Under Log in while the number is locked; time counts down, e.g. 04:59.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong attempts. Try again in {time}.'**
+  String loginLockedFor(String time);
 
   /// No description provided for @messageSentTitle.
   ///

@@ -3,11 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/dashed_border.dart';
 
-/// How a count tile looks, matching the calendar: present, absent, late,
+/// How a count tile looks, matching the calendar: present, absent,
 /// excused.
-enum CountTileStyle { soft, solid, dashed, info }
+enum CountTileStyle { present, solid, info }
 
 /// A month's count of one kind of day, e.g. "15 · Present".
 class AttendanceCountTile extends StatelessWidget {
@@ -27,9 +26,9 @@ class AttendanceCountTile extends StatelessWidget {
     final textTheme = context.textTheme;
     final radius = 16.r;
     final (background, numberColor, labelColor) = switch (style) {
-      CountTileStyle.soft => (
-        AppColors.blush,
-        AppColors.mahabbahRed,
+      CountTileStyle.present => (
+        AppColors.successBg,
+        AppColors.success,
         AppColors.slate,
       ),
       CountTileStyle.solid => (
@@ -37,7 +36,6 @@ class AttendanceCountTile extends StatelessWidget {
         AppColors.white,
         AppColors.white.withValues(alpha: 0.88),
       ),
-      CountTileStyle.dashed => (null, AppColors.mahabbahRed, AppColors.slate),
       CountTileStyle.info => (
         AppColors.infoBg,
         AppColors.info,
@@ -45,7 +43,7 @@ class AttendanceCountTile extends StatelessWidget {
       ),
     };
 
-    final tile = Container(
+    return Container(
       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: background,
@@ -77,9 +75,5 @@ class AttendanceCountTile extends StatelessWidget {
         ],
       ),
     );
-
-    return style == CountTileStyle.dashed
-        ? DashedBorder(radius: radius, child: tile)
-        : tile;
   }
 }

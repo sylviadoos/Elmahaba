@@ -40,10 +40,15 @@ abstract interface class AuthRemoteDataSource {
   ///   seconds left.
   /// - `phone_not_registered` — not in the school records; `body` has the
   ///   school's `school_contact`.
+  ///
+  /// `account_withdrawn` — the child left the school, so the account is
+  /// closed — fails with an `UnauthorizedException` whose
+  /// `isAccountWithdrawn` is set, as it does on any other request.
   Future<AuthSessionModel> login(LoginRequestModel request);
 
   /// Checks the saved token still works. An ended session fails with an
-  /// `UnauthorizedException` (`unauthenticated`, 401).
+  /// `UnauthorizedException` (`unauthenticated`, 401), a closed account
+  /// with one whose `isAccountWithdrawn` is set (`account_withdrawn`).
   Future<void> checkSession();
 
   /// Sets a new password once Firebase verified the number. It doesn't

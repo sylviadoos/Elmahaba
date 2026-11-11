@@ -7,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_loading.dart';
 import 'package:al_mahhaba_school/core/widgets/load_more_indicator.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
@@ -16,6 +15,7 @@ import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_b
 import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_intent.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_state.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/widgets/homework_card.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// The homework, from the [HomeworkBloc]: loading, why it didn't load
 /// (with "Try again"), none, or the cards, more loading as the end comes
@@ -46,11 +46,7 @@ class HomeworkList extends StatelessWidget {
           return CenteredStateMessage(
             icon: AppIcons.book,
             title: exception.localizedMessage(context),
-            action: AppButton(
-              label: l10n.tryAgain,
-              expand: false,
-              onPressed: reload,
-            ),
+            action: RetryOrLogInButton(exception: exception, onRetry: reload),
           );
         }
 

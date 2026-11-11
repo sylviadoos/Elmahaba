@@ -5,12 +5,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/widgets/linked_text.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_item_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_link_entity.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/chat_bloc_image_source.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_attachment_kind.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_labels.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_accent_card.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_attachment_link.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_image_grid.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_outline_action.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_read_mark.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/message_kind_chip.dart';
@@ -38,6 +42,11 @@ class ChatSchoolItem extends StatelessWidget {
     final textTheme = context.textTheme;
     final link = item.link;
     final onReply = this.onReply;
+    // Photos show in the card; other files are links to open.
+    final images = [
+      for (final attachment in item.attachments)
+        if (attachment.isImage) attachment,
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -110,7 +119,8 @@ class ChatSchoolItem extends StatelessWidget {
                 )
               else ...[
                 if (item.text.isNotEmpty)
-                  Text(
+                  // Links in it open in the browser by a tap.
+                  LinkedText(
                     item.text,
                     // In the language it was written in, on the page's side.
                     textDirection: item.textDirection,
@@ -118,9 +128,18 @@ class ChatSchoolItem extends StatelessWidget {
                     style: textTheme.bodyMedium?.copyWith(
                       color: AppColors.slate,
                     ),
+                    linkColor: AppColors.actionRed,
+                  ),
+                if (images.isNotEmpty)
+                  LayoutBuilder(
+                    builder: (_, constraints) => ChatImageGrid(
+                      source: const ChatBlocImageSource(),
+                      images: images,
+                      width: constraints.maxWidth,
+                    ),
                   ),
                 for (final attachment in item.attachments)
-                  ChatAttachmentLink(attachment),
+                  if (!attachment.isImage) ChatAttachmentLink(attachment),
                 if (link != null)
                   ChatOutlineAction(
                     label: link.screen.label(context),

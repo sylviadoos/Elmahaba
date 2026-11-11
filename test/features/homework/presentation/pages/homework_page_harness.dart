@@ -40,6 +40,7 @@ class HomeworkPageHarness {
   final getHomework = MockGetHomeworkUseCase();
   final markRead = MockMarkChatReadUseCase();
   final downloadAttachment = MockDownloadChatAttachmentUseCase();
+  final previewAttachment = MockPreviewChatAttachmentUseCase();
   final childrenViewModel = MockChildrenViewModel();
   final chatUnreadBloc = MockChatUnreadBloc();
 
@@ -50,7 +51,12 @@ class HomeworkPageHarness {
     provideResultDummy<int>();
     provideResultDummy<String>();
     getIt.registerFactory<HomeworkBloc>(
-      () => HomeworkBloc(getHomework, markRead, downloadAttachment),
+      () => HomeworkBloc(
+        getHomework,
+        markRead,
+        downloadAttachment,
+        previewAttachment,
+      ),
     );
     when(markRead(any)).thenAnswer((_) async => const Success(data: 0));
     when(chatUnreadBloc.stream).thenAnswer((_) => const Stream.empty());

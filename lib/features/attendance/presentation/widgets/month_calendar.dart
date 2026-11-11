@@ -24,8 +24,8 @@ class MonthCalendar extends StatelessWidget {
   final VoidCallback onPrevious;
   final VoidCallback? onNext;
 
-  /// Holidays first, then the recorded days; Fridays and Saturdays are the
-  /// weekend in Egypt (the API doesn't say).
+  /// Holidays first, then the recorded days, then the school's weekly days
+  /// off.
   CalendarDay _dayOf(DateTime date) {
     bool sameDay(DateTime other) =>
         other.year == date.year &&
@@ -37,16 +37,16 @@ class MonthCalendar extends StatelessWidget {
     }
     final record = attendance.records.where((r) => sameDay(r.date));
     switch (record.firstOrNull?.status) {
+      case AttendanceStatus.present:
+        return CalendarDay.present;
       case AttendanceStatus.absent:
         return CalendarDay.absent;
-      case AttendanceStatus.late:
-        return CalendarDay.late;
       case AttendanceStatus.excused:
         return CalendarDay.excused;
-      case AttendanceStatus.present || AttendanceStatus.unknown || null:
+      case AttendanceStatus.unknown || null:
         break;
     }
-    return date.weekday == DateTime.friday || date.weekday == DateTime.saturday
+    return attendance.weekendWeekdays.contains(date.weekday)
         ? CalendarDay.weekend
         : CalendarDay.other;
   }

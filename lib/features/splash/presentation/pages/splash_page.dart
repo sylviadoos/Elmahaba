@@ -73,14 +73,20 @@ class _SplashPageState extends State<SplashPage> {
       // Saved children show at once; the API refreshes them once, quietly.
       context.read<ChildrenViewModel>().doAction(const LoadChildrenEvent());
     }
-    if (session == SessionStatus.ended) {
-      // Shown on Log in: the messenger outlives this page.
-      context.showSnackBar(context.l10n.expiredToken, isError: true);
+    // Shown on Log in: the messenger outlives this page.
+    final l10n = context.l10n;
+    switch (session) {
+      case SessionStatus.ended:
+        context.showSnackBar(l10n.expiredToken, isError: true);
+      case SessionStatus.withdrawn:
+        context.showSnackBar(l10n.accountWithdrawn, isError: true);
+      case SessionStatus.none || SessionStatus.active:
+        break;
     }
     context.go(switch (session) {
       SessionStatus.none => AppRoutes.onboarding,
       SessionStatus.active => AppRoutes.home,
-      SessionStatus.ended => AppRoutes.login,
+      SessionStatus.ended || SessionStatus.withdrawn => AppRoutes.login,
     });
   }
 

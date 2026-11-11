@@ -23,6 +23,7 @@ void main() {
   late MockGetHomeworkUseCase getHomework;
   late MockMarkChatReadUseCase markRead;
   late MockDownloadChatAttachmentUseCase downloadAttachment;
+  late MockPreviewChatAttachmentUseCase previewAttachment;
   late List<HomeworkEffect> effects;
 
   setUpAll(() {
@@ -35,12 +36,18 @@ void main() {
     getHomework = MockGetHomeworkUseCase();
     markRead = MockMarkChatReadUseCase();
     downloadAttachment = MockDownloadChatAttachmentUseCase();
+    previewAttachment = MockPreviewChatAttachmentUseCase();
     effects = [];
     when(markRead(any)).thenAnswer((_) async => const Success(data: 0));
   });
 
   HomeworkBloc build() {
-    final bloc = HomeworkBloc(getHomework, markRead, downloadAttachment);
+    final bloc = HomeworkBloc(
+      getHomework,
+      markRead,
+      downloadAttachment,
+      previewAttachment,
+    );
     bloc.effects.listen(effects.add);
     return bloc;
   }
@@ -292,6 +299,56 @@ void main() {
       ),
     ]),
   );
+
+  group('photos', () {
+    blocTest<HomeworkBloc, HomeworkState>(
+      'on screen: saved on the phone to show, a file can still be opened',
+      setUp: () => when(
+        downloadAttachment(exercisePhoto, cancel: anyNamed('cancel')),
+      ).thenAnswer((_) async => const Success(data: '/tmp/ex1-board.jpg')),
+      build: build,
+      seed: shown,
+      act: (bloc) => bloc.add(const LoadHomeworkImageIntent(exercisePhoto)),
+      expect: () => [
+        isA<HomeworkState>()
+            .having((s) => s.images[89]?.state, 'photo', StateType.loading)
+            .having((s) => s.downloadingId, 'downloading', null),
+        isA<HomeworkState>().having(
+          (s) => s.images[89],
+          'photo',
+          const BaseState.success('/tmp/ex1-board.jpg'),
+        ),
+      ],
+    );
+
+    blocTest<HomeworkBloc, HomeworkState>(
+      'saved already: not asked again',
+      build: build,
+      seed: () => const HomeworkState(
+        images: {89: BaseState.success('/tmp/ex1-board.jpg')},
+      ),
+      act: (bloc) => bloc.add(const LoadHomeworkImageIntent(exercisePhoto)),
+      expect: () => <HomeworkState>[],
+      verify: (_) =>
+          verifyNever(downloadAttachment(any, cancel: anyNamed('cancel'))),
+    );
+
+    blocTest<HomeworkBloc, HomeworkState>(
+      'didn\'t load: why, to try again; signed out: the page logs out',
+      setUp: () =>
+          when(
+            downloadAttachment(exercisePhoto, cancel: anyNamed('cancel')),
+          ).thenAnswer(
+            (_) async => const Failure(exception: UnauthorizedException()),
+          ),
+      build: build,
+      act: (bloc) => bloc.add(const LoadHomeworkImageIntent(exercisePhoto)),
+      verify: (bloc) {
+        expect(bloc.state.images[89]?.exception, isA<UnauthorizedException>());
+        expect(effects, [isA<ShowHomeworkErrorEffect>()]);
+      },
+    );
+  });
 
   test('closed while it loads: the request is stopped', () async {
     CancelHandle? cancel;

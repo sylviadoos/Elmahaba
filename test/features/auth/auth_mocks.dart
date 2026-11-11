@@ -14,6 +14,7 @@
   MockSpec<ParentViewModel>(),
   MockSpec<ChildrenViewModel>(),
   MockSpec<ChatUnreadBloc>(),
+  MockSpec<ComplaintUpdatesBloc>(),
 ])
 import 'package:mockito/annotations.dart';
 
@@ -29,3 +30,4 @@ import 'package:al_mahhaba_school/features/auth/domain/use_cases/verify_otp_use_
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';

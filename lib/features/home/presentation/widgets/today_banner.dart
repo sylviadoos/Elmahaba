@@ -21,9 +21,9 @@ class TodayBanner extends StatelessWidget {
   static String _label(AppLocalizations l10n, String? status) =>
       switch (status) {
         null => l10n.attendanceNotTaken,
-        'present' => l10n.present,
+        // Late is present: the child came.
+        'present' || 'late' => l10n.present,
         'absent' => l10n.absent,
-        'late' => l10n.late,
         // TODO: name the other statuses once the API lists them.
         final other => other,
       };

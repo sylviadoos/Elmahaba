@@ -13,6 +13,7 @@ class AttachmentList extends StatelessWidget {
     required this.files,
     this.upload,
     required this.onRemove,
+    this.onPreview,
   });
 
   final List<PickedAttachment> files;
@@ -21,12 +22,17 @@ class AttachmentList extends StatelessWidget {
   /// Gets the index of the file to take off; null while none can be.
   final ValueChanged<int>? onRemove;
 
+  /// Gets the index of a photo tapped, to show it bigger; null where that
+  /// isn't offered.
+  final ValueChanged<int>? onPreview;
+
   @override
   Widget build(BuildContext context) {
     final upload = this.upload;
     final progress = upload == null ? null : files.uploadProgress(upload);
     final bytesLeft = files.bytesLeft;
     final onRemove = upload == null ? this.onRemove : null;
+    final onPreview = this.onPreview;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -38,6 +44,7 @@ class AttachmentList extends StatelessWidget {
             bytesLeft: bytesLeft,
             progress: progress?[file],
             onRemove: onRemove == null ? null : () => onRemove(index),
+            onPreview: onPreview == null ? null : () => onPreview(index),
           ),
       ],
     );

@@ -11,6 +11,8 @@ import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_in
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_event.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_intent.dart';
 
 extension LogOut on BuildContext {
   /// Forgets the saved session, parent, children and chat badge — so the
@@ -22,6 +24,7 @@ extension LogOut on BuildContext {
     read<ParentViewModel>().doAction(const ClearParentEvent());
     read<ChildrenViewModel>().doAction(const ClearChildrenEvent());
     read<ChatUnreadBloc>().add(const ClearChatUnreadIntent());
+    read<ComplaintUpdatesBloc>().add(const ClearComplaintUpdatesIntent());
     go(AppRoutes.login);
   }
 }

@@ -7,8 +7,8 @@ import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/equal_height_grid.dart';
+import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/presentation/view_model/attendance_event.dart';
@@ -32,6 +32,7 @@ import 'package:al_mahhaba_school/features/excuses/presentation/excuse_args.dart
 import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excusable_absences_event.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excusable_absences_view_model.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/parent_tab_page.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// The selected child's attendance, a month at a time: the rate, the
 /// counts, the calendar and the days that weren't plain school days — with
@@ -101,7 +102,17 @@ class _AttendanceViewState extends State<_AttendanceView> {
     _loadExcuses();
   }
 
-  /// Once sent, it opens; either way the absences load again.
+  /// The month and the absences asked again, quietly: an excuse may have
+  /// been accepted, attendance taken… (see [PageRefresher]).
+  void _refresh() {
+    context.read<AttendanceViewModel>().doAction(
+      const RefreshAttendanceEvent(),
+    );
+    _loadExcuses();
+  }
+
+  /// Once sent, it opens. The page asks again on the way back from each
+  /// ([PageRefresher]).
   Future<void> _submitExcuse(
     ExcusableAbsenceEntity absence,
     ExcuseRulesEntity rules,
@@ -112,15 +123,12 @@ class _AttendanceViewState extends State<_AttendanceView> {
       AppRoutes.newExcuse,
       extra: NewExcuseArgs(childId: childId, absence: absence, rules: rules),
     );
-    if (!mounted) return;
-    _loadExcuses();
-    if (sent != null) {
-      await _openExcuse(sent.id, shown: sent, rules: rules);
-    }
+    if (!mounted || sent == null) return;
+    await _openExcuse(sent.id, shown: sent, rules: rules);
   }
 
-  /// Where it stands may change there (documents added), so the absences
-  /// load again on the way back.
+  /// Where it stands may change there (documents added): the page asks
+  /// again on the way back ([PageRefresher]).
   Future<void> _openExcuse(
     int excuseId, {
     ExcuseDetailsEntity? shown,
@@ -132,7 +140,6 @@ class _AttendanceViewState extends State<_AttendanceView> {
       AppRoutes.excuseDetailsOf(childId, excuseId),
       extra: ExcuseDetailsArgs(shown: shown, rules: rules),
     );
-    if (mounted) _loadExcuses();
   }
 
   /// [step] months away: -1 back, 1 forward.
@@ -161,47 +168,50 @@ class _AttendanceViewState extends State<_AttendanceView> {
           previous.children.data != current.children.data ||
           current.showsOtherChildThan(previous),
       listener: (context, state) => _loadChild(),
-      child: ParentTabPage(
-        title: context.l10n.attendance,
-        selectedChild: context.watchSelectedChildIndex(),
-        onChildSelected: (index) =>
-            context.selectChild(children[index].studentId),
-        children: [
-          if (children.isEmpty)
-            NoChildrenState(
-              children: childrenState,
-              loading: const AttendanceSkeleton(),
-            )
-          else
-            BlocBuilder<AttendanceViewModel, AttendanceState>(
-              builder: (context, state) => state.when(
-                initial: () => const AttendanceSkeleton(),
-                loading: () => const AttendanceSkeleton(),
-                // The arrows stay, so a month that didn't load isn't a dead
-                // end.
-                error: (exception) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    MonthSwitcher(
-                      month: _month,
-                      onPrevious: _previousMonth,
-                      onNext: _nextMonth,
-                    ),
-                    StateMessage(
-                      icon: AppIcons.navAttendance,
-                      title: exception.localizedMessage(context),
-                      action: AppButton(
-                        label: context.l10n.tryAgain,
-                        expand: false,
-                        onPressed: _loadMonth,
+      child: PageRefresher(
+        path: AppRoutes.attendance,
+        onRefresh: _refresh,
+        child: ParentTabPage(
+          title: context.l10n.attendance,
+          selectedChild: context.watchSelectedChildIndex(),
+          onChildSelected: (index) =>
+              context.selectChild(children[index].studentId),
+          children: [
+            if (children.isEmpty)
+              NoChildrenState(
+                children: childrenState,
+                loading: const AttendanceSkeleton(),
+              )
+            else
+              BlocBuilder<AttendanceViewModel, AttendanceState>(
+                builder: (context, state) => state.when(
+                  initial: () => const AttendanceSkeleton(),
+                  loading: () => const AttendanceSkeleton(),
+                  // The arrows stay, so a month that didn't load isn't a dead
+                  // end.
+                  error: (exception) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      MonthSwitcher(
+                        month: _month,
+                        onPrevious: _previousMonth,
+                        onNext: _nextMonth,
                       ),
-                    ),
-                  ],
+                      StateMessage(
+                        icon: AppIcons.navAttendance,
+                        title: exception.localizedMessage(context),
+                        action: RetryOrLogInButton(
+                          exception: exception,
+                          onRetry: _loadMonth,
+                        ),
+                      ),
+                    ],
+                  ),
+                  success: (attendance) => _attendance(context, attendance),
                 ),
-                success: (attendance) => _attendance(context, attendance),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -216,23 +226,18 @@ class _AttendanceViewState extends State<_AttendanceView> {
       children: [
         AttendanceSummaryCard(counts: counts),
         EqualHeightGrid(
-          columns: 4,
+          columns: 3,
           spacing: 10.w,
           children: [
             AttendanceCountTile(
               count: counts.presentDays,
               label: l10n.present,
-              style: CountTileStyle.soft,
+              style: CountTileStyle.present,
             ),
             AttendanceCountTile(
               count: counts.absentDays,
               label: l10n.absent,
               style: CountTileStyle.solid,
-            ),
-            AttendanceCountTile(
-              count: counts.lateDays,
-              label: l10n.late,
-              style: CountTileStyle.dashed,
             ),
             AttendanceCountTile(
               count: counts.excusedDays,

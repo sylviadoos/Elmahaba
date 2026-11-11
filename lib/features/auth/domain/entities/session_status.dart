@@ -8,4 +8,8 @@ enum SessionStatus {
 
   /// The server ended the session; the token was forgotten.
   ended,
+
+  /// The account is closed — the child left the school — so logging in
+  /// again won't work; the token was forgotten.
+  withdrawn,
 }

@@ -17,6 +17,7 @@ import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_text_field.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_images_viewer.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/attachment_picker.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/complaint_error_alert.dart';
 import 'package:al_mahhaba_school/features/excuses/domain/entities/new_excuse_entity.dart';
@@ -218,6 +219,10 @@ class _NewExcuseViewState extends State<_NewExcuseView> {
                               ? null
                               : (index) =>
                                     setState(() => _documents.removeAt(index)),
+                          onPreview: (index) => context.previewPickedPhotos(
+                            _documents,
+                            _documents[index],
+                          ),
                           errorText: _tried && _documents.isEmpty
                               ? l10n.excuseDocumentRequired
                               : null,

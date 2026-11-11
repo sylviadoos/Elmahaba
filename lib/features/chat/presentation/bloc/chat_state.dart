@@ -6,6 +6,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_item_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_screen.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_image_loads.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/attachment_picker.dart';
 
@@ -20,6 +21,7 @@ class ChatState extends Equatable {
     this.screensWithNews = const {},
     this.othersUnread = false,
     this.downloadingId,
+    this.images = const {},
     this.noReply = const {},
     this.aboutId,
     this.replyingTo,
@@ -53,6 +55,11 @@ class ChatState extends Equatable {
 
   /// The attachment downloading now.
   final int? downloadingId;
+
+  /// The photos shown in the chat, by attachment id: where each is saved
+  /// on the phone, loading, or why it didn't load. Several load at once,
+  /// apart from [downloadingId].
+  final ChatImages images;
 
   /// Items the school refused an answer to since they loaded.
   final Set<String> noReply;
@@ -145,6 +152,7 @@ class ChatState extends Equatable {
     Set<ChatScreen>? screensWithNews,
     bool? othersUnread,
     int? Function()? downloadingId,
+    ChatImages? images,
     Set<String>? noReply,
     int? Function()? aboutId,
     ChatItemEntity? Function()? replyingTo,
@@ -161,6 +169,7 @@ class ChatState extends Equatable {
     screensWithNews: screensWithNews ?? this.screensWithNews,
     othersUnread: othersUnread ?? this.othersUnread,
     downloadingId: downloadingId != null ? downloadingId() : this.downloadingId,
+    images: images ?? this.images,
     noReply: noReply ?? this.noReply,
     aboutId: aboutId != null ? aboutId() : this.aboutId,
     replyingTo: replyingTo != null ? replyingTo() : this.replyingTo,
@@ -180,6 +189,7 @@ class ChatState extends Equatable {
     screensWithNews,
     othersUnread,
     downloadingId,
+    images,
     noReply,
     aboutId,
     replyingTo,

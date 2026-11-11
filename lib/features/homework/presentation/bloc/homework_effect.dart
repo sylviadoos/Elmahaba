@@ -1,4 +1,5 @@
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart';
 
 /// What happens once on Homework and isn't state, from `HomeworkBloc` to
 /// the page.
@@ -6,11 +7,12 @@ sealed class HomeworkEffect {
   const HomeworkEffect();
 }
 
-/// A file downloaded, to open.
+/// [attachment] downloaded to [path], to open: a PDF here, full screen.
 final class OpenHomeworkFileEffect extends HomeworkEffect {
-  const OpenHomeworkFileEffect(this.path);
+  const OpenHomeworkFileEffect(this.path, this.attachment);
 
   final String path;
+  final ChatAttachmentEntity attachment;
 }
 
 /// Something failed that the page says in a snack bar. An

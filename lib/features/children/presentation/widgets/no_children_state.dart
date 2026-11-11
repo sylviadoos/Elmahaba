@@ -8,13 +8,14 @@ import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_event.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 
 /// A child's page with no child to show: [loading] while the children
-/// load, their error with "Try again", or "No children yet" with
-/// "Add a child".
+/// load, their error with "Try again" ("Log in" when the session ended),
+/// or "No children yet" with "Add a child".
 class NoChildrenState extends StatelessWidget {
   const NoChildrenState({
     super.key,
@@ -43,10 +44,9 @@ class NoChildrenState extends StatelessWidget {
       StateType.error => StateMessage(
         icon: AppIcons.user,
         title: children.exception!.localizedMessage(context),
-        action: AppButton(
-          label: l10n.tryAgain,
-          expand: false,
-          onPressed: () => context.read<ChildrenViewModel>().doAction(
+        action: RetryOrLogInButton(
+          exception: children.exception!,
+          onRetry: () => context.read<ChildrenViewModel>().doAction(
             const LoadChildrenEvent(),
           ),
         ),

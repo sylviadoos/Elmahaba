@@ -139,6 +139,19 @@ void main() {
       verifyNever(childrenViewModel.doAction(any));
     });
 
+    testWidgets('the account is closed: opens Log in and says so', (
+      tester,
+    ) async {
+      when(checkSession()).thenAnswer((_) async => SessionStatus.withdrawn);
+      await pumpSplash(tester);
+      await leaveSplash(tester);
+
+      expect(find.text(AppRoutes.login), findsOneWidget);
+      expect(find.text(l10n.accountWithdrawn), findsOneWidget);
+      verifyNever(parentViewModel.doAction(any));
+      verifyNever(childrenViewModel.doAction(any));
+    });
+
     testWidgets('slow server: waits 5 seconds at most, keeps the session', (
       tester,
     ) async {

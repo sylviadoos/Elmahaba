@@ -7,6 +7,7 @@ class ParentEntity extends Equatable {
     required this.name,
     required this.phone,
     required this.language,
+    this.fullPhone,
   });
 
   final int id;
@@ -18,6 +19,11 @@ class ParentEntity extends Equatable {
   /// "en" or "ar".
   final String language;
 
+  /// [phone] in full, as typed to log in, e.g. "01201234154" (the API only
+  /// sends it masked): to fill in forms. Null when not known, e.g. kept
+  /// before it was.
+  final String? fullPhone;
+
   @override
-  List<Object?> get props => [id, name, phone, language];
+  List<Object?> get props => [id, name, phone, language, fullPhone];
 }

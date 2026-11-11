@@ -64,7 +64,12 @@ class ChatItemsList extends StatelessWidget {
       findChildIndexCallback: (key) => indexOf[key],
       itemBuilder: (context, index) {
         final row = rows[last - index];
-        return KeyedSubtree(key: row.key, child: row.build(context));
+        // Each row built under its own context: what it watches (e.g. the
+        // excuse opening) rebuilds that row, not the whole list.
+        return KeyedSubtree(
+          key: row.key,
+          child: Builder(builder: row.build),
+        );
       },
     );
   }

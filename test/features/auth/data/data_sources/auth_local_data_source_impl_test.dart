@@ -111,6 +111,22 @@ void main() {
       expect(await dataSource.getSavedParent(), parent);
     });
 
+    test('with the number in full: keeps it too', () async {
+      final withFullPhone = parent.withFullPhone(phone);
+      String? saved;
+      when(storage.write(key: 'parent', value: anyNamed('value'))).thenAnswer((
+        invocation,
+      ) async {
+        saved = invocation.namedArguments[#value] as String?;
+      });
+      when(storage.read(key: 'parent')).thenAnswer((_) async => saved);
+
+      await dataSource.saveParent(withFullPhone);
+
+      expect(jsonDecode(saved!), {...parentJson, 'full_phone': phone});
+      expect(await dataSource.getSavedParent(), withFullPhone);
+    });
+
     test('none saved: null', () async {
       when(storage.read(key: 'parent')).thenAnswer((_) async => null);
 

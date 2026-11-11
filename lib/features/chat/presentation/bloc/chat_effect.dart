@@ -1,4 +1,5 @@
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart';
 
 /// What happens once in the chat and isn't state, from `ChatBloc` to the
 /// page.
@@ -16,11 +17,12 @@ final class FocusComposerEffect extends ChatEffect {
   const FocusComposerEffect();
 }
 
-/// A file downloaded, to open.
+/// [attachment] downloaded to [path], to open: a PDF here, full screen.
 final class OpenFileEffect extends ChatEffect {
-  const OpenFileEffect(this.path);
+  const OpenFileEffect(this.path, this.attachment);
 
   final String path;
+  final ChatAttachmentEntity attachment;
 }
 
 /// Something failed that the page says in a snack bar. An

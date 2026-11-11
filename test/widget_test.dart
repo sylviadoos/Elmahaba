@@ -8,6 +8,8 @@ import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_router.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/notifications/notification_service.dart';
+import 'package:al_mahhaba_school/features/app_status/data/data_sources/app_status_remote_data_source.dart';
+import 'package:al_mahhaba_school/features/app_status/data/models/app_status_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/login_page.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/pages/chat_page.dart';
@@ -25,6 +27,13 @@ class _NoPhoneVerification implements PhoneVerificationDataSource {
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
+/// No server in tests: the school takes parents.
+class _ParentsWelcome implements AppStatusRemoteDataSource {
+  @override
+  Future<AppStatusModel> getAppStatus() async =>
+      const AppStatusModel(enabled: true);
+}
+
 /// Firebase isn't set up in tests: a phone without pushes.
 class _NoNotifications implements NotificationService {
   @override
@@ -40,6 +49,9 @@ class _NoNotifications implements NotificationService {
   Stream<Map<String, dynamic>> get onTap => const Stream.empty();
 
   @override
+  Stream<Map<String, dynamic>> get onReceived => const Stream.empty();
+
+  @override
   Future<void> deleteToken() async {}
 }
 
@@ -53,7 +65,9 @@ void main() {
         _NoPhoneVerification.new,
       )
       ..unregister<NotificationService>()
-      ..registerLazySingleton<NotificationService>(_NoNotifications.new);
+      ..registerLazySingleton<NotificationService>(_NoNotifications.new)
+      ..unregister<AppStatusRemoteDataSource>()
+      ..registerLazySingleton<AppStatusRemoteDataSource>(_ParentsWelcome.new);
   });
 
   Future<void> settle(WidgetTester tester) async {

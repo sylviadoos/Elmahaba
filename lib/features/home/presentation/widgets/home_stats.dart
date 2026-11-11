@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
@@ -9,12 +8,12 @@ import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/equal_height_grid.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
-import 'package:al_mahhaba_school/features/home/domain/entities/dashboard_fees_entity.dart';
+import 'package:al_mahhaba_school/features/home/domain/entities/dashboard_attendance_entity.dart';
 import 'package:al_mahhaba_school/features/home/presentation/extensions/dashboard_fees_labels.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/home_stat_card.dart';
 
-/// The four Home cards — the latest result, this month's attendance, fees
-/// paid and messages — each opening its page.
+/// The four Home cards — the latest result, days absent out of those
+/// allowed, the next fees installment and messages — each opening its page.
 class HomeStats extends StatelessWidget {
   const HomeStats({super.key, required this.dashboard});
 
@@ -23,20 +22,20 @@ class HomeStats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final locale = Localizations.localeOf(context).toString();
     final result = dashboard.latestResult;
-    final counts = dashboard.attendance.monthCounts;
+    final attendance = dashboard.attendance;
     final fees = dashboard.fees;
+    final feesNote = fees?.note(context);
     final messages = dashboard.messages;
     // What the API left empty shows as a dash.
     String orDash(String? text) => text == null || text.isEmpty ? '—' : text;
 
-    Widget note(String text) => Text(
+    Widget note(String text, {Color color = AppColors.ink}) => Text(
       text,
       style: context.textTheme.bodySmall?.copyWith(
         fontSize: 12.sp,
         fontWeight: FontWeight.w600,
-        color: AppColors.ink,
+        color: color,
       ),
     );
 
@@ -55,21 +54,24 @@ class HomeStats extends StatelessWidget {
         HomeStatCard(
           title: l10n.attendance,
           icon: AppIcons.calendarPresent,
-          value: '${counts.presentDays}/${counts.schoolDays}',
-          subtitle: l10n.daysPresentIn(
-            DateFormat.MMM(locale).format(DateTime.now()),
-          ),
-          footer: note(
-            l10n.absentLateCount(counts.absentDays, counts.lateDays),
-          ),
+          value: _absences(attendance),
+          subtitle: l10n.daysAbsent,
+          footer: attendance.exceededAbsenceDays > 0
+              ? note(
+                  l10n.absenceDaysOver(attendance.exceededAbsenceDays),
+                  color: AppColors.error,
+                )
+              : attendance.allowedAbsenceDays > 0
+              ? note(l10n.absenceDaysLeft(attendance.remainingAbsenceDays))
+              : null,
           onTap: () => context.go(AppRoutes.attendance),
         ),
         HomeStatCard(
           title: l10n.fees,
           icon: AppIcons.navFees,
-          value: fees == null ? '—' : _paidPercent(fees),
-          subtitle: fees == null ? l10n.noFeesYet : l10n.ofTheYearPaid,
-          footer: fees == null ? null : note(fees.note(context)),
+          value: fees?.amountLabel(context) ?? '—',
+          subtitle: fees?.subtitle(context) ?? l10n.noFeesYet,
+          footer: feesNote == null ? null : note(feesNote),
           onTap: () => context.go(AppRoutes.fees),
         ),
         HomeStatCard(
@@ -87,11 +89,9 @@ class HomeStats extends StatelessWidget {
     );
   }
 
-  /// "32%"; nothing to pay counts as all paid.
-  static String _paidPercent(DashboardFeesEntity fees) {
-    final share = fees.totalAmount > 0
-        ? fees.paidAmount / fees.totalAmount
-        : 1.0;
-    return '${(share.clamp(0, 1) * 100).round()}%';
-  }
+  /// "1/4": days absent out of those allowed; just the days with no limit.
+  static String _absences(DashboardAttendanceEntity attendance) =>
+      attendance.allowedAbsenceDays > 0
+      ? '${attendance.actualAbsenceDays}/${attendance.allowedAbsenceDays}'
+      : '${attendance.actualAbsenceDays}';
 }

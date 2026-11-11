@@ -37,8 +37,21 @@ abstract interface class ChatRepo {
   /// is what's still unread.
   Future<Result<int>> markRead(List<String> keys);
 
+  /// What's still unread after each [markRead] the school answered, from
+  /// any page, even one closed meanwhile (the chat marks what was seen
+  /// just before leaving).
+  Stream<int> get onMarkedRead;
+
   /// Saves [attachment] on the phone; the result is where.
   Future<Result<String>> downloadAttachment(
+    ChatAttachmentEntity attachment, {
+    CancelHandle? cancel,
+  });
+
+  /// Saves [attachment] (a PDF) on the phone and its first page as a
+  /// picture beside it, to show in place of it; the result is where the
+  /// picture is.
+  Future<Result<String>> previewAttachment(
     ChatAttachmentEntity attachment, {
     CancelHandle? cancel,
   });

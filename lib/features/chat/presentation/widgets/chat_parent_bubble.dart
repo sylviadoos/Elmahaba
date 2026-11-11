@@ -3,9 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/widgets/linked_text.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_item_entity.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/chat_bloc_image_source.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_attachment_kind.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_labels.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_attachment_link.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_image_grid.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_reply_quote.dart';
 
 /// The parent's message: a red bubble on the end side with what it
@@ -27,17 +31,26 @@ class ChatParentBubble extends StatelessWidget {
   /// Names the children it's about: the chat shows every child's.
   final bool showChildren;
 
+  /// The bubble's widest, and its side padding (design px).
+  static const double _maxWidth = 270;
+  static const double _padding = 12;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
     final answered = this.answered;
+    // Photos fill the bubble; other files are links to open.
+    final images = [
+      for (final attachment in item.attachments)
+        if (attachment.isImage) attachment,
+    ];
 
     return Align(
       alignment: AlignmentDirectional.centerEnd,
       child: Container(
-        constraints: BoxConstraints(maxWidth: 270.w),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        constraints: BoxConstraints(maxWidth: _maxWidth.w),
+        padding: EdgeInsets.symmetric(horizontal: _padding.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: AppColors.actionRed,
           borderRadius: BorderRadiusDirectional.only(
@@ -69,7 +82,8 @@ class ChatParentBubble extends StatelessWidget {
                 )
               else ...[
                 if (item.text.isNotEmpty)
-                  Text(
+                  // Links in it open in the browser by a tap.
+                  LinkedText(
                     item.text,
                     // In the language it was written in, on the page's side.
                     textDirection: item.textDirection,
@@ -78,8 +92,16 @@ class ChatParentBubble extends StatelessWidget {
                       color: AppColors.white,
                     ),
                   ),
+                if (images.isNotEmpty)
+                  ChatImageGrid(
+                    source: const ChatBlocImageSource(),
+                    images: images,
+                    width: (_maxWidth - 2 * _padding).w,
+                    onRed: true,
+                  ),
                 for (final attachment in item.attachments)
-                  ChatAttachmentLink(attachment, onRed: true),
+                  if (!attachment.isImage)
+                    ChatAttachmentLink(attachment, onRed: true),
               ],
               Text(
                 [

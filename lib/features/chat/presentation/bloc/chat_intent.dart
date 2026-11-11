@@ -46,6 +46,14 @@ final class RetryChatIntent extends ChatIntent {
   const RetryChatIntent();
 }
 
+/// The chat may have news (a notification came while it's open, the app
+/// came back to the front…): the newest items are asked for again and
+/// join what's shown, quietly — no spinner, the message being written
+/// stays.
+final class RefreshChatIntent extends ChatIntent {
+  const RefreshChatIntent();
+}
+
 /// Loads the items before the oldest shown (the parent scrolled up to it).
 final class LoadOlderChatIntent extends ChatIntent {
   const LoadOlderChatIntent();
@@ -108,6 +116,15 @@ final class SendMessageIntent extends ChatIntent {
 /// Downloads a file shown, to open it.
 final class OpenAttachmentIntent extends ChatIntent {
   const OpenAttachmentIntent(this.attachment);
+
+  final ChatAttachmentEntity attachment;
+}
+
+/// A photo came on screen, or "Try again" on one that didn't load: it's
+/// saved on the phone to show in the chat. Nothing when it's saved or on
+/// its way already.
+final class LoadImageIntent extends ChatIntent {
+  const LoadImageIntent(this.attachment);
 
   final ChatAttachmentEntity attachment;
 }

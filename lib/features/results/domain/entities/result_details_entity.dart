@@ -13,6 +13,8 @@ class ResultDetailsEntity extends Equatable {
     this.publishedAt,
     required this.studentName,
     this.finalResult,
+    this.finalResultMax,
+    this.rank,
     this.attendancePercentage,
     required this.subjectsIncluded,
     required this.subjectsNotIncluded,
@@ -36,6 +38,13 @@ class ResultDetailsEntity extends Equatable {
   /// The sum of [subjectsIncluded], e.g. 297.4; null when not given.
   final double? finalResult;
 
+  /// What [finalResult] is out of, when the school says (a month's
+  /// certificate); otherwise worked out from [subjectsIncluded].
+  final double? finalResultMax;
+
+  /// In the class, 1 the first; null when not given.
+  final int? rank;
+
   /// 0–100; null when not given.
   final double? attendancePercentage;
 
@@ -54,6 +63,7 @@ class ResultDetailsEntity extends Equatable {
 
   /// What [finalResult] is out of.
   double get finalMax =>
+      finalResultMax ??
       subjectsIncluded.fold(0, (sum, subject) => sum + subject.maxTotal);
 
   @override
@@ -65,6 +75,8 @@ class ResultDetailsEntity extends Equatable {
     publishedAt,
     studentName,
     finalResult,
+    finalResultMax,
+    rank,
     attendancePercentage,
     subjectsIncluded,
     subjectsNotIncluded,

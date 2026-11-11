@@ -10,6 +10,7 @@ import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/base/upload_progress.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/chat/domain/chat_error_codes.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_item_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_link_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart';
@@ -31,6 +32,7 @@ void main() {
   late MockSendChatMessageUseCase sendMessage;
   late MockMarkChatReadUseCase markRead;
   late MockDownloadChatAttachmentUseCase downloadAttachment;
+  late MockPreviewChatAttachmentUseCase previewAttachment;
   late List<ChatEffect> effects;
 
   setUpAll(() {
@@ -46,6 +48,7 @@ void main() {
     sendMessage = MockSendChatMessageUseCase();
     markRead = MockMarkChatReadUseCase();
     downloadAttachment = MockDownloadChatAttachmentUseCase();
+    previewAttachment = MockPreviewChatAttachmentUseCase();
     effects = [];
     when(markRead(any)).thenAnswer((_) async => const Success(data: 0));
   });
@@ -57,6 +60,7 @@ void main() {
       sendMessage,
       markRead,
       downloadAttachment,
+      previewAttachment,
     );
     bloc.effects.listen(effects.add);
     return bloc;
@@ -273,9 +277,12 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         bloc.add(const ShowChildChatIntent(null));
       },
-      verify: (_) => expect(effects.whereType<ChildPickedEffect>().map(
-        (effect) => effect.studentId,
-      ), [lina.studentId]),
+      verify: (_) => expect(
+        effects.whereType<ChildPickedEffect>().map(
+          (effect) => effect.studentId,
+        ),
+        [lina.studentId],
+      ),
     );
 
     blocTest<ChatBloc, ChatState>(
@@ -560,12 +567,221 @@ void main() {
         isA<ChatState>().having((s) => s.downloadingId, 'downloading', null),
       ],
       verify: (_) => expect(effects, [
-        isA<OpenFileEffect>().having(
-          (e) => e.path,
-          'path',
-          '/tmp/trip-form.pdf',
+        isA<OpenFileEffect>()
+            .having((e) => e.path, 'path', '/tmp/trip-form.pdf')
+            // A PDF: the page opens it here.
+            .having((e) => e.attachment, 'attachment', attachment),
+      ]),
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'a PDF on screen: its first page drawn to show, the file not opened',
+      setUp: () =>
+          when(
+            previewAttachment(attachment, cancel: anyNamed('cancel')),
+          ).thenAnswer(
+            (_) async => const Success(data: '/tmp/trip-form.pdf.preview.png'),
+          ),
+      build: build,
+      act: (bloc) => bloc.add(const LoadImageIntent(attachment)),
+      verify: (bloc) {
+        expect(
+          bloc.state.images[77],
+          const BaseState.success('/tmp/trip-form.pdf.preview.png'),
+        );
+        verifyNever(downloadAttachment(any, cancel: anyNamed('cancel')));
+        expect(effects, isEmpty);
+      },
+    );
+  });
+
+  group('photos', () {
+    void photoSaved() => when(
+      downloadAttachment(photo, cancel: anyNamed('cancel')),
+    ).thenAnswer((_) async => const Success(data: '/tmp/trip.jpg'));
+
+    blocTest<ChatBloc, ChatState>(
+      'on screen: saved on the phone to show, a file can still be opened',
+      setUp: photoSaved,
+      build: build,
+      act: (bloc) => bloc.add(const LoadImageIntent(photo)),
+      expect: () => [
+        isA<ChatState>()
+            .having((s) => s.images[78]?.state, 'photo', StateType.loading)
+            .having((s) => s.downloadingId, 'downloading', null),
+        isA<ChatState>().having(
+          (s) => s.images[78],
+          'photo',
+          const BaseState.success('/tmp/trip.jpg'),
+        ),
+      ],
+      verify: (_) => expect(effects, isEmpty),
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'saved already: not asked again',
+      build: build,
+      seed: () =>
+          const ChatState(images: {78: BaseState.success('/tmp/trip.jpg')}),
+      act: (bloc) => bloc.add(const LoadImageIntent(photo)),
+      expect: () => <ChatState>[],
+      verify: (_) =>
+          verifyNever(downloadAttachment(any, cancel: anyNamed('cancel'))),
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'on screen twice while it loads: asked once',
+      setUp: photoSaved,
+      build: build,
+      act: (bloc) => bloc
+        ..add(const LoadImageIntent(photo))
+        ..add(const LoadImageIntent(photo)),
+      verify: (_) => verify(
+        downloadAttachment(photo, cancel: anyNamed('cancel')),
+      ).called(1),
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'still checked by the school: not asked',
+      build: build,
+      act: (bloc) => bloc.add(
+        const LoadImageIntent(
+          ChatAttachmentEntity(
+            id: 79,
+            fileName: 'new.jpg',
+            mimeType: 'image/jpeg',
+            size: 1000,
+            isAvailable: false,
+          ),
+        ),
+      ),
+      expect: () => <ChatState>[],
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'didn\'t load: why, then "Try again" asks again',
+      setUp: () {
+        var calls = 0;
+        when(downloadAttachment(photo, cancel: anyNamed('cancel'))).thenAnswer(
+          (_) async => calls++ == 0
+              ? const Failure(exception: NetworkException())
+              : const Success(data: '/tmp/trip.jpg'),
+        );
+      },
+      build: build,
+      act: (bloc) async {
+        bloc.add(const LoadImageIntent(photo));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const LoadImageIntent(photo));
+      },
+      expect: () => [
+        isA<ChatState>().having(
+          (s) => s.images[78]?.state,
+          'photo',
+          StateType.loading,
+        ),
+        isA<ChatState>().having(
+          (s) => s.images[78]?.exception,
+          'why',
+          isA<NetworkException>(),
+        ),
+        isA<ChatState>().having(
+          (s) => s.images[78]?.state,
+          'photo',
+          StateType.loading,
+        ),
+        isA<ChatState>().having(
+          (s) => s.images[78]?.data,
+          'photo',
+          '/tmp/trip.jpg',
+        ),
+      ],
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'signed out meanwhile: the page logs out',
+      setUp: () => when(downloadAttachment(photo, cancel: anyNamed('cancel')))
+          .thenAnswer(
+            (_) async => const Failure(exception: UnauthorizedException()),
+          ),
+      build: build,
+      act: (bloc) => bloc.add(const LoadImageIntent(photo)),
+      verify: (_) => expect(effects, [
+        isA<ShowErrorEffect>().having(
+          (e) => e.exception,
+          'exception',
+          isA<UnauthorizedException>(),
         ),
       ]),
+    );
+
+    test('closed while it loads: the request is stopped', () async {
+      CancelHandle? cancel;
+      when(downloadAttachment(photo, cancel: anyNamed('cancel'))).thenAnswer((
+        invocation,
+      ) {
+        cancel = invocation.namedArguments[#cancel] as CancelHandle?;
+        return Completer<Result<String>>().future;
+      });
+      final bloc = build()..add(const LoadImageIntent(photo));
+      await Future<void>.delayed(Duration.zero);
+      expect(cancel?.isCancelled, isFalse);
+
+      await bloc.close();
+      expect(cancel?.isCancelled, isTrue);
+    });
+  });
+
+  group('refreshed while open', () {
+    final answer = schoolItem('message:43', about: omar);
+    final older = schoolItem('message:30', isRead: true);
+
+    ChatState open() => ChatState(
+      children: const [omar],
+      isRequested: true,
+      studentId: omar.studentId,
+      chat: BaseState.success(
+        chatPage([older, omarItem], hasMore: true, nextBefore: 'cursor-1'),
+      ),
+      draft: 'Thank you for',
+      replyingTo: omarItem,
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'the school answered: shown at once, older ones and the draft stay',
+      setUp: () => chatOf(omar.studentId, chatPage([omarItem, answer])),
+      build: build,
+      seed: open,
+      act: (bloc) => bloc.add(const RefreshChatIntent()),
+      verify: (bloc) {
+        expect(bloc.state.page?.items, [older, omarItem, answer]);
+        // Still able to load what's older than what was shown.
+        expect(bloc.state.page?.nextBefore, 'cursor-1');
+        expect(bloc.state.draft, 'Thank you for');
+        expect(bloc.state.replyingTo, omarItem);
+        expect(effects, isEmpty);
+      },
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'it doesn\'t load: what\'s shown stays, no snack bar',
+      setUp: () => when(
+        getChat(studentId: omar.studentId, cancel: anyNamed('cancel')),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException())),
+      build: build,
+      seed: open,
+      act: (bloc) => bloc.add(const RefreshChatIntent()),
+      expect: () => <ChatState>[],
+      verify: (_) => expect(effects, isEmpty),
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'before the chat shows: nothing asked',
+      build: build,
+      act: (bloc) => bloc.add(const RefreshChatIntent()),
+      verify: (_) => verifyNever(
+        getChat(studentId: anyNamed('studentId'), cancel: anyNamed('cancel')),
+      ),
     );
   });
 

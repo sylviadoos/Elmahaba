@@ -32,6 +32,7 @@ class ChatComposer extends StatelessWidget {
     required this.isSending,
     required this.onAttach,
     required this.onRemoveAttachment,
+    this.onPreviewAttachment,
     required this.onSend,
     this.onChanged,
     this.errorText,
@@ -55,6 +56,9 @@ class ChatComposer extends StatelessWidget {
   /// Null once there's no room for more files.
   final VoidCallback? onAttach;
   final ValueChanged<int> onRemoveAttachment;
+
+  /// Shows the photo picked at an index full screen, from its thumbnail.
+  final ValueChanged<int>? onPreviewAttachment;
 
   /// Null while it can't be sent.
   final VoidCallback? onSend;
@@ -122,6 +126,7 @@ class ChatComposer extends StatelessWidget {
               files: attachments,
               upload: upload,
               onRemove: isSending ? null : onRemoveAttachment,
+              onPreview: onPreviewAttachment,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

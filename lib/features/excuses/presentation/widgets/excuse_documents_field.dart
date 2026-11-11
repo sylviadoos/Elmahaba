@@ -17,6 +17,7 @@ class ExcuseDocumentsField extends StatelessWidget {
     required this.limits,
     required this.onAdd,
     required this.onRemove,
+    this.onPreview,
     this.label,
     this.errorText,
   });
@@ -27,6 +28,9 @@ class ExcuseDocumentsField extends StatelessWidget {
   /// Null while the files can't change (they're being sent).
   final VoidCallback? onAdd;
   final ValueChanged<int>? onRemove;
+
+  /// Gets the index of a photo tapped, to show it bigger.
+  final ValueChanged<int>? onPreview;
 
   /// "Medical documents" by default.
   final String? label;
@@ -42,6 +46,7 @@ class ExcuseDocumentsField extends StatelessWidget {
       color: AppColors.slate,
     );
     final onRemove = this.onRemove;
+    final onPreview = this.onPreview;
     final errorText = this.errorText;
 
     return Column(
@@ -67,9 +72,9 @@ class ExcuseDocumentsField extends StatelessWidget {
         ),
         for (final (index, file) in files.indexed)
           AttachmentTile(
-            fileName: file.name,
-            size: file.size,
+            file: file,
             onRemove: onRemove == null ? null : () => onRemove(index),
+            onPreview: onPreview == null ? null : () => onPreview(index),
           ),
         if (files.length < limits.maxFiles)
           AddAttachmentButton(onPressed: onAdd),

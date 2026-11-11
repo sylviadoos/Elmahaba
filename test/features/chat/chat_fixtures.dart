@@ -39,6 +39,14 @@ const attachment = ChatAttachmentEntity(
   isAvailable: true,
 );
 
+const photo = ChatAttachmentEntity(
+  id: 78,
+  fileName: 'trip.jpg',
+  mimeType: 'image/jpeg',
+  size: 120400,
+  isAvailable: true,
+);
+
 /// A school message about [about] (none: general), unread unless [isRead],
 /// leading to [link] if given.
 ChatItemEntity schoolItem(
