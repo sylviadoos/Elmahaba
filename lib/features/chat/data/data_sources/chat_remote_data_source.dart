@@ -11,10 +11,11 @@ abstract interface class ChatRemoteDataSource {
   /// The newest items, or those [before] a page's `nextBefore`: one
   /// child's ([studentId]) with the general ones, or everything. Fails with
   /// a `ServerException` (`child_not_available`) for a child no longer
-  /// linked.
+  /// linked. [limit] items at most; 30 when not given.
   Future<ChatPageModel> getChat({
     int? studentId,
     String? before,
+    int? limit,
     CancelHandle? cancel,
   });
 

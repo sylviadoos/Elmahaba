@@ -31,14 +31,19 @@ class ChatRepoImpl implements ChatRepo {
   Future<Result<ChatPageEntity>> getChat({
     int? studentId,
     String? before,
+    int? limit,
     CancelHandle? cancel,
   }) => Result.guard(() async {
     final page = await _remoteDataSource.getChat(
       studentId: studentId,
       before: before,
+      limit: limit,
       cancel: cancel,
     );
-    if (before == null) _localDataSource.saveNewestPage(studentId, page);
+    // Just the latest few (a refresh): the full page kept stays.
+    if (before == null && limit == null) {
+      _localDataSource.saveNewestPage(studentId, page);
+    }
     return page;
   });
 

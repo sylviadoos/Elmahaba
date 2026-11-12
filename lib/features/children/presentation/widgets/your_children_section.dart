@@ -36,11 +36,15 @@ class YourChildrenSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              l10n.yourChildren,
-              style: context.textTheme.titleLarge?.copyWith(
-                fontSize: 16.sp,
-                height: 1.3,
+            // Wraps rather than overflowing: "Your children" and "No
+            // children yet" together are wider than a small phone.
+            Expanded(
+              child: Text(
+                l10n.yourChildren,
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontSize: 16.sp,
+                  height: 1.3,
+                ),
               ),
             ),
             if (loaded != null) ChildrenCountBadge(count: loaded.length),

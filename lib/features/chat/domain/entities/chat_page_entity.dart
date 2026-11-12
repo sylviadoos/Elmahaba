@@ -63,6 +63,26 @@ class ChatPageEntity extends Equatable {
     canSend: canSend,
   );
 
+  /// These, with the items under [keys] read or not ([isRead]), and
+  /// [unread] left in the whole chat when the school said.
+  ChatPageEntity withRead(
+    Set<String> keys, {
+    required bool isRead,
+    int? unread,
+  }) => ChatPageEntity(
+    items: [
+      for (final item in items)
+        keys.contains(item.key) && item.isRead != isRead
+            ? item.withRead(isRead)
+            : item,
+    ],
+    hasMore: hasMore,
+    nextBefore: nextBefore,
+    unread: unread ?? this.unread,
+    isOpen: isOpen,
+    canSend: canSend,
+  );
+
   /// These, with the chat closed: the school closed it after they loaded.
   ChatPageEntity closed() => ChatPageEntity(
     items: items,

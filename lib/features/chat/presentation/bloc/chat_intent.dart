@@ -68,6 +68,17 @@ final class ItemSeenIntent extends ChatIntent {
   final String key;
 }
 
+/// The items under [keys] are read on screen ([isRead]), or unread again
+/// when telling the school failed; [unread] is what the school says is
+/// left in the whole chat. Sent by the bloc itself, as it marks them.
+final class ItemsReadChangedIntent extends ChatIntent {
+  const ItemsReadChangedIntent(this.keys, {required this.isRead, this.unread});
+
+  final Set<String> keys;
+  final bool isRead;
+  final int? unread;
+}
+
 /// With all children shown: the message is about the child with
 /// [studentId]; null for none of them (a general message).
 final class PickRecipientIntent extends ChatIntent {

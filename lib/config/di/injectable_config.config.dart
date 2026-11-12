@@ -252,6 +252,8 @@ import 'package:al_mahhaba_school/features/fees/data/repos/fees_repo_impl.dart'
     as _i793;
 import 'package:al_mahhaba_school/features/fees/domain/repos/fees_repo.dart'
     as _i990;
+import 'package:al_mahhaba_school/features/fees/domain/use_cases/change_optional_fee_use_case.dart'
+    as _i840;
 import 'package:al_mahhaba_school/features/fees/domain/use_cases/get_fee_statement_use_case.dart'
     as _i337;
 import 'package:al_mahhaba_school/features/fees/domain/use_cases/pay_online_use_case.dart'
@@ -328,12 +330,10 @@ import 'package:al_mahhaba_school/features/results/data/repos/results_repo_impl.
     as _i60;
 import 'package:al_mahhaba_school/features/results/domain/repos/results_repo.dart'
     as _i828;
-import 'package:al_mahhaba_school/features/results/domain/use_cases/get_latest_result_use_case.dart'
-    as _i161;
-import 'package:al_mahhaba_school/features/results/domain/use_cases/get_monthly_results_use_case.dart'
-    as _i345;
-import 'package:al_mahhaba_school/features/results/presentation/bloc/monthly_results_bloc.dart'
-    as _i411;
+import 'package:al_mahhaba_school/features/results/domain/use_cases/get_results_use_case.dart'
+    as _i218;
+import 'package:al_mahhaba_school/features/results/domain/use_cases/mark_latest_result_read_use_case.dart'
+    as _i515;
 import 'package:al_mahhaba_school/features/results/presentation/view_model/results_view_model.dart'
     as _i856;
 import 'package:device_info_plus/device_info_plus.dart' as _i833;
@@ -535,8 +535,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i438.ApiService>(instanceName: 'schoolApi'),
       ),
     );
-    gh.lazySingleton<_i345.GetMonthlyResultsUseCase>(
-      () => _i345.GetMonthlyResultsUseCase(gh<_i828.ResultsRepo>()),
+    gh.lazySingleton<_i218.GetResultsUseCase>(
+      () => _i218.GetResultsUseCase(gh<_i828.ResultsRepo>()),
     );
     gh.lazySingleton<_i816.NewsRemoteDataSource>(
       () => _i51.NewsRemoteDataSourceImpl(
@@ -554,9 +554,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i438.ApiService>(instanceName: 'schoolApi'),
         gh<_i438.ApiService>(instanceName: 'signedFilesApi'),
       ),
-    );
-    gh.factory<_i411.MonthlyResultsBloc>(
-      () => _i411.MonthlyResultsBloc(gh<_i345.GetMonthlyResultsUseCase>()),
     );
     gh.lazySingleton<_i9.DeleteAccountUseCase>(
       () => _i9.DeleteAccountUseCase(gh<_i559.ProfileRepo>()),
@@ -677,11 +674,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i647.AnnouncementsRemoteDataSource>(),
       ),
     );
-    gh.lazySingleton<_i161.GetLatestResultUseCase>(
-      () => _i161.GetLatestResultUseCase(
-        gh<_i758.HomeRepo>(),
-        gh<_i828.ResultsRepo>(),
-      ),
+    gh.lazySingleton<_i840.ChangeOptionalFeeUseCase>(
+      () => _i840.ChangeOptionalFeeUseCase(gh<_i990.FeesRepo>()),
     );
     gh.lazySingleton<_i337.GetFeeStatementUseCase>(
       () => _i337.GetFeeStatementUseCase(gh<_i990.FeesRepo>()),
@@ -772,9 +766,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i383.SendComplaintUseCase>(
       () => _i383.SendComplaintUseCase(gh<_i1051.ComplaintsRepo>()),
     );
-    gh.factory<_i740.FeesViewModel>(
-      () => _i740.FeesViewModel(gh<_i337.GetFeeStatementUseCase>()),
-    );
     gh.factory<_i875.ChildrenViewModel>(
       () => _i875.ChildrenViewModel(
         gh<_i449.GetSavedChildrenUseCase>(),
@@ -801,6 +792,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i422.NewExcuseViewModel>(
       () => _i422.NewExcuseViewModel(gh<_i674.SubmitExcuseUseCase>()),
     );
+    gh.lazySingleton<_i515.MarkLatestResultReadUseCase>(
+      () => _i515.MarkLatestResultReadUseCase(
+        gh<_i758.HomeRepo>(),
+        gh<_i619.ChatRepo>(),
+      ),
+    );
     gh.lazySingleton<_i778.DownloadChatAttachmentUseCase>(
       () => _i778.DownloadChatAttachmentUseCase(gh<_i619.ChatRepo>()),
     );
@@ -825,16 +822,29 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i818.WatchChatReadsUseCase>(
       () => _i818.WatchChatReadsUseCase(gh<_i619.ChatRepo>()),
     );
+    gh.factory<_i740.FeesViewModel>(
+      () => _i740.FeesViewModel(
+        gh<_i337.GetFeeStatementUseCase>(),
+        gh<_i840.ChangeOptionalFeeUseCase>(),
+      ),
+    );
+    gh.factory<_i856.ResultsViewModel>(
+      () => _i856.ResultsViewModel(
+        gh<_i218.GetResultsUseCase>(),
+        gh<_i515.MarkLatestResultReadUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i374.GetAnnouncementsUseCase>(
       () => _i374.GetAnnouncementsUseCase(gh<_i58.AnnouncementsRepo>()),
     );
     gh.factory<_i1065.PayFeesViewModel>(
       () => _i1065.PayFeesViewModel(gh<_i261.PayOnlineUseCase>()),
     );
-    gh.factory<_i856.ResultsViewModel>(
-      () => _i856.ResultsViewModel(
-        gh<_i161.GetLatestResultUseCase>(),
-        gh<_i25.MarkChatReadUseCase>(),
+    gh.factory<_i105.HomeBloc>(
+      () => _i105.HomeBloc(
+        gh<_i181.GetChildDashboardUseCase>(),
+        gh<_i1066.GetMonthAttendanceUseCase>(),
+        gh<_i818.WatchChatReadsUseCase>(),
       ),
     );
     gh.lazySingleton<_i23.GetAppStatusUseCase>(
@@ -879,12 +889,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i25.MarkChatReadUseCase>(),
         gh<_i778.DownloadChatAttachmentUseCase>(),
         gh<_i165.PreviewChatAttachmentUseCase>(),
-      ),
-    );
-    gh.factory<_i105.HomeBloc>(
-      () => _i105.HomeBloc(
-        gh<_i181.GetChildDashboardUseCase>(),
-        gh<_i818.WatchChatReadsUseCase>(),
       ),
     );
     gh.factory<_i924.ChatBloc>(

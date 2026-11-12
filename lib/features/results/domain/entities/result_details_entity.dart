@@ -1,19 +1,24 @@
 import 'package:equatable/equatable.dart';
 
 import 'package:al_mahhaba_school/features/results/domain/entities/result_activity_entity.dart';
+import 'package:al_mahhaba_school/features/results/domain/entities/result_kind.dart';
+import 'package:al_mahhaba_school/features/results/domain/entities/result_period_entity.dart';
 import 'package:al_mahhaba_school/features/results/domain/entities/result_subject_entity.dart';
 
-/// A published result (report card), in full.
+/// A published result (report card), in full: a month's or a term's.
 class ResultDetailsEntity extends Equatable {
   const ResultDetailsEntity({
     required this.id,
+    this.kind = ResultKind.other,
     required this.title,
     required this.academicYear,
     required this.resultType,
+    this.period,
     this.publishedAt,
-    required this.studentName,
+    this.studentName = '',
     this.finalResult,
     this.finalResultMax,
+    this.verdict,
     this.rank,
     this.attendancePercentage,
     required this.subjectsIncluded,
@@ -24,23 +29,35 @@ class ResultDetailsEntity extends Equatable {
 
   final int id;
 
-  /// As the school wrote it, e.g. "نتيجة الصف الاول الابتدائي".
+  /// A month's, a term's…
+  final ResultKind kind;
+
+  /// As the school wrote it, e.g. "نتيجة الصف الثالث شهر اكتوبر".
   final String title;
 
-  /// e.g. "2025-2026".
+  /// e.g. "2026-2027".
   final String academicYear;
 
   /// How the grades are shown: "value", or "value and color".
   final String resultType;
+
+  /// The month a monthly result is for; null for any other.
+  final ResultPeriodEntity? period;
   final DateTime? publishedAt;
+
+  /// Empty when the school doesn't send it.
   final String studentName;
 
-  /// The sum of [subjectsIncluded], e.g. 297.4; null when not given.
+  /// The counted subjects' marks together, e.g. 245; null when not given.
   final double? finalResult;
 
-  /// What [finalResult] is out of, when the school says (a month's
-  /// certificate); otherwise worked out from [subjectsIncluded].
+  /// What [finalResult] is out of, when the school says (a month's);
+  /// otherwise worked out from [subjectsIncluded].
   final double? finalResultMax;
+
+  /// The school's word for the outcome, e.g. "ناجح" (a term's); null when
+  /// not given.
+  final String? verdict;
 
   /// In the class, 1 the first; null when not given.
   final int? rank;
@@ -51,12 +68,14 @@ class ResultDetailsEntity extends Equatable {
   /// Counted in [finalResult].
   final List<ResultSubjectEntity> subjectsIncluded;
 
-  /// Not counted in [finalResult] (e.g. Religious).
+  /// Not counted in [finalResult] (e.g. Religion).
   final List<ResultSubjectEntity> subjectsNotIncluded;
 
   /// An extra level, not counted in [finalResult].
   final List<ResultSubjectEntity> highLevel;
   final List<ResultActivityEntity> activities;
+
+  bool get isMonthly => kind == ResultKind.monthly;
 
   /// Whether the grades are shown in colors, by how good they are.
   bool get usesColors => resultType.contains('color');
@@ -69,13 +88,16 @@ class ResultDetailsEntity extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    kind,
     title,
     academicYear,
     resultType,
+    period,
     publishedAt,
     studentName,
     finalResult,
     finalResultMax,
+    verdict,
     rank,
     attendancePercentage,
     subjectsIncluded,

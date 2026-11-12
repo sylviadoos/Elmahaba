@@ -14,6 +14,7 @@ class FeeInstallmentModel extends FeeInstallmentEntity {
     required super.canPay,
     required super.payKey,
     super.requires,
+    super.lockedReason,
   });
 
   /// { "pay_key": "8472|قسط ثانى|2026-10-01",
@@ -43,6 +44,8 @@ class FeeInstallmentModel extends FeeInstallmentEntity {
           for (final key in json['requires'] as List)
             if (key is String && key.isNotEmpty) key,
       ],
+      // The school's wording, as its website shows it.
+      lockedReason: locked ? jsonText(json['locked_reason']) : '',
     );
   }
 }

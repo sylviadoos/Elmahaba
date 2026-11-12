@@ -59,12 +59,14 @@ class MockGetChatUseCase extends _i1.Mock implements _i2.GetChatUseCase {
   _i3.Future<_i4.Result<_i5.ChatPageEntity>> call({
     int? studentId,
     String? before,
+    int? limit,
     _i6.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#call, [], {
               #studentId: studentId,
               #before: before,
+              #limit: limit,
               #cancel: cancel,
             }),
             returnValue: _i3.Future<_i4.Result<_i5.ChatPageEntity>>.value(
@@ -73,6 +75,7 @@ class MockGetChatUseCase extends _i1.Mock implements _i2.GetChatUseCase {
                 Invocation.method(#call, [], {
                   #studentId: studentId,
                   #before: before,
+                  #limit: limit,
                   #cancel: cancel,
                 }),
               ),
@@ -84,6 +87,7 @@ class MockGetChatUseCase extends _i1.Mock implements _i2.GetChatUseCase {
                     Invocation.method(#call, [], {
                       #studentId: studentId,
                       #before: before,
+                      #limit: limit,
                       #cancel: cancel,
                     }),
                   ),

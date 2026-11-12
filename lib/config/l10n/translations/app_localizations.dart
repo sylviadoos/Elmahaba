@@ -2180,6 +2180,42 @@ abstract class AppLocalizations {
   /// **'Tick the installments you want to pay'**
   String get tickInstallments;
 
+  /// No description provided for @confirmOptionalFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Optional Fee'**
+  String get confirmOptionalFee;
+
+  /// No description provided for @confirmOptionalFeeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to pay this fee?\n{fee} — {amount}'**
+  String confirmOptionalFeeMessage(String fee, String amount);
+
+  /// No description provided for @yesPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Pay'**
+  String get yesPay;
+
+  /// No description provided for @dropOptionalFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Optional Fee'**
+  String get dropOptionalFee;
+
+  /// No description provided for @dropOptionalFeeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove {fee} from the fees?'**
+  String dropOptionalFeeMessage(String fee);
+
+  /// No description provided for @yesDrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, Remove'**
+  String get yesDrop;
+
   /// No description provided for @tickEarlierInstallmentsFirst.
   ///
   /// In en, this message translates to:

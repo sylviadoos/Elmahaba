@@ -13,4 +13,17 @@ abstract interface class FeesRepo {
     required int childId,
     required List<String> payKeys,
   });
+
+  /// Adds the optional fee to the child's fees, at once. [feeId] is a
+  /// statement line's `id`.
+  Future<Result<void>> confirmOptionalFee({
+    required int childId,
+    required int feeId,
+  });
+
+  /// Drops it again; the school refuses once anything is paid on it.
+  Future<Result<void>> dropOptionalFee({
+    required int childId,
+    required int feeId,
+  });
 }

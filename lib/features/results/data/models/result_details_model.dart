@@ -1,21 +1,28 @@
 import 'package:al_mahhaba_school/core/utils/json_values.dart';
 import 'package:al_mahhaba_school/features/results/data/models/result_activity_model.dart';
+import 'package:al_mahhaba_school/features/results/data/models/result_period_model.dart';
 import 'package:al_mahhaba_school/features/results/data/models/result_subject_model.dart';
 import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart';
+import 'package:al_mahhaba_school/features/results/domain/entities/result_kind.dart';
 
-/// The `data` of `GET v1/parent/children/{child_id}/results/{result_id}`.
+/// One result in the `data` of
+/// `GET v1/parent/children/{child_id}/results-v2`.
 ///
-/// The marks are in `result`; any list in it may be missing (no high level,
-/// no activities…) and reads as empty.
+/// The marks are in `data`; any list in it may be missing (a month has no
+/// high level or activities) and reads as empty.
 class ResultDetailsModel extends ResultDetailsEntity {
   const ResultDetailsModel({
     required super.id,
+    super.kind,
     required super.title,
     required super.academicYear,
     required super.resultType,
+    super.period,
     super.publishedAt,
-    required super.studentName,
     super.finalResult,
+    super.finalResultMax,
+    super.verdict,
+    super.rank,
     super.attendancePercentage,
     required super.subjectsIncluded,
     required super.subjectsNotIncluded,
@@ -23,31 +30,62 @@ class ResultDetailsModel extends ResultDetailsEntity {
     required super.activities,
   });
 
+  /// { "result_id": 820, "result_type": "monthly", "title": "…",
+  ///   "academic_year": "2026-2027", "period": { … } | null,
+  ///   "display": "value and color", "published_at": "…",
+  ///   "data": { "attendance_percentage": 96, "subjects": [ … ],
+  ///     "grand_total": 245, "max_grand_total": 280, "rank": 3,
+  ///     "high_level": [ … ], "activities": [ … ],
+  ///     "final_result": "ناجح", "final_result_2": null } }
   factory ResultDetailsModel.fromJson(Map<String, dynamic> json) {
-    final result = json['result'] as Map<String, dynamic>? ?? const {};
-    List<ResultSubjectModel> subjects(String key) => [
-      for (final subject in jsonObjects(result[key]))
-        ResultSubjectModel.fromJson(subject),
-    ];
+    final data = json['data'] as Map<String, dynamic>? ?? const {};
+    final counted = <ResultSubjectModel>[];
+    final notCounted = <ResultSubjectModel>[];
+    for (final subject in jsonObjects(data['subjects'])) {
+      // Counted unless the school says not.
+      (subject['included_in_total'] as bool? ?? true)
+          ? counted.add(ResultSubjectModel.fromJson(subject))
+          : notCounted.add(ResultSubjectModel.fromJson(subject));
+    }
+    // A term's final result is a word ("ناجح") or a mark ("297.4").
+    final finalResults = [data['final_result'], data['final_result_2']];
+    final verdict = finalResults
+        .where((value) => jsonDouble(value) == null)
+        .map(jsonText)
+        .where((text) => text.isNotEmpty)
+        .firstOrNull;
+    final period = json['period'];
 
     return ResultDetailsModel(
-      id: json['id'] as int,
-      title: json['title'] as String? ?? '',
-      academicYear: json['academic_year'] as String? ?? '',
-      resultType: json['result_type'] as String? ?? '',
-      // "2026-06-03T11:55:34+00:00", in UTC.
-      publishedAt: DateTime.tryParse(json['published_at'] as String? ?? ''),
-      studentName: jsonText(result['studentName']),
-      // "297.4", or the rounded "297" when that's all there is.
+      id: json['result_id'] as int,
+      kind: ResultKind.of(json['result_type'] as String?),
+      title: jsonText(json['title']),
+      academicYear: jsonText(json['academic_year']),
+      resultType: jsonText(json['display']),
+      period: period is Map<String, dynamic>
+          ? ResultPeriodModel.fromJson(period)
+          : null,
+      // "2026-11-11T12:00:00+00:00", in UTC.
+      publishedAt: DateTime.tryParse(jsonText(json['published_at'])),
       finalResult:
-          jsonDouble(result['finalResult']) ??
-          jsonDouble(result['finalResult2']),
-      attendancePercentage: jsonDouble(result['attendancePercentage']),
-      subjectsIncluded: subjects('subjectsIncluded'),
-      subjectsNotIncluded: subjects('subjectsNotIncluded'),
-      highLevel: subjects('highLevel'),
+          jsonDouble(data['grand_total']) ??
+          finalResults.map(jsonDouble).nonNulls.firstOrNull ??
+          // Not given: the counted subjects' marks together.
+          (counted.isEmpty
+              ? null
+              : counted.fold<double>(0, (sum, s) => sum + s.total)),
+      finalResultMax: jsonDouble(data['max_grand_total']),
+      verdict: verdict,
+      rank: jsonDouble(data['rank'])?.toInt(),
+      attendancePercentage: jsonDouble(data['attendance_percentage']),
+      subjectsIncluded: counted,
+      subjectsNotIncluded: notCounted,
+      highLevel: [
+        for (final subject in jsonObjects(data['high_level']))
+          ResultSubjectModel.fromJson(subject),
+      ],
       activities: [
-        for (final activity in jsonObjects(result['activities']))
+        for (final activity in jsonObjects(data['activities']))
           ResultActivityModel.fromJson(activity),
       ],
     );

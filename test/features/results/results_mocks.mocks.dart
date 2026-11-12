@@ -6,17 +6,29 @@
 
 import 'dart:async' as _i3;
 
+import 'package:al_mahhaba_school/core/base/cancel_handle.dart' as _i12;
 import 'package:al_mahhaba_school/core/base/result.dart' as _i4;
-import 'package:al_mahhaba_school/features/chat/domain/use_cases/mark_chat_read_use_case.dart'
+import 'package:al_mahhaba_school/core/base/upload_progress.dart' as _i15;
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart'
+    as _i16;
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_item_entity.dart'
+    as _i13;
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart'
+    as _i11;
+import 'package:al_mahhaba_school/features/chat/domain/entities/new_chat_message_entity.dart'
+    as _i14;
+import 'package:al_mahhaba_school/features/chat/domain/repos/chat_repo.dart'
+    as _i10;
+import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart'
     as _i9;
-import 'package:al_mahhaba_school/features/results/domain/entities/monthly_results_entity.dart'
-    as _i5;
-import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart'
+import 'package:al_mahhaba_school/features/home/domain/repos/home_repo.dart'
     as _i8;
-import 'package:al_mahhaba_school/features/results/domain/use_cases/get_latest_result_use_case.dart'
-    as _i7;
-import 'package:al_mahhaba_school/features/results/domain/use_cases/get_monthly_results_use_case.dart'
+import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart'
+    as _i5;
+import 'package:al_mahhaba_school/features/results/domain/use_cases/get_results_use_case.dart'
     as _i2;
+import 'package:al_mahhaba_school/features/results/domain/use_cases/mark_latest_result_read_use_case.dart'
+    as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i6;
 
@@ -35,115 +47,276 @@ import 'package:mockito/src/dummies.dart' as _i6;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-/// A class which mocks [GetMonthlyResultsUseCase].
+/// A class which mocks [GetResultsUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetMonthlyResultsUseCase extends _i1.Mock
-    implements _i2.GetMonthlyResultsUseCase {
+class MockGetResultsUseCase extends _i1.Mock implements _i2.GetResultsUseCase {
   @override
-  _i3.Future<_i4.Result<_i5.MonthlyResultsEntity>> call(int? childId) =>
+  _i3.Future<_i4.Result<List<_i5.ResultDetailsEntity>>> call(int? childId) =>
       (super.noSuchMethod(
             Invocation.method(#call, [childId]),
-            returnValue: _i3.Future<_i4.Result<_i5.MonthlyResultsEntity>>.value(
-              _i6.dummyValue<_i4.Result<_i5.MonthlyResultsEntity>>(
-                this,
-                Invocation.method(#call, [childId]),
-              ),
-            ),
+            returnValue:
+                _i3.Future<_i4.Result<List<_i5.ResultDetailsEntity>>>.value(
+                  _i6.dummyValue<_i4.Result<List<_i5.ResultDetailsEntity>>>(
+                    this,
+                    Invocation.method(#call, [childId]),
+                  ),
+                ),
             returnValueForMissingStub:
-                _i3.Future<_i4.Result<_i5.MonthlyResultsEntity>>.value(
-                  _i6.dummyValue<_i4.Result<_i5.MonthlyResultsEntity>>(
+                _i3.Future<_i4.Result<List<_i5.ResultDetailsEntity>>>.value(
+                  _i6.dummyValue<_i4.Result<List<_i5.ResultDetailsEntity>>>(
                     this,
                     Invocation.method(#call, [childId]),
                   ),
                 ),
           )
-          as _i3.Future<_i4.Result<_i5.MonthlyResultsEntity>>);
+          as _i3.Future<_i4.Result<List<_i5.ResultDetailsEntity>>>);
 }
 
-/// A class which mocks [GetLatestResultUseCase].
+/// A class which mocks [MarkLatestResultReadUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockGetLatestResultUseCase extends _i1.Mock
-    implements _i7.GetLatestResultUseCase {
+class MockMarkLatestResultReadUseCase extends _i1.Mock
+    implements _i7.MarkLatestResultReadUseCase {
   @override
-  _i3.Future<
-    _i4.Result<
-      ({String? chatKey, _i8.ResultDetailsEntity details, bool isRead})?
-    >
-  >
-  call(int? childId) =>
+  _i3.Future<_i4.Result<void>> call(int? childId) =>
       (super.noSuchMethod(
             Invocation.method(#call, [childId]),
-            returnValue:
-                _i3.Future<
-                  _i4.Result<
-                    ({
-                      String? chatKey,
-                      _i8.ResultDetailsEntity details,
-                      bool isRead,
-                    })?
-                  >
-                >.value(
-                  _i6.dummyValue<
-                    _i4.Result<
-                      ({
-                        String? chatKey,
-                        _i8.ResultDetailsEntity details,
-                        bool isRead,
-                      })?
-                    >
-                  >(this, Invocation.method(#call, [childId])),
-                ),
-            returnValueForMissingStub:
-                _i3.Future<
-                  _i4.Result<
-                    ({
-                      String? chatKey,
-                      _i8.ResultDetailsEntity details,
-                      bool isRead,
-                    })?
-                  >
-                >.value(
-                  _i6.dummyValue<
-                    _i4.Result<
-                      ({
-                        String? chatKey,
-                        _i8.ResultDetailsEntity details,
-                        bool isRead,
-                      })?
-                    >
-                  >(this, Invocation.method(#call, [childId])),
-                ),
+            returnValue: _i3.Future<_i4.Result<void>>.value(
+              _i6.dummyValue<_i4.Result<void>>(
+                this,
+                Invocation.method(#call, [childId]),
+              ),
+            ),
+            returnValueForMissingStub: _i3.Future<_i4.Result<void>>.value(
+              _i6.dummyValue<_i4.Result<void>>(
+                this,
+                Invocation.method(#call, [childId]),
+              ),
+            ),
           )
-          as _i3.Future<
-            _i4.Result<
-              ({String? chatKey, _i8.ResultDetailsEntity details, bool isRead})?
-            >
-          >);
+          as _i3.Future<_i4.Result<void>>);
 }
 
-/// A class which mocks [MarkChatReadUseCase].
+/// A class which mocks [HomeRepo].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockMarkChatReadUseCase extends _i1.Mock
-    implements _i9.MarkChatReadUseCase {
+class MockHomeRepo extends _i1.Mock implements _i8.HomeRepo {
   @override
-  _i3.Future<_i4.Result<int>> call(List<String>? keys) =>
+  _i3.Future<_i4.Result<_i9.ChildDashboardEntity>> getChildDashboard(
+    int? childId,
+  ) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [keys]),
+            Invocation.method(#getChildDashboard, [childId]),
+            returnValue: _i3.Future<_i4.Result<_i9.ChildDashboardEntity>>.value(
+              _i6.dummyValue<_i4.Result<_i9.ChildDashboardEntity>>(
+                this,
+                Invocation.method(#getChildDashboard, [childId]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i3.Future<_i4.Result<_i9.ChildDashboardEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i9.ChildDashboardEntity>>(
+                    this,
+                    Invocation.method(#getChildDashboard, [childId]),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<_i9.ChildDashboardEntity>>);
+}
+
+/// A class which mocks [ChatRepo].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
+  @override
+  _i3.Stream<int> get onMarkedRead =>
+      (super.noSuchMethod(
+            Invocation.getter(#onMarkedRead),
+            returnValue: _i3.Stream<int>.empty(),
+            returnValueForMissingStub: _i3.Stream<int>.empty(),
+          )
+          as _i3.Stream<int>);
+
+  @override
+  _i3.Future<_i4.Result<_i11.ChatPageEntity>> getChat({
+    int? studentId,
+    String? before,
+    int? limit,
+    _i12.CancelHandle? cancel,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#getChat, [], {
+              #studentId: studentId,
+              #before: before,
+              #limit: limit,
+              #cancel: cancel,
+            }),
+            returnValue: _i3.Future<_i4.Result<_i11.ChatPageEntity>>.value(
+              _i6.dummyValue<_i4.Result<_i11.ChatPageEntity>>(
+                this,
+                Invocation.method(#getChat, [], {
+                  #studentId: studentId,
+                  #before: before,
+                  #limit: limit,
+                  #cancel: cancel,
+                }),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i3.Future<_i4.Result<_i11.ChatPageEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i11.ChatPageEntity>>(
+                    this,
+                    Invocation.method(#getChat, [], {
+                      #studentId: studentId,
+                      #before: before,
+                      #limit: limit,
+                      #cancel: cancel,
+                    }),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<_i11.ChatPageEntity>>);
+
+  @override
+  _i3.Future<_i4.Result<int>> getUnreadCount() =>
+      (super.noSuchMethod(
+            Invocation.method(#getUnreadCount, []),
             returnValue: _i3.Future<_i4.Result<int>>.value(
               _i6.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#call, [keys]),
+                Invocation.method(#getUnreadCount, []),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<int>>.value(
               _i6.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#call, [keys]),
+                Invocation.method(#getUnreadCount, []),
               ),
             ),
           )
           as _i3.Future<_i4.Result<int>>);
+
+  @override
+  _i3.Future<_i4.Result<_i13.ChatItemEntity>> sendMessage(
+    _i14.NewChatMessageEntity? message, {
+    _i15.UploadProgressCallback? onProgress,
+    _i12.CancelHandle? cancel,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #sendMessage,
+              [message],
+              {#onProgress: onProgress, #cancel: cancel},
+            ),
+            returnValue: _i3.Future<_i4.Result<_i13.ChatItemEntity>>.value(
+              _i6.dummyValue<_i4.Result<_i13.ChatItemEntity>>(
+                this,
+                Invocation.method(
+                  #sendMessage,
+                  [message],
+                  {#onProgress: onProgress, #cancel: cancel},
+                ),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i3.Future<_i4.Result<_i13.ChatItemEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i13.ChatItemEntity>>(
+                    this,
+                    Invocation.method(
+                      #sendMessage,
+                      [message],
+                      {#onProgress: onProgress, #cancel: cancel},
+                    ),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<_i13.ChatItemEntity>>);
+
+  @override
+  _i3.Future<_i4.Result<int>> markRead(List<String>? keys) =>
+      (super.noSuchMethod(
+            Invocation.method(#markRead, [keys]),
+            returnValue: _i3.Future<_i4.Result<int>>.value(
+              _i6.dummyValue<_i4.Result<int>>(
+                this,
+                Invocation.method(#markRead, [keys]),
+              ),
+            ),
+            returnValueForMissingStub: _i3.Future<_i4.Result<int>>.value(
+              _i6.dummyValue<_i4.Result<int>>(
+                this,
+                Invocation.method(#markRead, [keys]),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Result<int>>);
+
+  @override
+  _i3.Future<_i4.Result<String>> downloadAttachment(
+    _i16.ChatAttachmentEntity? attachment, {
+    _i12.CancelHandle? cancel,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #downloadAttachment,
+              [attachment],
+              {#cancel: cancel},
+            ),
+            returnValue: _i3.Future<_i4.Result<String>>.value(
+              _i6.dummyValue<_i4.Result<String>>(
+                this,
+                Invocation.method(
+                  #downloadAttachment,
+                  [attachment],
+                  {#cancel: cancel},
+                ),
+              ),
+            ),
+            returnValueForMissingStub: _i3.Future<_i4.Result<String>>.value(
+              _i6.dummyValue<_i4.Result<String>>(
+                this,
+                Invocation.method(
+                  #downloadAttachment,
+                  [attachment],
+                  {#cancel: cancel},
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Result<String>>);
+
+  @override
+  _i3.Future<_i4.Result<String>> previewAttachment(
+    _i16.ChatAttachmentEntity? attachment, {
+    _i12.CancelHandle? cancel,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #previewAttachment,
+              [attachment],
+              {#cancel: cancel},
+            ),
+            returnValue: _i3.Future<_i4.Result<String>>.value(
+              _i6.dummyValue<_i4.Result<String>>(
+                this,
+                Invocation.method(
+                  #previewAttachment,
+                  [attachment],
+                  {#cancel: cancel},
+                ),
+              ),
+            ),
+            returnValueForMissingStub: _i3.Future<_i4.Result<String>>.value(
+              _i6.dummyValue<_i4.Result<String>>(
+                this,
+                Invocation.method(
+                  #previewAttachment,
+                  [attachment],
+                  {#cancel: cancel},
+                ),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Result<String>>);
 }

@@ -9,12 +9,14 @@ import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
+import 'package:al_mahhaba_school/core/widgets/confirm_dialog.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/children/presentation/widgets/no_children_state.dart';
+import 'package:al_mahhaba_school/features/fees/domain/entities/fee_entity.dart';
 import 'package:al_mahhaba_school/features/fees/domain/entities/fee_statement_entity.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/extensions/money_text.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/view_model/fees_event.dart';
@@ -73,6 +75,30 @@ class _FeesViewState extends State<_FeesView> {
     if (changed == true && mounted) _loadStatement(refresh: true);
   }
 
+  /// Adds an optional fee to the statement or drops it, once the parent
+  /// says yes. The school changes it at once, so it's worth asking.
+  Future<void> _changeOptional(FeeEntity fee, bool add) async {
+    final l10n = context.l10n;
+    final child = context.read<ChildrenViewModel>().state.selectedChild;
+    if (child == null) return;
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: add ? l10n.confirmOptionalFee : l10n.dropOptionalFee,
+      message: add
+          ? l10n.confirmOptionalFeeMessage(fee.name, context.egp(fee.amount))
+          : l10n.dropOptionalFeeMessage(fee.name),
+      confirmLabel: add ? l10n.yesPay : l10n.yesDrop,
+    );
+    if (!confirmed || !mounted) return;
+    context.read<FeesViewModel>().doAction(
+      ChangeOptionalFeeEvent(
+        childId: child.studentId,
+        feeId: fee.id!,
+        add: add,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final childrenState = context.select(
@@ -99,8 +125,17 @@ class _FeesViewState extends State<_FeesView> {
               loading: const FeesSkeleton(),
             )
           else
-            BlocBuilder<FeesViewModel, FeesState>(
-              builder: (context, state) => state.when(
+            BlocConsumer<FeesViewModel, FeesState>(
+              // The school turned a change down — the fee is on the
+              // statement already, or a payment keeps it there.
+              listenWhen: (previous, current) =>
+                  previous.changeFailed != current.changeFailed &&
+                  current.changeFailed != null,
+              listener: (context, state) => context.showSnackBar(
+                state.changeFailed!.localizedMessage(context),
+                isError: true,
+              ),
+              builder: (context, state) => state.statement.when(
                 initial: () => const FeesSkeleton(),
                 loading: () => const FeesSkeleton(),
                 error: (exception) => StateMessage(
@@ -111,7 +146,8 @@ class _FeesViewState extends State<_FeesView> {
                     onRetry: _loadStatement,
                   ),
                 ),
-                success: (statement) => _statement(context, statement),
+                success: (statement) =>
+                    _statement(context, statement, state.changingFeeId),
               ),
             ),
         ],
@@ -119,13 +155,21 @@ class _FeesViewState extends State<_FeesView> {
     );
   }
 
-  Widget _statement(BuildContext context, FeeStatementEntity statement) {
+  Widget _statement(
+    BuildContext context,
+    FeeStatementEntity statement,
+    int? changingFeeId,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 18.h,
       children: [
         StudentSummaryCard(student: statement.student),
-        FeeStatementCard(statement: statement),
+        FeeStatementCard(
+          statement: statement,
+          onChangeOptional: _changeOptional,
+          changingFeeId: changingFeeId,
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 10.h,

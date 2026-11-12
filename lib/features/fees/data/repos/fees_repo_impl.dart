@@ -27,4 +27,17 @@ class FeesRepoImpl implements FeesRepo {
       PayOnlineRequestModel(payKeys: payKeys),
     ),
   );
+
+  @override
+  Future<Result<void>> confirmOptionalFee({
+    required int childId,
+    required int feeId,
+  }) =>
+      Result.guard(() => _remoteDataSource.confirmOptionalFee(childId, feeId));
+
+  @override
+  Future<Result<void>> dropOptionalFee({
+    required int childId,
+    required int feeId,
+  }) => Result.guard(() => _remoteDataSource.dropOptionalFee(childId, feeId));
 }

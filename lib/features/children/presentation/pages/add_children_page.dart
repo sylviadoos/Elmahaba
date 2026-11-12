@@ -66,7 +66,11 @@ class _AddChildrenPageState extends State<AddChildrenPage> {
     final link = state.link;
 
     if (link.data case final result?) {
-      _idController.clear();
+      // In setState: Continue waits on the field being empty again.
+      setState(() {
+        _idController.clear();
+        _idError = null;
+      });
       context.showSnackBar(switch (result) {
         ChildLinked() => l10n.childLinked,
         ChildLinkPending() => l10n.childLinkPending,
@@ -116,6 +120,9 @@ class _AddChildrenPageState extends State<AddChildrenPage> {
                     listener: _onLinked,
                     builder: (context, state) {
                       final children = state.children.data;
+                      // An ID typed but not added yet: Continue would
+                      // leave the page and drop it, so it waits for Add.
+                      final idWaiting = _idController.text.isNotEmpty;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -138,7 +145,10 @@ class _AddChildrenPageState extends State<AddChildrenPage> {
                           const Spacer(),
                           AppButton(
                             label: context.l10n.continueButton,
-                            onPressed: children == null || children.isEmpty
+                            onPressed:
+                                children == null ||
+                                    children.isEmpty ||
+                                    idWaiting
                                 ? null
                                 : () => context.go(AppRoutes.home),
                             trailingIcon: AppSvgIcon(

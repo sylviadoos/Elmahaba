@@ -41,4 +41,12 @@ class FeesRemoteDataSourceImpl implements FeesRemoteDataSource {
             as Map<String, dynamic>;
     return CheckoutModel.fromJson(json[ApiKeys.data] as Map<String, dynamic>);
   }
+
+  @override
+  Future<void> confirmOptionalFee(int childId, int feeId) =>
+      _api.post(ApiEndpoints.confirmOptionalFee(childId, feeId));
+
+  @override
+  Future<void> dropOptionalFee(int childId, int feeId) =>
+      _api.delete(ApiEndpoints.optionalFee(childId, feeId));
 }

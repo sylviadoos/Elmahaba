@@ -1161,6 +1161,28 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tickInstallments => 'اختر الأقساط التي تريد دفعها';
 
   @override
+  String get confirmOptionalFee => 'تأكيد الرسم الاختياري';
+
+  @override
+  String confirmOptionalFeeMessage(String fee, String amount) {
+    return 'هل أنت متأكد أنك تريد دفع هذا الرسم؟\n$fee — $amount';
+  }
+
+  @override
+  String get yesPay => 'نعم، ادفع';
+
+  @override
+  String get dropOptionalFee => 'إزالة الرسم الاختياري';
+
+  @override
+  String dropOptionalFeeMessage(String fee) {
+    return 'هل أنت متأكد أنك تريد إزالة $fee من الرسوم؟';
+  }
+
+  @override
+  String get yesDrop => 'نعم، أزل';
+
+  @override
   String get tickEarlierInstallmentsFirst =>
       'لمعاينة الكشف أو تحميله، اختر الأقساط السابقة غير المدفوعة أيضًا.';
 

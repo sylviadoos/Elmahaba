@@ -29,6 +29,7 @@ import 'package:al_mahhaba_school/features/excuses/domain/entities/excusable_abs
 import 'package:al_mahhaba_school/features/excuses/domain/entities/excuse_details_entity.dart';
 import 'package:al_mahhaba_school/features/excuses/domain/entities/excuse_rules_entity.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/excuse_args.dart';
+import 'package:al_mahhaba_school/features/excuses/presentation/extensions/excuse_dates.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excusable_absences_event.dart';
 import 'package:al_mahhaba_school/features/excuses/presentation/view_model/excusable_absences_view_model.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/parent_tab_page.dart';
@@ -246,10 +247,19 @@ class _AttendanceViewState extends State<_AttendanceView> {
             ),
           ],
         ),
-        MonthCalendar(
-          attendance: attendance,
-          onPrevious: _previousMonth,
-          onNext: _nextMonth,
+        // An absence with an excuse sent shows as excused.
+        BlocSelector<
+          ExcusableAbsencesViewModel,
+          ExcusableAbsencesState,
+          Set<DateTime>
+        >(
+          selector: (state) => state.data?.excuseDates ?? const {},
+          builder: (context, excuseDates) => MonthCalendar(
+            attendance: attendance,
+            excuseDates: excuseDates,
+            onPrevious: _previousMonth,
+            onNext: _nextMonth,
+          ),
         ),
         BlocBuilder<ExcusableAbsencesViewModel, ExcusableAbsencesState>(
           builder: (context, state) {

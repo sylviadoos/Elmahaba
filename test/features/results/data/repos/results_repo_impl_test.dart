@@ -4,8 +4,9 @@ import 'package:mockito/mockito.dart';
 
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/results/data/data_sources/results_remote_data_source.dart';
-import 'package:al_mahhaba_school/features/results/data/models/monthly_results_model.dart';
+import 'package:al_mahhaba_school/features/results/data/models/result_details_model.dart';
 import 'package:al_mahhaba_school/features/results/data/repos/results_repo_impl.dart';
+import 'package:al_mahhaba_school/features/results/domain/entities/result_kind.dart';
 
 import '../../../../helpers/result_matchers.dart';
 import '../../results_fixtures.dart';
@@ -21,20 +22,34 @@ void main() {
     repo = ResultsRepoImpl(remoteDataSource);
   });
 
-  test('getMonthlyResults: what the school sent', () async {
-    final results = MonthlyResultsModel.fromJson(monthlyJson);
-    when(
-      remoteDataSource.getMonthlyResults(146),
-    ).thenAnswer((_) async => results);
+  void answer(ResultKind kind, List<Map<String, dynamic>> results) => when(
+    remoteDataSource.getResults(any, kind: kind),
+  ).thenAnswer((_) async => results.map(ResultDetailsModel.fromJson).toList());
 
-    expect(await repo.getMonthlyResults(146), isSuccess(results));
+  test('the months and the terms together, newest first', () async {
+    answer(ResultKind.monthly, [octoberJson, novemberJson]);
+    answer(ResultKind.term, [firstTermJson]);
+
+    final result = await repo.getResults(146);
+
+    verify(remoteDataSource.getResults(146, kind: ResultKind.monthly));
+    verify(remoteDataSource.getResults(146, kind: ResultKind.term));
+    expect(result, isSuccess(allResults));
   });
 
-  test('getMonthlyResults: can\'t reach it, fails with the error', () async {
+  test('none published: empty', () async {
+    answer(ResultKind.monthly, []);
+    answer(ResultKind.term, []);
+
+    expect(await repo.getResults(146), isSuccess(isEmpty));
+  });
+
+  test('one of them can\'t be reached: fails with its error', () async {
+    answer(ResultKind.monthly, [octoberJson]);
     when(
-      remoteDataSource.getMonthlyResults(any),
+      remoteDataSource.getResults(any, kind: ResultKind.term),
     ).thenThrow(const NetworkException());
 
-    expect(await repo.getMonthlyResults(146), isFailure<NetworkException>());
+    expect(await repo.getResults(146), isFailure<NetworkException>());
   });
 }

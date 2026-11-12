@@ -12,4 +12,13 @@ abstract interface class FeesRemoteDataSource {
   /// Starts an online payment of the installments in [request]; the
   /// returned page is where the parent pays.
   Future<CheckoutModel> payOnline(int childId, PayOnlineRequestModel request);
+
+  /// Adds the optional fee [feeId] (a statement line's `fee_id`) to the
+  /// child's fees, at once. Ask for the statement again after: the fee
+  /// moves into the mandatory lines and the totals change.
+  Future<void> confirmOptionalFee(int childId, int feeId);
+
+  /// Drops the optional fee [feeId] from the child's fees again. The
+  /// school refuses once anything is paid on it.
+  Future<void> dropOptionalFee(int childId, int feeId);
 }

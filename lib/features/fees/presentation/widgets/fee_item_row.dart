@@ -8,15 +8,29 @@ import 'package:al_mahhaba_school/features/fees/domain/entities/fee_entity.dart'
 import 'package:al_mahhaba_school/features/fees/presentation/extensions/money_text.dart';
 
 /// A fee on the statement: its name, the account to pay into and the
-/// amount. An optional one has a box, ticked while subscribed. A paid one
-/// is marked in grey instead of red.
+/// amount. A paid one is marked in grey instead of red.
+///
+/// An optional fee the parent can add or drop has a box, ticked once it's
+/// on the statement: an optional line isn't on it yet, and a mandatory one
+/// the school lets go of ([FeeEntity.canDelete]) is. Without
+/// [onSubscribedChanged] there's no box: the fee is simply owed.
 class FeeItemRow extends StatelessWidget {
-  const FeeItemRow({super.key, required this.fee, this.onSubscribedChanged});
+  const FeeItemRow({
+    super.key,
+    required this.fee,
+    this.onSubscribedChanged,
+    this.isChanging = false,
+  });
 
   final FeeEntity fee;
 
-  /// null shows the box without letting it change.
+  /// Called with whether the fee should be on the statement. null hides
+  /// the box: this fee isn't the parent's to choose.
   final ValueChanged<bool>? onSubscribedChanged;
+
+  /// The school is adding it or dropping it now: a spinner, and no second
+  /// tap.
+  final bool isChanging;
 
   @override
   Widget build(BuildContext context) {
@@ -37,23 +51,33 @@ class FeeItemRow extends StatelessWidget {
         child: Row(
           spacing: 10.w,
           children: [
-            if (fee.isOptional)
+            if (onSubscribedChanged != null)
               SizedBox.square(
                 dimension: 20.r,
-                child: Checkbox(
-                  value: fee.isSubscribed ?? false,
-                  onChanged: onSubscribedChanged == null
-                      ? null
-                      : (value) => onSubscribedChanged(value ?? false),
-                  fillColor: fee.isPaid
-                      ? WidgetStateProperty.resolveWith(
-                          (states) => states.contains(WidgetState.selected)
-                              ? AppColors.mist
-                              : Colors.transparent,
-                        )
-                      : null,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
+                child: isChanging
+                    ? Padding(
+                        padding: EdgeInsets.all(2.r),
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.actionRed,
+                        ),
+                      )
+                    // On the statement already, unless it's still only on
+                    // offer.
+                    : Checkbox(
+                        value: !fee.isOptional,
+                        onChanged: (value) =>
+                            onSubscribedChanged(value ?? false),
+                        fillColor: fee.isPaid
+                            ? WidgetStateProperty.resolveWith(
+                                (states) =>
+                                    states.contains(WidgetState.selected)
+                                    ? AppColors.mist
+                                    : Colors.transparent,
+                              )
+                            : null,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
               ),
             Expanded(
               child: Column(

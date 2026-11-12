@@ -10,7 +10,6 @@ class FeeModel extends FeeEntity {
     required super.isOptional,
     required super.isPaid,
     required super.canDelete,
-    super.isSubscribed,
   });
 
   /// A line of `fee_statement.mandatory` or `fee_statement.optional`:
@@ -27,6 +26,5 @@ class FeeModel extends FeeEntity {
     isOptional: isOptional,
     isPaid: json['is_paid'] as bool? ?? false,
     canDelete: json['can_delete'] as bool? ?? false,
-    isSubscribed: json['is_subscribed'] as bool?,
   );
 }

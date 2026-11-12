@@ -10,7 +10,6 @@ class FeeEntity extends Equatable {
     required this.isOptional,
     required this.isPaid,
     required this.canDelete,
-    this.isSubscribed,
   });
 
   /// null for a line the school adds up from several fees, e.g.
@@ -26,16 +25,15 @@ class FeeEntity extends Equatable {
   /// In EGP; may have piasters (1.5).
   final double amount;
 
-  /// Counts only once the parent subscribes to it.
+  /// On offer but not on the statement yet: the school lists it apart,
+  /// and it counts in no total until the parent adds it. One that's been
+  /// added is a mandatory line with [canDelete].
   final bool isOptional;
   final bool isPaid;
 
-  /// Whether the parent can drop it, e.g. the bus subscription.
+  /// Whether the parent can drop it again — an optional fee they added,
+  /// with nothing paid on it yet.
   final bool canDelete;
-
-  /// For an optional fee, whether the child is subscribed; null when the
-  /// school doesn't say.
-  final bool? isSubscribed;
 
   @override
   List<Object?> get props => [
@@ -46,6 +44,5 @@ class FeeEntity extends Equatable {
     isOptional,
     isPaid,
     canDelete,
-    isSubscribed,
   ];
 }

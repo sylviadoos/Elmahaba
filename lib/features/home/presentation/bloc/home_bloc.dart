@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/base/base_state.dart';
+import 'package:al_mahhaba_school/features/attendance/domain/use_cases/get_month_attendance_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/watch_chat_reads_use_case.dart';
 import 'package:al_mahhaba_school/features/home/domain/use_cases/get_child_dashboard_use_case.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_intent.dart';
@@ -18,14 +19,21 @@ import 'package:al_mahhaba_school/features/home/presentation/bloc/home_state.dar
 /// [Bloc].
 @injectable
 class HomeBloc extends Bloc<HomeIntent, HomeState> {
-  HomeBloc(this._getChildDashboard, WatchChatReadsUseCase watchReads)
-    : super(const HomeState()) {
+  HomeBloc(
+    this._getChildDashboard,
+    this._getMonthAttendance,
+    WatchChatReadsUseCase watchReads,
+  ) : super(const HomeState()) {
     on<ShowChildIntent>(_onShowChild);
     on<RefreshHomeIntent>(_onRefresh);
     _reads = watchReads().listen((_) => add(const RefreshHomeIntent()));
   }
 
   final GetChildDashboardUseCase _getChildDashboard;
+
+  /// This month's holidays and days off, for the Today card: the
+  /// dashboard doesn't say whether today is one.
+  final GetMonthAttendanceUseCase _getMonthAttendance;
   late final StreamSubscription<int> _reads;
 
   /// Asked to refresh while the dashboard was on its way: that answer may
@@ -49,7 +57,7 @@ class HomeBloc extends Bloc<HomeIntent, HomeState> {
     }
     // Another child (or theirs failed): the skeleton until it comes.
     emit(HomeState(childId: childId, dashboard: const BaseState.loading()));
-    await _load(childId, emit);
+    await Future.wait([_load(childId, emit), _loadCalendar(childId, emit)]);
   }
 
   Future<void> _onRefresh(
@@ -75,7 +83,31 @@ class HomeBloc extends Bloc<HomeIntent, HomeState> {
         }
         emit(state.copyWith(isRefreshing: true));
     }
-    await _load(childId, emit);
+    await Future.wait([
+      _load(childId, emit),
+      // A new month (open past midnight on the 1st), or it didn't come.
+      if (!_hasCalendarFor(DateTime.now())) _loadCalendar(childId, emit),
+    ]);
+  }
+
+  bool _hasCalendarFor(DateTime day) {
+    final month = state.calendar?.month;
+    return month != null && month.year == day.year && month.month == day.month;
+  }
+
+  /// This month's attendance of the child, for today's holiday or day
+  /// off. Without it, the Today card just says what's recorded.
+  Future<void> _loadCalendar(int childId, Emitter<HomeState> emit) async {
+    final now = DateTime.now();
+    final result = await _getMonthAttendance(
+      childId: childId,
+      month: DateTime(now.year, now.month),
+    );
+    if (state.childId != childId) return;
+    result.when(
+      success: (calendar) => emit(state.copyWith(calendar: calendar)),
+      failure: (exception) => debugPrint('Home calendar: $exception'),
+    );
   }
 
   Future<void> _load(int childId, Emitter<HomeState> emit) async {

@@ -45,13 +45,12 @@ abstract final class ApiEndpoints {
   /// newest announcements, homework and results.
   static String childDashboard(int childId) =>
       'v1/parent/children/$childId/dashboard';
-  static String childResult(int childId, int resultId) =>
-      'v1/parent/children/$childId/results/$resultId';
 
-  /// GET, with `?template=monthly`: the published sheets, and the
-  /// certificate they make.
-  static String childResultSheets(int childId) =>
-      'v1/parent/children/$childId/result-sheets';
+  /// GET: the published results, in full, newest first. Narrowed with
+  /// `?result_type=monthly` (or `term`), and for a month with
+  /// `&month=10&year=2026`.
+  static String childResults(int childId) =>
+      'v1/parent/children/$childId/results-v2';
 
   /// GET, with `?page=1&per_page=10`: the school's announcements to the
   /// child's parents, newest first.
@@ -88,6 +87,15 @@ abstract final class ApiEndpoints {
     int documentId,
   ) => 'v1/parent/children/$childId/excuses/$excuseId/documents/$documentId';
   static String childFees(int childId) => 'v1/parent/children/$childId/fees';
+
+  /// DELETE: drops the optional fee from the child's fees again, while
+  /// nothing is paid on it. [feeId] is the statement line's `fee_id`.
+  static String optionalFee(int childId, int feeId) =>
+      'v1/parent/children/$childId/fees/optional/$feeId';
+
+  /// POST: adds the optional fee to the child's fees, at once.
+  static String confirmOptionalFee(int childId, int feeId) =>
+      '${optionalFee(childId, feeId)}/confirm';
   static String childFeesPayOnline(int childId) =>
       'v1/parent/children/$childId/fees/pay-online';
 

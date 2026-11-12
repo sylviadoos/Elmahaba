@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_counts_entity.dart';
+import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_record_entity.dart';
+import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_status.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/holiday_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/presentation/widgets/calendar_day_cell.dart';
@@ -17,30 +19,34 @@ final _armedForcesDay = DateTime(2026, 10, 6);
 
 void main() {
   /// October 2026 for a school closed on [weekendWeekdays].
-  MonthAttendanceEntity month(Set<int> weekendWeekdays) =>
-      MonthAttendanceEntity(
-        month: _october,
-        counts: const AttendanceCountsEntity(
-          presentDays: 0,
-          absentDays: 0,
-          excusedDays: 0,
-        ),
-        records: const [],
-        holidays: [
-          HolidayEntity(
-            date: _armedForcesDay,
-            name: '6 october',
-            nameAr: '6 اكتوبر',
-          ),
-        ],
-        weekendWeekdays: weekendWeekdays,
-      );
+  MonthAttendanceEntity month(
+    Set<int> weekendWeekdays, {
+    List<AttendanceRecordEntity> records = const [],
+  }) => MonthAttendanceEntity(
+    month: _october,
+    counts: const AttendanceCountsEntity(
+      presentDays: 0,
+      absentDays: 0,
+      excusedDays: 0,
+    ),
+    records: records,
+    holidays: [
+      HolidayEntity(
+        date: _armedForcesDay,
+        name: '6 october',
+        nameAr: '6 اكتوبر',
+      ),
+    ],
+    weekendWeekdays: weekendWeekdays,
+  );
 
   /// What the calendar shows for each day of the month, by day number.
   Future<Map<int, CalendarDay>> pumpCalendar(
     WidgetTester tester,
-    Set<int> weekendWeekdays,
-  ) async {
+    Set<int> weekendWeekdays, {
+    List<AttendanceRecordEntity> records = const [],
+    Set<DateTime> excuseDates = const {},
+  }) async {
     tester.usePhoneScreen();
     final router = GoRouter(
       routes: [
@@ -49,7 +55,8 @@ void main() {
           builder: (_, _) => Scaffold(
             body: SingleChildScrollView(
               child: MonthCalendar(
-                attendance: month(weekendWeekdays),
+                attendance: month(weekendWeekdays, records: records),
+                excuseDates: excuseDates,
                 onPrevious: () {},
                 onNext: null,
               ),
@@ -114,5 +121,30 @@ void main() {
     final shown = await pumpCalendar(tester, {_armedForcesDay.weekday});
 
     expect(shown[_armedForcesDay.day], CalendarDay.holiday);
+  });
+
+  testWidgets('an absence is red until an excuse is sent for it, then '
+      'excused; a present day stays present', (tester) async {
+    final excused = DateTime(2026, 10, 12);
+    final unexcused = DateTime(2026, 10, 13);
+    final present = DateTime(2026, 10, 14);
+
+    final shown = await pumpCalendar(
+      tester,
+      const {},
+      records: [
+        AttendanceRecordEntity(date: excused, status: AttendanceStatus.absent),
+        AttendanceRecordEntity(
+          date: unexcused,
+          status: AttendanceStatus.absent,
+        ),
+        AttendanceRecordEntity(date: present, status: AttendanceStatus.present),
+      ],
+      excuseDates: {excused, present},
+    );
+
+    expect(shown[12], CalendarDay.excused);
+    expect(shown[13], CalendarDay.absent);
+    expect(shown[14], CalendarDay.present);
   });
 }

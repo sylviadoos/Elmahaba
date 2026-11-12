@@ -72,6 +72,25 @@ class ChatItemEntity extends Equatable {
 
   bool get fromParent => sender == ChatSender.parent;
 
+  /// This, read or not: marked as the parent sees it.
+  ChatItemEntity withRead(bool isRead) => ChatItemEntity(
+    key: key,
+    sender: sender,
+    sentAt: sentAt,
+    scope: scope,
+    audience: audience,
+    children: children,
+    title: title,
+    text: text,
+    attachments: attachments,
+    replyTo: replyTo,
+    isRead: isRead,
+    isEdited: isEdited,
+    isDeleted: isDeleted,
+    canReply: canReply,
+    link: link,
+  );
+
   @override
   List<Object?> get props => [
     key,

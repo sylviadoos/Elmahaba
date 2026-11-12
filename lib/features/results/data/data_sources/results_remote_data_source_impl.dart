@@ -4,9 +4,10 @@ import 'package:al_mahhaba_school/core/network/api_endpoints.dart';
 import 'package:al_mahhaba_school/core/network/api_keys.dart';
 import 'package:al_mahhaba_school/core/network/api_names.dart';
 import 'package:al_mahhaba_school/core/network/api_service.dart';
+import 'package:al_mahhaba_school/core/utils/json_values.dart';
 import 'package:al_mahhaba_school/features/results/data/data_sources/results_remote_data_source.dart';
-import 'package:al_mahhaba_school/features/results/data/models/monthly_results_model.dart';
 import 'package:al_mahhaba_school/features/results/data/models/result_details_model.dart';
+import 'package:al_mahhaba_school/features/results/domain/entities/result_kind.dart';
 
 @LazySingleton(as: ResultsRemoteDataSource)
 class ResultsRemoteDataSourceImpl implements ResultsRemoteDataSource {
@@ -15,30 +16,22 @@ class ResultsRemoteDataSourceImpl implements ResultsRemoteDataSource {
   final ApiService _api;
 
   @override
-  Future<ResultDetailsModel> getResult({
-    required int childId,
-    required int resultId,
+  Future<List<ResultDetailsModel>> getResults(
+    int childId, {
+    required ResultKind kind,
   }) async {
-    // { "status": "success", "data": { "id": 53, "title": "…",
-    //   "result_type": "value and color", "result": { … } } }
-    final json =
-        await _api.get(ApiEndpoints.childResult(childId, resultId))
-            as Map<String, dynamic>;
-    return ResultDetailsModel.fromJson(
-      json[ApiKeys.data] as Map<String, dynamic>,
-    );
-  }
-
-  @override
-  Future<MonthlyResultsModel> getMonthlyResults(int childId) async {
-    // { "status": "success", "data": [ …sheet… ], "meta": { … },
-    //   "certificate": { … } }
+    // { "status": "success", "data": [ …result… ],
+    //   "meta": { "total": 2, "periods": [ … ], "academic_years": [ … ] } }
     final json =
         await _api.get(
-              ApiEndpoints.childResultSheets(childId),
-              queryParameters: {'template': 'monthly'},
+              ApiEndpoints.childResults(childId),
+              queryParameters: {'result_type': kind.name},
             )
             as Map<String, dynamic>;
-    return MonthlyResultsModel.fromJson(json);
+    return [
+      for (final result in jsonObjects(json[ApiKeys.data]))
+        // One without its id couldn't be told apart.
+        if (result['result_id'] is int) ResultDetailsModel.fromJson(result),
+    ];
   }
 }

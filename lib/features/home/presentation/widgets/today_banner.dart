@@ -10,37 +10,63 @@ import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/icon_box.dart';
 
-/// Today's date and the child's attendance today, in red when absent.
+/// Today's date and the child's attendance today, in red when absent. With
+/// nothing recorded on a holiday or a weekly day off, that instead — in
+/// gold for a holiday, as on the calendar — so it doesn't read as missing.
 /// Opens Attendance.
 class TodayBanner extends StatelessWidget {
-  const TodayBanner({super.key, required this.status});
+  const TodayBanner({
+    super.key,
+    required this.status,
+    this.holidayName,
+    this.isWeekend = false,
+  });
 
   /// e.g. "present"; null until today's attendance is taken.
   final String? status;
 
-  static String _label(AppLocalizations l10n, String? status) =>
-      switch (status) {
-        null => l10n.attendanceNotTaken,
-        // Late is present: the child came.
-        'present' || 'late' => l10n.present,
-        'absent' => l10n.absent,
-        // TODO: name the other statuses once the API lists them.
-        final other => other,
-      };
+  /// Today's holiday, by name ("6 October"; empty when the school gave
+  /// none); null when today isn't one.
+  final String? holidayName;
+
+  /// Today is one of the school's weekly days off.
+  final bool isWeekend;
+
+  String _label(AppLocalizations l10n) {
+    final holiday = holidayName;
+    return switch (status) {
+      null when holiday != null =>
+        holiday.isEmpty
+            ? l10n.officialHoliday
+            : '${l10n.officialHoliday} · $holiday',
+      null when isWeekend => l10n.friSatOff,
+      null => l10n.attendanceNotTaken,
+      // Late is present: the child came.
+      'present' || 'late' => l10n.present,
+      'absent' => l10n.absent,
+      // TODO: name the other statuses once the API lists them.
+      final other => other,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
     final absent = status == 'absent';
-    final foreground = absent ? AppColors.white : AppColors.ink;
+    final holiday = status == null && holidayName != null;
+    final (background, foreground) = absent
+        ? (AppColors.mahabbahRed, AppColors.white)
+        : holiday
+        ? (AppColors.gold, AppColors.goldText)
+        : (AppColors.blush, AppColors.ink);
     final date = DateFormat(
       'EEEE, MMM d',
       Localizations.localeOf(context).toString(),
     ).format(DateTime.now());
 
     return Material(
-      color: absent ? AppColors.mahabbahRed : AppColors.blush,
+      color: background,
       borderRadius: BorderRadius.circular(16.r),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -69,7 +95,7 @@ class TodayBanner extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _label(l10n, status),
+                      _label(l10n),
                       style: textTheme.bodyLarge?.copyWith(
                         fontSize: 15.sp,
                         height: 1.3,

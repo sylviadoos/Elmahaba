@@ -8,9 +8,11 @@ import 'package:uuid/uuid.dart';
 import 'package:al_mahhaba_school/core/base/base_bloc.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/base/cancel_handle.dart';
+import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/base/upload_progress.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/chat/domain/chat_error_codes.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/new_chat_message_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/download_chat_attachment_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/get_cached_chat_use_case.dart';
@@ -57,6 +59,7 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     on<RefreshChatIntent>(_onRefresh);
     on<LoadOlderChatIntent>(_onLoadOlder);
     on<ItemSeenIntent>(_onItemSeen);
+    on<ItemsReadChangedIntent>(_onItemsReadChanged);
     on<PickRecipientIntent>(_onPickRecipient);
     on<StartReplyIntent>(_onStartReply);
     on<CancelReplyIntent>(_onCancelReply);
@@ -77,6 +80,10 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
 
   /// How long items seen are gathered, to mark them read in one request.
   static const Duration _markDelay = Duration(milliseconds: 400);
+
+  /// How many of the newest items a refresh asks for, not a full page: it
+  /// usually finds one new, or none, and a small answer comes back sooner.
+  static const int _refreshLimit = 5;
 
   /// Counts the chats asked for: an answer for an earlier one is dropped.
   int _loads = 0;
@@ -197,7 +204,21 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     }
     final load = _loads;
     final cancel = _refreshing = CancelHandle();
-    final result = await _getChat(studentId: state.studentId, cancel: cancel);
+    final studentId = state.studentId;
+    final before = state.chat.data!;
+    // Just the latest few: a refresh usually finds one new item, or none.
+    var result = await _getChat(
+      studentId: studentId,
+      limit: _refreshLimit,
+      cancel: cancel,
+    );
+    // More came than that (back after a while): none of them is shown, so
+    // those between could be missing. The full page instead.
+    if (result case Success(
+      data: final latest,
+    ) when load == _loads && _leavesGap(latest, before)) {
+      result = await _getChat(studentId: studentId, cancel: cancel);
+    }
     _refreshing = null;
     if (load != _loads) return;
     final shown = state.chat.data;
@@ -207,6 +228,14 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
           emit(state.showing(BaseState.success(newest.after(shown)))),
       failure: (exception) => debugPrint('Refreshing the chat: $exception'),
     );
+  }
+
+  /// Whether [latest] (the newest few) could leave items out between it and
+  /// [shown]: there are more than it brought, and none of it is shown.
+  static bool _leavesGap(ChatPageEntity latest, ChatPageEntity shown) {
+    if (!latest.hasMore || latest.items.isEmpty) return false;
+    final shownKeys = {for (final item in shown.items) item.key};
+    return !latest.items.any((item) => shownKeys.contains(item.key));
   }
 
   Future<void> _onLoadOlder(
@@ -261,21 +290,58 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     _markTimer = Timer(_markDelay, _markSeen);
   }
 
-  /// Tells the school the parent saw the items gathered: what's still
-  /// unread goes to the badge on Chat.
+  /// Tells the school the parent saw the items gathered: they show as read
+  /// at once, not when the school answers; what's still unread goes to the
+  /// badge on Chat.
   Future<void> _markSeen() async {
     if (_seen.isEmpty) return;
-    final keys = _seen.toList();
+    final keys = _seen.toSet();
     _seen.clear();
     _marked.addAll(keys);
-    final result = await _markRead(keys);
+    // Not after leaving: there's nothing on screen to change.
+    void show(bool isRead, {int? unread}) {
+      if (!isClosed) {
+        add(ItemsReadChangedIntent(keys, isRead: isRead, unread: unread));
+      }
+    }
+
+    show(true);
+    final result = await _markRead(keys.toList());
     result.when(
-      success: (unread) => emitEffect(UnreadChangedEffect(unread)),
+      success: (unread) {
+        emitEffect(UnreadChangedEffect(unread));
+        show(true, unread: unread);
+      },
       failure: (exception) {
-        // Tried again when they come on screen again.
+        // New again, and tried again when they come on screen again.
         _marked.removeAll(keys);
+        show(false);
         debugPrint('Marking chat items read: $exception');
       },
+    );
+  }
+
+  /// The items marked read (or not) in what's shown, as it is: loading
+  /// older ones or not.
+  void _onItemsReadChanged(
+    ItemsReadChangedIntent intent,
+    Emitter<ChatState> emit,
+  ) {
+    final chat = state.chat;
+    final page = chat.data;
+    if (page == null) return;
+    emit(
+      state.showing(
+        BaseState.all(
+          state: chat.state,
+          data: page.withRead(
+            intent.keys,
+            isRead: intent.isRead,
+            unread: intent.unread,
+          ),
+          exception: chat.exception,
+        ),
+      ),
     );
   }
 

@@ -66,8 +66,13 @@ void main() {
     return bloc;
   }
 
+  /// [studentId]'s chat answers [page], a full one or the latest few.
   void chatOf(int? studentId, ChatPageEntity page) => when(
-    getChat(studentId: studentId, cancel: anyNamed('cancel')),
+    getChat(
+      studentId: studentId,
+      limit: anyNamed('limit'),
+      cancel: anyNamed('cancel'),
+    ),
   ).thenAnswer((_) async => Success(data: page));
 
   final omarItem = schoolItem('message:41', about: omar);
@@ -185,6 +190,40 @@ void main() {
         expect(effects, [
           isA<UnreadChangedEffect>().having((e) => e.count, 'count', 0),
         ]);
+      },
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'marked: read on screen at once, not "new" until the chat reloads',
+      setUp: () =>
+          when(markRead(any)).thenAnswer((_) async => const Success(data: 1)),
+      build: build,
+      seed: loaded,
+      act: (bloc) => bloc.add(const ItemSeenIntent('message:41')),
+      wait: const Duration(milliseconds: 500),
+      verify: (bloc) {
+        final [omarShown, linaShown] = bloc.state.page!.items;
+        expect(omarShown.isRead, isTrue);
+        expect(omarShown.key, 'message:41');
+        // Not seen: still new.
+        expect(linaShown.isRead, isFalse);
+        // What the school says is left.
+        expect(bloc.state.page!.unread, 1);
+      },
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'telling the school failed: new again, to try once more',
+      setUp: () => when(
+        markRead(any),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException())),
+      build: build,
+      seed: loaded,
+      act: (bloc) => bloc.add(const ItemSeenIntent('message:41')),
+      wait: const Duration(milliseconds: 500),
+      verify: (bloc) {
+        expect(bloc.state.page!.items.first.isRead, isFalse);
+        expect(bloc.state.page!.unread, 2);
       },
     );
 
@@ -766,7 +805,11 @@ void main() {
     blocTest<ChatBloc, ChatState>(
       'it doesn\'t load: what\'s shown stays, no snack bar',
       setUp: () => when(
-        getChat(studentId: omar.studentId, cancel: anyNamed('cancel')),
+        getChat(
+          studentId: omar.studentId,
+          limit: anyNamed('limit'),
+          cancel: anyNamed('cancel'),
+        ),
       ).thenAnswer((_) async => const Failure(exception: NetworkException())),
       build: build,
       seed: open,
@@ -780,8 +823,71 @@ void main() {
       build: build,
       act: (bloc) => bloc.add(const RefreshChatIntent()),
       verify: (_) => verifyNever(
-        getChat(studentId: anyNamed('studentId'), cancel: anyNamed('cancel')),
+        getChat(
+          studentId: anyNamed('studentId'),
+          limit: anyNamed('limit'),
+          cancel: anyNamed('cancel'),
+        ),
       ),
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'asks for just the latest few, not a full page',
+      setUp: () => chatOf(omar.studentId, chatPage([omarItem, answer])),
+      build: build,
+      seed: open,
+      act: (bloc) => bloc.add(const RefreshChatIntent()),
+      verify: (_) {
+        verify(
+          getChat(
+            studentId: omar.studentId,
+            limit: 5,
+            cancel: anyNamed('cancel'),
+          ),
+        ).called(1);
+        // They join what was shown: no full page needed.
+        verifyNever(
+          getChat(studentId: omar.studentId, cancel: anyNamed('cancel')),
+        );
+      },
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'more came than the latest few (none of them shown): the full page, '
+      'so none in between is missing',
+      setUp: () {
+        final newer = [
+          for (var i = 50; i < 55; i++) schoolItem('message:$i', about: omar),
+        ];
+        when(
+          getChat(
+            studentId: omar.studentId,
+            limit: 5,
+            cancel: anyNamed('cancel'),
+          ),
+        ).thenAnswer(
+          (_) async => Success(data: chatPage(newer, hasMore: true)),
+        );
+        when(
+          getChat(studentId: omar.studentId, cancel: anyNamed('cancel')),
+        ).thenAnswer(
+          (_) async => Success(data: chatPage([omarItem, answer, ...newer])),
+        );
+      },
+      build: build,
+      seed: open,
+      act: (bloc) => bloc.add(const RefreshChatIntent()),
+      verify: (bloc) {
+        verify(
+          getChat(studentId: omar.studentId, cancel: anyNamed('cancel')),
+        ).called(1);
+        expect(bloc.state.page?.items.map((item) => item.key), [
+          'message:30',
+          'message:41',
+          'message:43',
+          for (var i = 50; i < 55; i++) 'message:$i',
+        ]);
+      },
     );
   });
 

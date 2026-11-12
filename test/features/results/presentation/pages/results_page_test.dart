@@ -15,12 +15,10 @@ import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bl
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
-import 'package:al_mahhaba_school/features/results/domain/entities/monthly_results_entity.dart';
 import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart';
-import 'package:al_mahhaba_school/features/results/domain/use_cases/get_latest_result_use_case.dart';
-import 'package:al_mahhaba_school/features/results/presentation/bloc/monthly_results_bloc.dart';
 import 'package:al_mahhaba_school/features/results/presentation/pages/results_page.dart';
 import 'package:al_mahhaba_school/features/results/presentation/view_model/results_view_model.dart';
+import 'package:al_mahhaba_school/features/results/presentation/widgets/result_filter_chip.dart';
 
 import '../../../../helpers/fake_file_picker.dart';
 import '../../../../helpers/result_dummy.dart';
@@ -32,64 +30,43 @@ import '../../results_mocks.mocks.dart';
 
 final en = lookupAppLocalizations(const Locale('en'));
 
-/// The latest result, and not one of the months.
-const _termResult = ResultDetailsEntity(
-  id: 280,
-  title: 'First term result',
-  academicYear: '2026-2027',
-  resultType: 'value',
-  studentName: 'Omar Ahmed',
-  subjectsIncluded: [],
-  subjectsNotIncluded: [],
-  highLevel: [],
-  activities: [],
-);
-
 void main() {
-  late MockGetLatestResultUseCase getLatest;
-  late MockGetMonthlyResultsUseCase getMonthly;
+  late MockGetResultsUseCase getResults;
+  late MockMarkLatestResultReadUseCase markLatestRead;
   late MockChildrenViewModel childrenViewModel;
   late MockChatUnreadBloc chatUnreadBloc;
-  late MockMarkChatReadUseCase markRead;
 
   setUpAll(() {
-    provideResultDummy<LatestResult?>();
-    provideResultDummy<MonthlyResultsEntity>();
+    provideResultDummy<List<ResultDetailsEntity>>();
+    provideResultDummy<void>();
   });
 
   setUp(() {
-    getLatest = MockGetLatestResultUseCase();
-    getMonthly = MockGetMonthlyResultsUseCase();
-    markRead = MockMarkChatReadUseCase();
+    getResults = MockGetResultsUseCase();
+    markLatestRead = MockMarkLatestResultReadUseCase();
     childrenViewModel = MockChildrenViewModel();
     chatUnreadBloc = MockChatUnreadBloc();
-    getIt
-      ..registerFactory<ResultsViewModel>(
-        () => ResultsViewModel(getLatest, markRead),
-      )
-      ..registerFactory<MonthlyResultsBloc>(
-        () => MonthlyResultsBloc(getMonthly),
-      );
+    getIt.registerFactory<ResultsViewModel>(
+      () => ResultsViewModel(getResults, markLatestRead),
+    );
+    when(
+      markLatestRead(any),
+    ).thenAnswer((_) async => const Success(data: null));
     when(
       childrenViewModel.state,
     ).thenReturn(const ChildrenState(children: BaseState.success([omar])));
     when(childrenViewModel.stream).thenAnswer((_) => const Stream.empty());
     when(chatUnreadBloc.stream).thenAnswer((_) => const Stream.empty());
-    when(getLatest(any)).thenAnswer(
-      (_) async => const Success(
-        data: (details: _termResult, isRead: true, chatKey: null),
-      ),
-    );
   });
   tearDown(getIt.reset);
 
-  /// Opens Results for [omar], the months answering [monthlyResults].
+  /// Opens Results for [omar], the school answering [results].
   Future<void> pump(
     WidgetTester tester,
-    Result<MonthlyResultsEntity> monthlyResults,
+    Result<List<ResultDetailsEntity>> results,
   ) async {
     tester.usePhoneScreen();
-    when(getMonthly(any)).thenAnswer((_) async => monthlyResults);
+    when(getResults(any)).thenAnswer((_) async => results);
     final router = GoRouter(
       routes: [GoRoute(path: '/', builder: (_, _) => const ResultsPage())],
     );
@@ -115,48 +92,95 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('no months published: the latest result, and the certificate '
-      'to download all the same', (tester) async {
-    await pump(tester, const Success(data: MonthlyResultsEntity()));
+  Finder chip(String label) => find.descendant(
+    of: find.byType(SingleChildScrollView).at(1),
+    matching: find.text(label),
+  );
 
-    expect(find.text('First term result'), findsOneWidget);
-    expect(find.text(en.downloadCertificate), findsOneWidget);
-  });
-
-  testWidgets('the months didn\'t load: the certificate all the same', (
+  testWidgets('the newest shows first, with every result in the filter', (
     tester,
   ) async {
-    await pump(tester, const Failure(exception: NetworkException()));
+    await pump(tester, Success(data: allResults));
 
-    expect(find.text('First term result'), findsOneWidget);
-    expect(find.text(en.downloadCertificate), findsOneWidget);
+    expect(find.text(november.title), findsOneWidget);
+    // In the school year's order: months by name, the term by its title
+    // (published before November).
+    final labels = tester
+        .widgetList<ResultFilterChip>(find.byType(ResultFilterChip))
+        .map((chip) => chip.label);
+    expect(labels, ['October', firstTerm.title, 'November']);
+    // The newest, shown.
+    expect(
+      tester
+          .widget<ResultFilterChip>(
+            find.widgetWithText(ResultFilterChip, 'November'),
+          )
+          .isSelected,
+      isTrue,
+    );
   });
 
-  testWidgets('no months: the certificate has the child on it', (tester) async {
+  testWidgets('a month: the certificate to download, every month on it', (
+    tester,
+  ) async {
     final dialog = useFakeFilePicker();
-    await pump(tester, const Success(data: MonthlyResultsEntity()));
+    await pump(tester, Success(data: allResults));
 
     await tester.ensureVisible(find.text(en.downloadCertificate));
     await tester.tap(find.text(en.downloadCertificate));
     await tester.pumpAndSettle();
 
-    // The child's year, "2026/2027".
     expect(dialog.fileName, 'monthly-certificate-2026-2027.pdf');
     expect(ascii.decode(dialog.bytes!.sublist(0, 5)), '%PDF-');
     expect(find.text(en.certificateSaved), findsOneWidget);
   });
 
-  testWidgets('months too: the latest result\'s tab has it as well', (
-    tester,
-  ) async {
-    await pump(tester, Success(data: monthly));
+  testWidgets('a term picked: its result, and no certificate', (tester) async {
+    await pump(tester, Success(data: allResults));
 
-    // The months first: published after.
-    expect(find.text(en.downloadCertificate), findsOneWidget);
-    await tester.tap(find.text(en.latestResult));
+    // The last chip: scrolled to first.
+    await tester.ensureVisible(chip(firstTerm.title));
+    await tester.tap(chip(firstTerm.title));
     await tester.pump();
 
-    expect(find.text('First term result'), findsOneWidget);
+    expect(find.text(firstTerm.title), findsWidgets);
+    expect(find.text('ناجح'), findsOneWidget);
+    expect(find.text(en.downloadCertificate), findsNothing);
+
+    // Back to a month: the certificate again.
+    await tester.ensureVisible(chip('October'));
+    await tester.tap(chip('October'));
+    await tester.pump();
+
+    expect(find.text(october.title), findsOneWidget);
     expect(find.text(en.downloadCertificate), findsOneWidget);
+  });
+
+  testWidgets('only one: no filter', (tester) async {
+    await pump(tester, Success(data: [firstTerm]));
+
+    expect(find.text(firstTerm.title), findsOneWidget);
+    expect(find.text(en.downloadCertificate), findsNothing);
+  });
+
+  testWidgets('none yet: says so', (tester) async {
+    await pump(tester, const Success(data: []));
+
+    expect(find.text(en.noResultsYet), findsOneWidget);
+  });
+
+  testWidgets('can\'t be reached: says why, and "Try again" loads again', (
+    tester,
+  ) async {
+    await pump(tester, const Failure(exception: NetworkException()));
+
+    expect(find.text(en.tryAgain), findsOneWidget);
+
+    when(getResults(any)).thenAnswer((_) async => Success(data: allResults));
+    await tester.tap(find.text(en.tryAgain));
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text(november.title), findsOneWidget);
   });
 }

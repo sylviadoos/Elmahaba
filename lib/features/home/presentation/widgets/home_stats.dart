@@ -9,6 +9,7 @@ import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/equal_height_grid.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/dashboard_attendance_entity.dart';
+import 'package:al_mahhaba_school/features/home/presentation/extensions/dashboard_chat_counts.dart';
 import 'package:al_mahhaba_school/features/home/presentation/extensions/dashboard_fees_labels.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/home_stat_card.dart';
 
@@ -26,7 +27,7 @@ class HomeStats extends StatelessWidget {
     final attendance = dashboard.attendance;
     final fees = dashboard.fees;
     final feesNote = fees?.note(context);
-    final messages = dashboard.messages;
+    final chat = dashboard.unreadChat;
     // What the API left empty shows as a dash.
     String orDash(String? text) => text == null || text.isEmpty ? '—' : text;
 
@@ -77,11 +78,8 @@ class HomeStats extends StatelessWidget {
         HomeStatCard(
           title: l10n.schoolChat,
           icon: AppIcons.navChat,
-          value: l10n.newCount(messages.total),
-          subtitle: l10n.messagesAndNotices(
-            messages.messages,
-            messages.notices,
-          ),
+          value: l10n.newCount(chat.total),
+          subtitle: l10n.messagesAndNotices(chat.messages, chat.notices),
           highlighted: true,
           onTap: () => context.push(AppRoutes.chat),
         ),

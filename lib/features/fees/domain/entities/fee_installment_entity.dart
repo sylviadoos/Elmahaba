@@ -15,6 +15,7 @@ class FeeInstallmentEntity extends Equatable {
     required this.canPay,
     required this.payKey,
     this.requires = const [],
+    this.lockedReason = '',
   });
 
   /// The fee it's part of, as the school wrote it, e.g. "رسوم كتب".
@@ -46,6 +47,11 @@ class FeeInstallmentEntity extends Equatable {
   /// order only together with them. Empty when nothing comes before it.
   final List<String> requires;
 
+  /// Why it can't be paid on its own, in the school's own words — the same
+  /// sentence the school's website shows, naming the fee whose earlier
+  /// installments come first. Empty when the school sends none.
+  final String lockedReason;
+
   /// Ticked with the installments in [picked] (`payKey`s), it's paid in
   /// order: every earlier one it needs is ticked too.
   bool isInOrderWith(Set<String> picked) => requires.every(picked.contains);
@@ -62,5 +68,6 @@ class FeeInstallmentEntity extends Equatable {
     canPay,
     payKey,
     requires,
+    lockedReason,
   ];
 }

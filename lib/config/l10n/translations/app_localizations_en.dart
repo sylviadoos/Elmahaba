@@ -1161,6 +1161,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tickInstallments => 'Tick the installments you want to pay';
 
   @override
+  String get confirmOptionalFee => 'Confirm Optional Fee';
+
+  @override
+  String confirmOptionalFeeMessage(String fee, String amount) {
+    return 'Are you sure you want to pay this fee?\n$fee — $amount';
+  }
+
+  @override
+  String get yesPay => 'Yes, Pay';
+
+  @override
+  String get dropOptionalFee => 'Remove Optional Fee';
+
+  @override
+  String dropOptionalFeeMessage(String fee) {
+    return 'Are you sure you want to remove $fee from the fees?';
+  }
+
+  @override
+  String get yesDrop => 'Yes, Remove';
+
+  @override
   String get tickEarlierInstallmentsFirst =>
       'To preview or download the statement, tick the earlier unpaid installments too.';
 

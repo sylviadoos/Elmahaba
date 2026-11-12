@@ -34,6 +34,11 @@ class MonthlyCertificateEntity extends Equatable {
   final List<CertificateMonthEntity> months;
   final List<CertificateSubjectEntity> subjects;
 
+  /// Whether there are marks to put on it: a month published, and the
+  /// subjects marked in it. Without both, the PDF would be a blank table
+  /// with nothing but the child's name on it, so it isn't offered.
+  bool get hasMarks => months.isNotEmpty && subjects.isNotEmpty;
+
   @override
   List<Object?> get props => [
     studentName,

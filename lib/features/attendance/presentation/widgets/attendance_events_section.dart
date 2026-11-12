@@ -9,6 +9,7 @@ import 'package:al_mahhaba_school/core/widgets/section_title.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_record_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_status.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/holiday_entity.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/extensions/holiday_labels.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/presentation/widgets/attendance_event_row.dart';
 import 'package:al_mahhaba_school/features/excuses/domain/entities/excusable_absence_entity.dart';
@@ -125,15 +126,10 @@ class AttendanceEventsSection extends StatelessWidget {
     BuildContext context,
     HolidayEntity holiday,
   ) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final name = isArabic && holiday.nameAr.isNotEmpty
-        ? holiday.nameAr
-        : (holiday.name.isNotEmpty ? holiday.name : holiday.nameAr);
-
     return AttendanceEventRow(
       date: holiday.date,
       title: context.l10n.officialHoliday,
-      detail: context.l10n.holidayNoSchool(name),
+      detail: context.l10n.holidayNoSchool(holiday.localName(context)),
       background: AppColors.gold,
       foreground: AppColors.goldText,
     );

@@ -537,6 +537,18 @@
   "payInInstallments": "Pay in installments",
   "amountPayableNow": "Amount payable now",
   "tickInstallments": "Tick the installments you want to pay",
+  "confirmOptionalFee": "Confirm Optional Fee",
+  "confirmOptionalFeeMessage": "Are you sure you want to pay this fee?\n{fee} — {amount}",
+  "@confirmOptionalFeeMessage": {
+    "placeholders": { "fee": { "type": "String" }, "amount": { "type": "String" } }
+  },
+  "yesPay": "Yes, Pay",
+  "dropOptionalFee": "Remove Optional Fee",
+  "dropOptionalFeeMessage": "Are you sure you want to remove {fee} from the fees?",
+  "@dropOptionalFeeMessage": {
+    "placeholders": { "fee": { "type": "String" } }
+  },
+  "yesDrop": "Yes, Remove",
   "tickEarlierInstallmentsFirst": "To preview or download the statement, tick the earlier unpaid installments too.",
   "dueOnAccount": "Due {date} · Account {account}",
   "@dueOnAccount": {

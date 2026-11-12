@@ -19,6 +19,7 @@ import 'package:al_mahhaba_school/features/home/presentation/bloc/home_bloc.dart
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_intent.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_state.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/home_dashboard_skeleton.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/extensions/holiday_labels.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/home_header.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/home_stats.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_updates.dart';
@@ -141,7 +142,8 @@ class _Dashboard extends StatelessWidget {
     return BlocBuilder<HomeBloc, HomeState>(
       buildWhen: (previous, current) =>
           previous.dashboard != current.dashboard ||
-          previous.childId != current.childId,
+          previous.childId != current.childId ||
+          previous.calendar != current.calendar,
       builder: (context, state) => state.dashboard.when(
         initial: () => const HomeDashboardSkeleton(),
         loading: () => const HomeDashboardSkeleton(),
@@ -158,7 +160,13 @@ class _Dashboard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 14.h,
           children: [
-            TodayBanner(status: dashboard.attendance.todayStatus),
+            TodayBanner(
+              status: dashboard.attendance.todayStatus,
+              holidayName: state.calendar
+                  ?.holidayOn(DateTime.now())
+                  ?.localName(context),
+              isWeekend: state.calendar?.isWeekendOn(DateTime.now()) ?? false,
+            ),
             HomeStats(dashboard: dashboard),
             LatestUpdates(dashboard: dashboard, childId: state.childId),
           ],

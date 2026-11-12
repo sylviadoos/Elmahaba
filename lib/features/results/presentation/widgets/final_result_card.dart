@@ -10,8 +10,8 @@ import 'package:al_mahhaba_school/core/widgets/progress_ring.dart';
 import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart';
 
 /// The final result out of the counted subjects' maximum — as a ring and in
-/// numbers — the attendance, and the rank in the class when there's one (a
-/// month's).
+/// numbers — the school's word for it when there's one (a term's, "ناجح"),
+/// the attendance, and the rank in the class when there's one (a month's).
 class FinalResultCard extends StatelessWidget {
   const FinalResultCard({super.key, required this.result});
 
@@ -91,6 +91,8 @@ class FinalResultCard extends StatelessWidget {
                   spacing: 6.w,
                   runSpacing: 6.h,
                   children: [
+                    if (result.verdict case final verdict?)
+                      _Pill(icon: AppIcons.check, label: verdict),
                     _Pill(
                       icon: AppIcons.calendarPresent,
                       label: l10n.attendancePercent(

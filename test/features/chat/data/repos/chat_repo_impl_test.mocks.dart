@@ -60,12 +60,14 @@ class MockChatRemoteDataSource extends _i1.Mock
   _i5.Future<_i2.ChatPageModel> getChat({
     int? studentId,
     String? before,
+    int? limit,
     _i6.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getChat, [], {
               #studentId: studentId,
               #before: before,
+              #limit: limit,
               #cancel: cancel,
             }),
             returnValue: _i5.Future<_i2.ChatPageModel>.value(
@@ -74,6 +76,7 @@ class MockChatRemoteDataSource extends _i1.Mock
                 Invocation.method(#getChat, [], {
                   #studentId: studentId,
                   #before: before,
+                  #limit: limit,
                   #cancel: cancel,
                 }),
               ),
@@ -84,6 +87,7 @@ class MockChatRemoteDataSource extends _i1.Mock
                 Invocation.method(#getChat, [], {
                   #studentId: studentId,
                   #before: before,
+                  #limit: limit,
                   #cancel: cancel,
                 }),
               ),

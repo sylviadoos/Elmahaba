@@ -16,11 +16,16 @@ class MonthCalendar extends StatelessWidget {
   const MonthCalendar({
     super.key,
     required this.attendance,
+    this.excuseDates = const {},
     required this.onPrevious,
     required this.onNext,
   });
 
   final MonthAttendanceEntity attendance;
+
+  /// The days the parent sent an excuse for, at midnight: an absence on
+  /// one shows as excused, not red.
+  final Set<DateTime> excuseDates;
   final VoidCallback onPrevious;
   final VoidCallback? onNext;
 
@@ -40,7 +45,10 @@ class MonthCalendar extends StatelessWidget {
       case AttendanceStatus.present:
         return CalendarDay.present;
       case AttendanceStatus.absent:
-        return CalendarDay.absent;
+        // Red until an excuse is sent for it.
+        return excuseDates.contains(date)
+            ? CalendarDay.excused
+            : CalendarDay.absent;
       case AttendanceStatus.excused:
         return CalendarDay.excused;
       case AttendanceStatus.unknown || null:

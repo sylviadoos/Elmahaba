@@ -71,6 +71,22 @@ void main() {
       verifyNever(localDataSource.saveNewestPage(any, any));
     });
 
+    test('just the latest few (a refresh): asked for, the full page kept '
+        'stays', () async {
+      when(
+        remoteDataSource.getChat(
+          studentId: omar.studentId,
+          limit: 5,
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) async => page);
+
+      final result = await repo.getChat(studentId: omar.studentId, limit: 5);
+
+      expect(result, isSuccess<Object?>(page));
+      verifyNever(localDataSource.saveNewestPage(any, any));
+    });
+
     test('didn\'t load: what was kept stays', () async {
       when(
         remoteDataSource.getChat(

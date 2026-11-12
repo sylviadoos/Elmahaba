@@ -4,14 +4,14 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 
-import 'dart:async' as _i5;
+import 'dart:async' as _i3;
 
 import 'package:al_mahhaba_school/features/results/data/data_sources/results_remote_data_source.dart'
-    as _i4;
-import 'package:al_mahhaba_school/features/results/data/models/monthly_results_model.dart'
-    as _i3;
-import 'package:al_mahhaba_school/features/results/data/models/result_details_model.dart'
     as _i2;
+import 'package:al_mahhaba_school/features/results/data/models/result_details_model.dart'
+    as _i4;
+import 'package:al_mahhaba_school/features/results/domain/entities/result_kind.dart'
+    as _i5;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -29,71 +29,25 @@ import 'package:mockito/mockito.dart' as _i1;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
-class _FakeResultDetailsModel_0 extends _i1.SmartFake
-    implements _i2.ResultDetailsModel {
-  _FakeResultDetailsModel_0(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
-class _FakeMonthlyResultsModel_1 extends _i1.SmartFake
-    implements _i3.MonthlyResultsModel {
-  _FakeMonthlyResultsModel_1(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
-}
-
 /// A class which mocks [ResultsRemoteDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockResultsRemoteDataSource extends _i1.Mock
-    implements _i4.ResultsRemoteDataSource {
+    implements _i2.ResultsRemoteDataSource {
   @override
-  _i5.Future<_i2.ResultDetailsModel> getResult({
-    required int? childId,
-    required int? resultId,
+  _i3.Future<List<_i4.ResultDetailsModel>> getResults(
+    int? childId, {
+    required _i5.ResultKind? kind,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#getResult, [], {
-              #childId: childId,
-              #resultId: resultId,
-            }),
-            returnValue: _i5.Future<_i2.ResultDetailsModel>.value(
-              _FakeResultDetailsModel_0(
-                this,
-                Invocation.method(#getResult, [], {
-                  #childId: childId,
-                  #resultId: resultId,
-                }),
-              ),
-            ),
-            returnValueForMissingStub: _i5.Future<_i2.ResultDetailsModel>.value(
-              _FakeResultDetailsModel_0(
-                this,
-                Invocation.method(#getResult, [], {
-                  #childId: childId,
-                  #resultId: resultId,
-                }),
-              ),
-            ),
-          )
-          as _i5.Future<_i2.ResultDetailsModel>);
-
-  @override
-  _i5.Future<_i3.MonthlyResultsModel> getMonthlyResults(int? childId) =>
-      (super.noSuchMethod(
-            Invocation.method(#getMonthlyResults, [childId]),
-            returnValue: _i5.Future<_i3.MonthlyResultsModel>.value(
-              _FakeMonthlyResultsModel_1(
-                this,
-                Invocation.method(#getMonthlyResults, [childId]),
-              ),
+            Invocation.method(#getResults, [childId], {#kind: kind}),
+            returnValue: _i3.Future<List<_i4.ResultDetailsModel>>.value(
+              <_i4.ResultDetailsModel>[],
             ),
             returnValueForMissingStub:
-                _i5.Future<_i3.MonthlyResultsModel>.value(
-                  _FakeMonthlyResultsModel_1(
-                    this,
-                    Invocation.method(#getMonthlyResults, [childId]),
-                  ),
+                _i3.Future<List<_i4.ResultDetailsModel>>.value(
+                  <_i4.ResultDetailsModel>[],
                 ),
           )
-          as _i5.Future<_i3.MonthlyResultsModel>);
+          as _i3.Future<List<_i4.ResultDetailsModel>>);
 }

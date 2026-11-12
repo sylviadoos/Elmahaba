@@ -121,9 +121,18 @@ class _PayFeesViewState extends State<_PayFeesView> {
     // Its statement only once the earlier installments are ticked too: no
     // statement for a second installment while the first is unpaid.
     final keysToPay = {for (final installment in toPay) installment.payKey};
-    final inOrder = toPay.every(
-      (installment) => installment.isInOrderWith(keysToPay),
-    );
+    final outOfOrder = [
+      for (final installment in toPay)
+        if (!installment.isInOrderWith(keysToPay)) installment,
+    ];
+    final inOrder = outOfOrder.isEmpty;
+    // Why, in the school's own words — the same sentences its website
+    // shows, each naming the fee whose earlier installments come first.
+    // One line per reason; the app's own when the school sends none.
+    final lockedReasons = {
+      for (final installment in outOfOrder)
+        if (installment.lockedReason.isNotEmpty) installment.lockedReason,
+    };
     final name = _studentName(context);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -259,14 +268,18 @@ class _PayFeesViewState extends State<_PayFeesView> {
                           enabled: inOrder,
                         ),
                         if (!inOrder)
-                          Text(
-                            l10n.tickEarlierInstallmentsFirst,
-                            textAlign: TextAlign.center,
-                            style: textTheme.bodySmall?.copyWith(
-                              fontSize: 12.sp,
-                              color: AppColors.slate,
+                          for (final reason
+                              in lockedReasons.isEmpty
+                                  ? [l10n.tickEarlierInstallmentsFirst]
+                                  : lockedReasons)
+                            Text(
+                              reason,
+                              textAlign: TextAlign.center,
+                              style: textTheme.bodySmall?.copyWith(
+                                fontSize: 12.sp,
+                                color: AppColors.slate,
+                              ),
                             ),
-                          ),
                       ],
                     ),
                   ],

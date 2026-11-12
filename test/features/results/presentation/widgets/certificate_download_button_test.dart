@@ -45,7 +45,7 @@ void main() {
   }
 
   testWidgets('saves the certificate as a PDF, and says so', (tester) async {
-    final dialog = await download(tester, monthly.certificate!);
+    final dialog = await download(tester, certificate);
 
     expect(dialog.fileName, 'monthly-certificate-2026-2027.pdf');
     expect(dialog.mimeType, 'application/pdf');
@@ -63,7 +63,7 @@ void main() {
   testWidgets('can\'t save it there: says so', (tester) async {
     await download(
       tester,
-      monthly.certificate!,
+      certificate,
       outcome: () async => throw PlatformException(code: 'save_failed'),
     );
 

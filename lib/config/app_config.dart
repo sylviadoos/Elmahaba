@@ -37,11 +37,11 @@ abstract final class AppConfig {
   static String get schoolBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-     // 'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
+      'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
     // Live:
-   //_liveSchool,
-    // Jenkins' server:
-     'http://petrasoftware:8080/mariam_hany/almahaba316/Almahhaba-School-back-API/public/api/',
+    //_liveSchool,
+    // Jenkins' server (petrasoftware; the phone can't look the name up):
+    //'http://192.168.0.106:8080/mariam_hany/almahaba316/Almahhaba-School-back-API/public/api/',
     Environment.staging || Environment.prod => _liveSchool,
   };
 

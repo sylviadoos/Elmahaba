@@ -7,6 +7,10 @@
 import 'dart:async' as _i3;
 
 import 'package:al_mahhaba_school/core/base/result.dart' as _i4;
+import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart'
+    as _i8;
+import 'package:al_mahhaba_school/features/attendance/domain/use_cases/get_month_attendance_use_case.dart'
+    as _i7;
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart'
     as _i5;
 import 'package:al_mahhaba_school/features/home/domain/use_cases/get_child_dashboard_use_case.dart'
@@ -53,4 +57,40 @@ class MockGetChildDashboardUseCase extends _i1.Mock
                 ),
           )
           as _i3.Future<_i4.Result<_i5.ChildDashboardEntity>>);
+}
+
+/// A class which mocks [GetMonthAttendanceUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetMonthAttendanceUseCase extends _i1.Mock
+    implements _i7.GetMonthAttendanceUseCase {
+  @override
+  _i3.Future<_i4.Result<_i8.MonthAttendanceEntity>> call({
+    required int? childId,
+    required DateTime? month,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [], {#childId: childId, #month: month}),
+            returnValue:
+                _i3.Future<_i4.Result<_i8.MonthAttendanceEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i8.MonthAttendanceEntity>>(
+                    this,
+                    Invocation.method(#call, [], {
+                      #childId: childId,
+                      #month: month,
+                    }),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i3.Future<_i4.Result<_i8.MonthAttendanceEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i8.MonthAttendanceEntity>>(
+                    this,
+                    Invocation.method(#call, [], {
+                      #childId: childId,
+                      #month: month,
+                    }),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<_i8.MonthAttendanceEntity>>);
 }

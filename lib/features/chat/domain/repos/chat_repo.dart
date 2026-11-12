@@ -10,11 +10,13 @@ import 'package:al_mahhaba_school/features/chat/domain/entities/new_chat_message
 /// once [CancelHandle.cancel]led).
 abstract interface class ChatRepo {
   /// The newest items, or those [before] a page's `nextBefore`: one
-  /// child's ([studentId]) with the general ones, or everything. The newest
-  /// are kept, for [cachedChat].
+  /// child's ([studentId]) with the general ones, or everything; [limit]
+  /// at most (a full page when not given). A full page of the newest is
+  /// kept, for [cachedChat].
   Future<Result<ChatPageEntity>> getChat({
     int? studentId,
     String? before,
+    int? limit,
     CancelHandle? cancel,
   });
 

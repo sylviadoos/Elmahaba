@@ -33,13 +33,14 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   Future<ChatPageModel> getChat({
     int? studentId,
     String? before,
+    int? limit,
     CancelHandle? cancel,
   }) async {
     final json =
         await _api.get(
               ApiEndpoints.chat,
               queryParameters: {
-                'limit': _limit,
+                'limit': limit ?? _limit,
                 'student_id': ?studentId,
                 'before': ?before,
               },

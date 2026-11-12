@@ -1,152 +1,166 @@
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
-import 'package:al_mahhaba_school/features/results/data/models/monthly_results_model.dart';
+import 'package:al_mahhaba_school/features/results/data/models/result_details_model.dart';
 import 'package:al_mahhaba_school/features/results/domain/entities/monthly_certificate_entity.dart';
-import 'package:al_mahhaba_school/features/results/domain/entities/monthly_results_entity.dart';
+import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart';
+import 'package:al_mahhaba_school/features/results/presentation/extensions/child_certificate.dart';
 
-Map<String, dynamic> _parts(
-  num exam,
-  num homework,
-  num classWork,
-  num weekly,
-) => {
-  'Monthly exam': exam,
-  'Homework': homework,
-  'Class work': classWork,
-  'Weekly assessment': weekly,
-  'Attendance & behavior': 5,
+/// A month's subject, its parts out of 15, 5, 5, 10 and 5.
+Map<String, dynamic> _monthSubject(
+  String name, {
+  required bool counted,
+  required List<num> marks,
+}) {
+  const parts = [
+    ('Monthly exam', 15),
+    ('Homework', 5),
+    ('Class work', 5),
+    ('Weekly assessment', 10),
+    ('Attendance & behavior', 5),
+  ];
+  return {
+    'name': name,
+    'included_in_total': counted,
+    'components': [
+      for (final (index, (part, max)) in parts.indexed)
+        {'name': part, 'mark': marks[index], 'max': max},
+    ],
+    'total': marks.fold<num>(0, (sum, mark) => sum + mark),
+    'max_total': 40,
+  };
+}
+
+/// A month's result, as `results-v2` lists it.
+Map<String, dynamic> _month({
+  required int id,
+  required int month,
+  required String name,
+  required String nameAr,
+  required String publishedAt,
+  required List<num> arabic,
+}) => {
+  'result_id': id,
+  'result_type': 'monthly',
+  'layout': 'monthly',
+  'title': 'نتيجة شهر $nameAr',
+  'academic_year': '2026-2027',
+  'period': {
+    'month': month,
+    'month_name': name,
+    'month_name_ar': nameAr,
+    'year': 2026,
+  },
+  'display': 'value and color',
+  'published_at': publishedAt,
+  'data': {
+    'attendance_percentage': 96,
+    'subjects': [
+      _monthSubject('Arabic', counted: true, marks: arabic),
+      _monthSubject('Religion', counted: false, marks: [15, 5, 5, 10, 5]),
+    ],
+    'grand_total': 245,
+    'max_grand_total': 280,
+    'percentage': 87.5,
+    'rank': 3,
+  },
 };
 
-const _components = [
-  {'name': 'Monthly exam', 'max': 15},
-  {'name': 'Homework', 'max': 5},
-  {'name': 'Class work', 'max': 5},
-  {'name': 'Weekly assessment', 'max': 10},
-  {'name': 'Attendance & behavior', 'max': 5},
-];
+final octoberJson = _month(
+  id: 820,
+  month: 10,
+  name: 'October',
+  nameAr: 'أكتوبر',
+  publishedAt: '2026-11-11T12:00:00+00:00',
+  arabic: [14, 5, 5, 9, 5],
+);
 
-/// The API's example `result-sheets?template=monthly` response.
-final monthlyJson = <String, dynamic>{
-  'status': 'success',
-  'data': [
-    {
-      'id': 341,
-      'publication_id': 61,
-      'title': 'نتيجة شهر نوفمبر',
-      'template': 'monthly',
-      'layout': 'monthly',
-      'month': 'November',
-      'display': 'value and color',
-      'academic_year': '2026-2027',
-      'published_at': '2026-12-05T10:00:00+00:00',
-    },
-    {
-      'id': 326,
-      'publication_id': 59,
-      'title': 'نتيجة شهر أكتوبر',
-      'template': 'monthly',
-      'layout': 'monthly',
-      'month': 'October',
-      'display': 'value and color',
-      'academic_year': '2026-2027',
-      'published_at': '2026-11-09T12:23:00+00:00',
-    },
-  ],
-  'meta': {
-    'page': 1,
-    'per_page': 2,
-    'total': 2,
-    'last_page': 1,
-    'months': ['October', 'November'],
-  },
-  'certificate': {
-    'student': {
-      'student_id': 146,
-      'name': 'Omar Ahmed',
-      'name_ar': 'عمر أحمد',
-      'grade': 'First Primary',
-      'class': 'A',
-      'academic_year': '2026-2027',
-    },
-    'months': [
-      {
-        'key': 'm0',
-        'month': 'October',
-        'title': 'نتيجة شهر أكتوبر',
-        'published_at': '2026-11-09T12:23:00+00:00',
-        'grand_total': 245,
-        'max_grand_total': 280,
-        'percentage': 87.5,
-        'rank': 3,
-        'attendance_percentage': 96,
-      },
-      {
-        'key': 'm1',
-        'month': 'November',
-        'title': 'نتيجة شهر نوفمبر',
-        'published_at': '2026-12-05T10:00:00+00:00',
-        'grand_total': 252,
-        'max_grand_total': 280,
-        'percentage': 90,
-        'rank': 2,
-        'attendance_percentage': 100,
-      },
-    ],
+final novemberJson = _month(
+  id: 905,
+  month: 11,
+  name: 'November',
+  nameAr: 'نوفمبر',
+  publishedAt: '2026-12-06T09:30:00+00:00',
+  arabic: [15, 4, 5, 10, 5],
+);
+
+/// The API's example term result.
+final firstTermJson = <String, dynamic>{
+  'result_id': 268,
+  'result_type': 'term',
+  'layout': 'term',
+  'title': 'نتيجة الترم الأول',
+  'academic_year': '2026-2027',
+  'period': null,
+  'display': 'value and color',
+  'published_at': '2026-11-04T17:48:00+00:00',
+  'data': {
+    'attendance_percentage': 92,
     'subjects': [
       {
-        'subject_id': 24,
-        'name': 'Arabic',
-        'in_grade': true,
-        'included_in_total': true,
-        'components': _components,
-        'marks': {
-          'm0': {
-            'components': _parts(14, 5, 5, 9),
-            'total': 38,
-            'max_total': 40,
-            'included_in_total': true,
-          },
-          'm1': {
-            'components': _parts(15, 5, 4, 10),
-            'total': 39,
-            'max_total': 40,
-            'included_in_total': true,
-          },
-        },
-      },
-      {
-        'subject_id': 31,
-        'name': 'Religion',
-        'in_grade': true,
-        'included_in_total': false,
-        'components': _components,
-        'marks': {
-          'm0': {
-            'components': _parts(15, 5, 5, 10),
-            'total': 40,
-            'max_total': 40,
-            'included_in_total': false,
-          },
-        },
-      },
-      {
-        'subject_id': 25,
         'name': 'Math',
-        'in_grade': true,
-        'included_in_total': null,
+        'included_in_total': true,
+        'components': [
+          {'name': 'Class Performance', 'mark': 20, 'max': 20},
+        ],
+        'total': 96,
+        'max_total': 100,
+        'initial_assessment': 'F',
+        'final_assessment': 'F',
+        'status': null,
+      },
+      {
+        'name': 'Art',
+        'included_in_total': false,
         'components': [],
-        'marks': {},
+        'total': 18,
+        'max_total': 20,
+        'initial_assessment': null,
+        'final_assessment': null,
+        'status': 'Pass',
       },
     ],
-    'pdf_url':
-        'http://192.168.0.219/Almahhaba-School-back-API/public/api/v1/parent/certificate-pdf/146/7?expires=1762706400&signature=3f1c9a',
-    'pdf_url_expires_in_minutes': 30,
+    'high_level': [
+      {
+        'name': 'ICT',
+        'included_in_total': false,
+        'components': [],
+        'total': 9,
+        'max_total': 10,
+        'initial_assessment': null,
+        'final_assessment': null,
+        'status': 'Pass',
+      },
+    ],
+    'activities': [
+      {'name': 'Sports', 'status': 'Pass'},
+    ],
+    'final_result': 'ناجح',
+    'final_result_2': null,
   },
 };
 
-/// [monthlyJson], read.
-final MonthlyResultsEntity monthly = MonthlyResultsModel.fromJson(monthlyJson);
+/// The whole answer of `results-v2` with these [results].
+Map<String, dynamic> resultsResponse(List<Map<String, dynamic>> results) => {
+  'status': 'success',
+  'data': results,
+  'meta': {
+    'total': results.length,
+    'periods': [],
+    'academic_years': [
+      {'id': 2, 'name': '2026-2027'},
+    ],
+  },
+};
 
-/// The child [monthly] is about, as the children list has them.
+final ResultDetailsEntity october = ResultDetailsModel.fromJson(octoberJson);
+final ResultDetailsEntity november = ResultDetailsModel.fromJson(novemberJson);
+final ResultDetailsEntity firstTerm = ResultDetailsModel.fromJson(
+  firstTermJson,
+);
+
+/// Everything published for [omar], newest first.
+final allResults = [november, october, firstTerm];
+
+/// The child the results are about, as the children list has them.
 const omar = ChildEntity(
   studentId: 146,
   name: 'Omar Ahmed',
@@ -159,14 +173,20 @@ const omar = ChildEntity(
   academicYear: '2026/2027',
 );
 
-/// [monthly]'s certificate, without the student's name, class or grade.
+/// [omar]'s certificate with October and November on it.
+final MonthlyCertificateEntity certificate = omar.certificateWith([
+  october,
+  november,
+]);
+
+/// [certificate], without the student's name, class or grade.
 final MonthlyCertificateEntity certificateWithoutStudent =
     MonthlyCertificateEntity(
       studentName: '',
       studentNameAr: '',
       grade: '',
       className: '',
-      academicYear: monthly.certificate!.academicYear,
-      months: monthly.certificate!.months,
-      subjects: monthly.certificate!.subjects,
+      academicYear: certificate.academicYear,
+      months: certificate.months,
+      subjects: certificate.subjects,
     );
