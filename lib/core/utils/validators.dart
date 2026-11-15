@@ -8,7 +8,6 @@ enum ValidationError {
   invalidName,
   invalidEmail,
   invalidPassword,
-  invalidConfirmPassword,
   passwordMismatch,
   invalidPhoneNumber,
 }
@@ -20,8 +19,7 @@ extension ValidationErrorMessage on ValidationError {
       ValidationError.required => l10n.thisFieldIsRequired,
       ValidationError.invalidName => l10n.nameIsNotValid,
       ValidationError.invalidEmail => l10n.emailIsNotValid,
-      ValidationError.invalidPassword => l10n.passwordMustNotBeEmpty,
-      ValidationError.invalidConfirmPassword => l10n.confirmPasswordIsNotValid,
+      ValidationError.invalidPassword => l10n.passwordTooShort,
       ValidationError.passwordMismatch => l10n.passwordsDoNotMatch,
       ValidationError.invalidPhoneNumber => l10n.phoneNumberIsNotValid,
     };
@@ -76,10 +74,6 @@ abstract final class Validators {
   }) {
     if (confirmPassword == null || confirmPassword.isEmpty) {
       return ValidationError.required;
-    }
-
-    if (!AppRegExp.isPasswordValid(confirmPassword)) {
-      return ValidationError.invalidConfirmPassword;
     }
 
     if (password != confirmPassword) {

@@ -69,6 +69,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get expiredToken => 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى';
 
   @override
+  String get accountWithdrawn =>
+      'لم يعد حسابك متاحًا لأن الطالب لم يعد مقيدًا بالمدرسة، يرجى التواصل مع المدرسة';
+
+  @override
   String get phoneNumberIsNotValid => 'رقم الهاتف غير صحيح';
 
   @override
@@ -115,6 +119,32 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get logout => 'تسجيل الخروج';
+
+  @override
+  String get logOutTitle => 'تسجيل الخروج؟';
+
+  @override
+  String get logOutMessage =>
+      'ستحتاج إلى رقم الموبايل وكلمة المرور لتسجيل الدخول مرة أخرى.';
+
+  @override
+  String get deleteMyAccount => 'حذف حسابي';
+
+  @override
+  String get deleteAccountTitle => 'حذف حسابك؟';
+
+  @override
+  String get deleteAccountMessage =>
+      'سيتم حذف حسابك وأبنائك المرتبطين وإعداداتك. تحتفظ المدرسة بسجلات المحادثة والشكاوى.';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get cancel => 'إلغاء';
+
+  @override
+  String get accountDeleted => 'تم حذف حسابك';
 
   @override
   String get home => 'الرئيسية';
@@ -197,17 +227,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetPassword => 'إعادة تعيين كلمة المرور';
 
   @override
-  String get passwordMustNotBeEmpty =>
-      'يجب ألا تكون كلمة المرور فارغة وأن تحتوي على 6 أحرف وحرف كبير ورقم واحد على الأقل';
+  String get passwordTooShort => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل';
 
   @override
   String get enterYourPassword => 'أدخل كلمة المرور';
 
   @override
   String get newPassword => 'كلمة المرور الجديدة';
-
-  @override
-  String get rememberMe => 'تذكرني';
 
   @override
   String get continueButton => 'متابعة';
@@ -421,10 +447,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get loginSubtitle =>
-      'أولياء الأمور، سجّلوا الدخول لمتابعة يوم أبنائكم الدراسي.';
-
-  @override
-  String get emailOrMobile => 'البريد الإلكتروني أو رقم الموبايل';
+      'أولياء الأمور، سجّلوا الدخول برقم الهاتف المسجّل لدى المدرسة لمتابعة يوم أبنائكم الدراسي.';
 
   @override
   String get emailHint => 'parent@email.com';
@@ -448,19 +471,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get createAccount => 'إنشاء حساب';
 
   @override
-  String get registerSubtitle => 'حساب ولي الأمر — تابع يوم أبنائك الدراسي.';
-
-  @override
-  String get parentFullName => 'اسم ولي الأمر بالكامل';
-
-  @override
-  String get asOnNationalId => 'كما هو في بطاقة الرقم القومي';
+  String get registerSubtitle =>
+      'حساب ولي الأمر — سجّل برقم الهاتف المسجّل لدى المدرسة لمتابعة يوم أبنائك الدراسي.';
 
   @override
   String get phoneHint => '10 1234 5678';
 
   @override
-  String get passwordHint => '6 أحرف على الأقل';
+  String get fullPhoneHint => '010 1234 5678';
+
+  @override
+  String get passwordHint => '8 أحرف على الأقل';
+
+  @override
+  String get confirmPasswordHint => 'اكتب كلمة المرور مرة أخرى';
+
+  @override
+  String get accountAlreadyExists =>
+      'يوجد حساب بالفعل لهذا الرقم. سجّل الدخول.';
+
+  @override
+  String get accountCreated => 'تم إنشاء حسابك. سجّل الدخول.';
+
+  @override
+  String get phoneVerificationFailed => 'تعذّر التحقق من رقمك. حاول مرة أخرى.';
+
+  @override
+  String get otpWrongCode => 'الرمز غير صحيح. راجع الرسالة وحاول مرة أخرى.';
+
+  @override
+  String get otpExpired => 'انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا.';
+
+  @override
+  String get tooManyAttempts => 'محاولات كثيرة. حاول مرة أخرى لاحقًا.';
 
   @override
   String get agreePrefix => 'أوافق على ';
@@ -505,6 +548,96 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get changeIt => 'غيّره';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'أدخل رقم الموبايل المسجل في حسابك وسنرسل لك كودًا.';
+
+  @override
+  String get useRegisteredNumber => 'استخدم نفس الرقم الذي سجلت به.';
+
+  @override
+  String get sendCode => 'إرسال الكود';
+
+  @override
+  String get rememberedIt => 'تذكرتها؟';
+
+  @override
+  String get enterTheCode => 'أدخل الكود';
+
+  @override
+  String get resetCodeSentTo =>
+      'لإعادة تعيين كلمة المرور، أدخل الكود المكون من 6 أرقام المرسل إلى ';
+
+  @override
+  String get setNewPassword => 'تعيين كلمة مرور جديدة';
+
+  @override
+  String get setNewPasswordSubtitle =>
+      'اختر كلمة مرور قوية لا تستخدمها في أي مكان آخر.';
+
+  @override
+  String get enterNewPassword => 'أدخل كلمة مرور جديدة';
+
+  @override
+  String get confirmNewPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get typeItAgain => 'اكتبها مرة أخرى';
+
+  @override
+  String get ruleEightCharacters => '8 أحرف على الأقل';
+
+  @override
+  String get ruleHasLetter => 'تحتوي على حرف';
+
+  @override
+  String get ruleHasNumber => 'تحتوي على رقم';
+
+  @override
+  String get rulePasswordsMatch => 'كلمتا المرور متطابقتان';
+
+  @override
+  String get saveNewPassword => 'حفظ كلمة المرور الجديدة';
+
+  @override
+  String get passwordChanged => 'تم تغيير كلمة المرور';
+
+  @override
+  String get logInWithNewPassword =>
+      'يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.';
+
+  @override
+  String get backToLogin => 'العودة لتسجيل الدخول';
+
+  @override
+  String get changePasswordSubtitle =>
+      'لأمانك، أدخل كلمة المرور الحالية أولًا.';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get enterCurrentPassword => 'أدخل كلمة المرور الحالية';
+
+  @override
+  String get forgotCurrentPassword => 'نسيت كلمة المرور الحالية؟';
+
+  @override
+  String get ruleNewPasswordsMatch => 'كلمتا المرور الجديدتان متطابقتان';
+
+  @override
+  String get ruleDifferentFromCurrent => 'مختلفة عن كلمة المرور الحالية';
+
+  @override
+  String get passwordUpdated => 'تم تحديث كلمة المرور';
+
+  @override
+  String get useNewPasswordNextTime =>
+      'استخدم كلمة المرور الجديدة في المرة القادمة التي تسجل فيها الدخول.';
+
+  @override
+  String get backToSettings => 'العودة للإعدادات';
 
   @override
   String get lastStep => 'الخطوة الأخيرة';
@@ -553,21 +686,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get linked => 'مرتبط';
 
   @override
-  String removeChild(String name) {
-    return 'إزالة $name';
+  String get childLinked => 'تم ربط طفلك بحسابك.';
+
+  @override
+  String get linkCodeSentTo => 'سيتم إرسال كود التحقق إلى: ';
+
+  @override
+  String codeAttemptsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تبقّت $count محاولة',
+      few: 'تبقّت $count محاولات',
+      two: 'تبقّت محاولتان',
+      one: 'تبقّت محاولة واحدة',
+      zero: 'لم تتبقَّ محاولات',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String get childLinkPending =>
+      'تم إرسال طلبك للمدرسة. ستتمكن من رؤية طفلك بعد تأكيد المدرسة.';
 
   @override
   String get noChildrenYet => 'لم تتم إضافة أطفال بعد';
 
   @override
   String get goodMorning => 'صباح الخير';
-
-  @override
-  String get myProfile => 'ملفي الشخصي';
-
-  @override
-  String get notifications => 'الإشعارات';
 
   @override
   String get today => 'اليوم';
@@ -593,51 +739,198 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String daysPresentIn(String month) {
-    return 'أيام حضور في $month';
+  String get needsYourAttention => 'يحتاج انتباهك';
+
+  @override
+  String get attendanceNotTaken => 'لم يُسجَّل الحضور بعد';
+
+  @override
+  String get noResultsYet => 'لا توجد نتائج بعد';
+
+  @override
+  String get noFeesYet => 'لا توجد مصروفات بعد';
+
+  @override
+  String overdueInstallmentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count قسط متأخر',
+      many: '$count قسطًا متأخرًا',
+      few: '$count أقساط متأخرة',
+      two: 'قسطان متأخران',
+      one: 'قسط واحد متأخر',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get ofTheYearPaid => 'من مصروفات العام مدفوعة';
+  String feesDueOn(String date) {
+    return 'مستحق $date';
+  }
 
   @override
-  String get needsYourAttention => 'يحتاج انتباهك';
+  String feesOverdueSince(String date) {
+    return 'متأخر منذ $date';
+  }
+
+  @override
+  String get daysPresent => 'أيام الحضور';
+
+  @override
+  String messagesAndNotices(int messages, int notices) {
+    return 'رسائل $messages · إعلانات $notices';
+  }
 
   @override
   String get chatGeneral => 'عام';
 
   @override
+  String get chatNew => 'جديدة';
+
+  @override
+  String get chatRead => 'مقروءة';
+
+  @override
   String get chatPrivate => 'خاص';
-
-  @override
-  String get chatPrivateOnlyYou => 'خاص · لا يراه غيرك';
-
-  @override
-  String get youReplied => 'رددت';
 
   @override
   String get you => 'أنت';
 
   @override
-  String get chatReplyHint => 'رد باختيار أحد الخيارات في كل رسالة';
+  String get yesterday => 'أمس';
 
   @override
-  String get term1 => 'الترم الأول';
+  String get noMessagesYet => 'لا توجد رسائل بعد';
 
   @override
-  String get term2Soon => 'الترم الثاني · قريبًا';
+  String get noMessagesHint => 'تظهر هنا رسائل المدرسة والرسائل التي ترسلها.';
 
   @override
-  String get term1Average => 'متوسط الترم الأول';
+  String get olderMessagesFailed => 'تعذّر تحميل الرسائل الأقدم.';
 
   @override
-  String get reportCardPdf => 'الشهادة (PDF)';
+  String get send => 'إرسال';
+
+  @override
+  String get replyingTo => 'رد على';
+
+  @override
+  String get inReplyTo => 'ردًا على';
+
+  @override
+  String get cancelReply => 'إلغاء الرد';
+
+  @override
+  String get deletedMessage => 'تم حذف هذه الرسالة';
+
+  @override
+  String get earlierMessage => 'رسالة سابقة';
+
+  @override
+  String get edited => 'معدّلة';
+
+  @override
+  String get chatCantSend => 'يمكنك مراسلة المدرسة طالما أحد أبنائك مقيد بها.';
+
+  @override
+  String get chatClosed => 'الشات مغلق حاليًا. يمكنك قراءة الرسائل فقط.';
+
+  @override
+  String get messageAbout => 'بخصوص';
+
+  @override
+  String get viewAttendance => 'عرض الحضور';
+
+  @override
+  String get viewResults => 'عرض النتائج';
+
+  @override
+  String get viewFees => 'عرض المصروفات';
+
+  @override
+  String get result => 'النتيجة';
+
+  @override
+  String publishedOn(String date) {
+    return 'نُشرت $date';
+  }
+
+  @override
+  String get finalResult => 'النتيجة النهائية';
+
+  @override
+  String attendancePercent(String percent) {
+    return 'الحضور $percent';
+  }
 
   @override
   String get subjects => 'المواد';
 
   @override
-  String get teachersNote => 'ملاحظة المعلم';
+  String get countedInFinalResult => 'تُحسب في النتيجة النهائية';
+
+  @override
+  String get otherSubjects => 'مواد أخرى';
+
+  @override
+  String get notCountedInFinalResult => 'لا تُحسب في النتيجة النهائية';
+
+  @override
+  String get highLevel => 'المستوى المتقدم';
+
+  @override
+  String get highLevelNote => 'مستوى إضافي، لا يُحسب في النتيجة النهائية';
+
+  @override
+  String get activities => 'الأنشطة';
+
+  @override
+  String get certificate => 'الشهادة';
+
+  @override
+  String get downloadCertificate => 'تنزيل الشهادة (PDF)';
+
+  @override
+  String get certificateSaved => 'تم حفظ الشهادة';
+
+  @override
+  String get certificateNotSaved => 'تعذّر حفظ الشهادة. حاول مرة أخرى.';
+
+  @override
+  String get certificateFailed => 'تعذّر إنشاء الشهادة. حاول مرة أخرى.';
+
+  @override
+  String get monthlyResults => 'الشهرية';
+
+  @override
+  String get latestResult => 'آخر نتيجة';
+
+  @override
+  String classRank(int rank) {
+    return 'الترتيب $rank';
+  }
+
+  @override
+  String get assessmentInitial => 'مبدئي';
+
+  @override
+  String get assessmentFinal => 'نهائي';
+
+  @override
+  String get assessmentStatus => 'الحالة';
+
+  @override
+  String get gradeExceeds => 'يفوق التوقعات';
+
+  @override
+  String get gradeMeets => 'يلبي التوقعات';
+
+  @override
+  String get gradePartiallyMeets => 'يلبي التوقعات جزئيًا';
+
+  @override
+  String get gradeBelow => 'دون التوقعات';
 
   @override
   String get present => 'حاضر';
@@ -646,13 +939,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get absent => 'غائب';
 
   @override
-  String get late => 'متأخر';
-
-  @override
   String get officialHoliday => 'إجازة رسمية';
 
   @override
-  String get friSatOff => 'إجازة الجمعة والسبت';
+  String get friSatOff => 'إجازة أسبوعية';
 
   @override
   String get thisMonth => 'هذا الشهر';
@@ -664,32 +954,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get nextMonth => 'الشهر التالي';
 
   @override
-  String schoolYear(String years) {
-    return 'العام الدراسي $years';
+  String get attendanceWord => 'حضور';
+
+  @override
+  String attendedOfDays(int attended, int total) {
+    return '$attended من $total يوم دراسي';
   }
 
   @override
-  String percentPaid(String percent) {
-    return '$percent مدفوعة';
+  String get excused => 'بعذر';
+
+  @override
+  String get excusedOrMedical => 'بعذر / طبي';
+
+  @override
+  String get excusedAbsence => 'غياب بعذر';
+
+  @override
+  String reasonIs(String reason) {
+    return 'السبب: $reason';
   }
 
   @override
-  String get remaining => 'المتبقي';
+  String get noReasonGiven => 'لم يُذكر سبب';
 
   @override
-  String paidAmount(String amount) {
-    return 'المدفوع $amount';
+  String holidayNoSchool(String name) {
+    return '$name · لا دراسة';
   }
 
   @override
-  String totalAmount(String amount) {
-    return 'الإجمالي $amount';
-  }
+  String get reply => 'رد';
 
   @override
-  String payAmount(String amount) {
-    return 'ادفع $amount';
-  }
+  String get noAbsencesThisMonth => 'لا غياب ولا تأخير هذا الشهر.';
 
   @override
   String egpAmount(String amount) {
@@ -700,22 +998,217 @@ class AppLocalizationsAr extends AppLocalizations {
   String get allFeesPaid => 'تم دفع كل المصروفات';
 
   @override
-  String get installments => 'الأقساط';
-
-  @override
   String get paid => 'مدفوع';
 
   @override
-  String get due => 'مستحق';
+  String accountNumber(String number) {
+    return 'حساب $number';
+  }
 
   @override
-  String get receipts => 'الإيصالات';
+  String payFeesAmount(String amount) {
+    return 'ادفع المصروفات · $amount';
+  }
 
   @override
-  String get pdf => 'PDF';
+  String get preview => 'معاينة';
 
   @override
-  String get editProfile => 'تعديل الملف الشخصي';
+  String get downloadPdf => 'تحميل PDF';
+
+  @override
+  String get allParents => 'كل أولياء الأمور';
+
+  @override
+  String get medicalExcuse => 'عذر طبي';
+
+  @override
+  String get submitExcuse => 'تقديم عذر';
+
+  @override
+  String get viewExcuse => 'عرض العذر';
+
+  @override
+  String excuseStatusLine(String status) {
+    return 'عذر طبي · $status';
+  }
+
+  @override
+  String excuseSubmitBy(String date) {
+    return 'العذر حتى $date';
+  }
+
+  @override
+  String get excuseUnderReview => 'قيد المراجعة';
+
+  @override
+  String get excuseInfoRequired => 'مطلوب معلومات';
+
+  @override
+  String get excuseAccepted => 'مقبول';
+
+  @override
+  String get excuseRejected => 'مرفوض';
+
+  @override
+  String excuseForAbsence(String date) {
+    return 'عن غياب يوم $date';
+  }
+
+  @override
+  String excuseSubmitUntil(String date) {
+    return 'يمكنك تقديمه حتى $date.';
+  }
+
+  @override
+  String get excuseNote => 'ملاحظة';
+
+  @override
+  String get excuseNoteHint => 'مثلًا: زيارة طبيب — حرارة';
+
+  @override
+  String get excuseDocuments => 'المستندات الطبية';
+
+  @override
+  String excuseDocumentsRules(String types, int megabytes, int count) {
+    return '$types · حتى $megabytes ميجابايت للملف · حتى $count ملفات';
+  }
+
+  @override
+  String get excuseDocumentRequired => 'أرفق مستندًا واحدًا على الأقل.';
+
+  @override
+  String get excuseSent => 'تم إرسال العذر الطبي.';
+
+  @override
+  String get excuseSubmittedByOther => 'قدّمه ولي الأمر الآخر';
+
+  @override
+  String get excuseRejectionReason => 'سبب الرفض';
+
+  @override
+  String get excuseInformationRequest => 'المطلوب من المدرسة';
+
+  @override
+  String get excuseAcceptedNote => 'اليوم يُحتسب الآن إجازة مرضية.';
+
+  @override
+  String get addDocuments => 'إضافة مستندات';
+
+  @override
+  String get sendDocuments => 'إرسال المستندات';
+
+  @override
+  String get documentsSent =>
+      'تم إرسال المستندات. ستراجع المدرسة العذر مرة أخرى.';
+
+  @override
+  String get excuseHistory => 'السجل';
+
+  @override
+  String get excuseStepSubmitted => 'تم إرسال العذر';
+
+  @override
+  String get excuseStepInfoRequested => 'طلبت المدرسة معلومات إضافية';
+
+  @override
+  String get excuseStepDocumentsAdded => 'تمت إضافة مستندات';
+
+  @override
+  String get excuseStepAccepted => 'تم قبول العذر';
+
+  @override
+  String get excuseStepRejected => 'تم رفض العذر';
+
+  @override
+  String get byParent => 'ولي الأمر';
+
+  @override
+  String get bySchool => 'المدرسة';
+
+  @override
+  String get feeStatement => 'كشف الرسوم';
+
+  @override
+  String get feeStatementSaved => 'تم حفظ كشف الرسوم';
+
+  @override
+  String get feeStatementNotSaved => 'تعذر حفظ كشف الرسوم. حاول مرة أخرى.';
+
+  @override
+  String get feeStatementFailed => 'تعذر إنشاء كشف الرسوم. حاول مرة أخرى.';
+
+  @override
+  String get payFees => 'دفع المصروفات';
+
+  @override
+  String get payFullAmount => 'دفع المبلغ كاملًا';
+
+  @override
+  String get payInInstallments => 'الدفع بالأقساط';
+
+  @override
+  String get amountPayableNow => 'المبلغ المطلوب الآن';
+
+  @override
+  String get tickInstallments => 'اختر الأقساط التي تريد دفعها';
+
+  @override
+  String get confirmOptionalFee => 'تأكيد الرسم الاختياري';
+
+  @override
+  String confirmOptionalFeeMessage(String fee, String amount) {
+    return 'هل أنت متأكد أنك تريد دفع هذا الرسم؟\n$fee — $amount';
+  }
+
+  @override
+  String get yesPay => 'نعم، ادفع';
+
+  @override
+  String get dropOptionalFee => 'إزالة الرسم الاختياري';
+
+  @override
+  String dropOptionalFeeMessage(String fee) {
+    return 'هل أنت متأكد أنك تريد إزالة $fee من الرسوم؟';
+  }
+
+  @override
+  String get yesDrop => 'نعم، أزل';
+
+  @override
+  String get tickEarlierInstallmentsFirst =>
+      'لمعاينة الكشف أو تحميله، اختر الأقساط السابقة غير المدفوعة أيضًا.';
+
+  @override
+  String dueOnAccount(String date, String account) {
+    return 'الاستحقاق $date · حساب $account';
+  }
+
+  @override
+  String get upcoming => 'قادم';
+
+  @override
+  String get overdue => 'متأخر';
+
+  @override
+  String get underSettlement => 'تحت التسوية';
+
+  @override
+  String get paymentInProgress => 'الدفع قيد المعالجة';
+
+  @override
+  String get payOnline => 'ادفع أونلاين';
+
+  @override
+  String payOnlineAmount(String amount) {
+    return 'ادفع أونلاين · $amount';
+  }
+
+  @override
+  String get paymentBySkoolex => 'يتم الدفع من خلال نظام Skoolex المدرسي';
+
+  @override
+  String get paymentPageFailed => 'تعذّر فتح صفحة الدفع';
 
   @override
   String get myChildren => 'أبنائي';
@@ -724,10 +1217,219 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addAChild => 'إضافة طفل';
 
   @override
+  String get chooseChild => 'اختر طفلًا';
+
+  @override
+  String get allChildren => 'كل الأبناء';
+
+  @override
+  String get childDetails => 'بيانات الطفل';
+
+  @override
+  String get childStudentInfo => 'بيانات الطالب';
+
+  @override
+  String get childSchoolInfo => 'الدراسة';
+
+  @override
+  String get childContactInfo => 'التواصل';
+
+  @override
+  String get father => 'الأب';
+
+  @override
+  String get mother => 'الأم';
+
+  @override
+  String get guardian => 'ولي الأمر';
+
+  @override
+  String get studentCode => 'كود الطالب';
+
+  @override
+  String get nationalId => 'الرقم القومي';
+
+  @override
+  String get dateOfBirth => 'تاريخ الميلاد';
+
+  @override
+  String get age => 'العمر';
+
+  @override
+  String yearsOld(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count سنة',
+      few: '$count سنوات',
+      two: 'سنتان',
+      one: 'سنة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gender => 'النوع';
+
+  @override
+  String get religion => 'الديانة';
+
+  @override
+  String get nationality => 'الجنسية';
+
+  @override
+  String get grade => 'الصف';
+
+  @override
+  String get schoolClass => 'الفصل';
+
+  @override
+  String get academicYear => 'العام الدراسي';
+
+  @override
+  String get enrolledOn => 'تاريخ الالتحاق';
+
+  @override
+  String get previousSchool => 'المدرسة السابقة';
+
+  @override
+  String get address => 'العنوان';
+
+  @override
+  String get homePhone => 'هاتف المنزل';
+
+  @override
+  String get job => 'الوظيفة';
+
+  @override
+  String get education => 'المؤهل الدراسي';
+
+  @override
+  String childrenLinked(int count) {
+    return '$count مرتبطون';
+  }
+
+  @override
+  String get linkAnotherChild => 'ربط طفل آخر';
+
+  @override
   String get language => 'اللغة';
 
   @override
-  String get chatNotifications => 'إشعارات المحادثة';
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get notificationKindsHint =>
+      'اختر ما يصل هاتفك من إشعارات. كل شيء يظل ظاهرًا في التطبيق.';
+
+  @override
+  String get notificationsOffNote =>
+      'الإشعارات متوقفة. شغّلها لتختار ما يصلك منها.';
+
+  @override
+  String get announcements => 'الإعلانات';
+
+  @override
+  String get noAnnouncements => 'لا توجد إعلانات بعد';
+
+  @override
+  String get noAnnouncementsHint => 'إعلانات المدرسة تظهر هنا.';
+
+  @override
+  String announcementsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count إعلان',
+      few: '$count إعلانات',
+      two: 'إعلانان',
+      one: 'إعلان واحد',
+      zero: 'لا توجد إعلانات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get announcementEnded => 'انتهى';
+
+  @override
+  String announcementUntil(String date) {
+    return 'حتى $date';
+  }
+
+  @override
+  String get homework => 'الواجبات';
+
+  @override
+  String homeworkCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count واجبًا',
+      few: '$count واجبات',
+      two: 'واجبان',
+      one: 'واجب واحد',
+      zero: 'لا واجبات',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkDueSoon => 'قريبًا';
+
+  @override
+  String get homeworkUpcoming => 'القادمة';
+
+  @override
+  String get homeworkDueTodayFilter => 'اليوم';
+
+  @override
+  String get homeworkPast => 'السابقة';
+
+  @override
+  String get homeworkNoDueDate => 'بلا موعد';
+
+  @override
+  String get allSubjects => 'كل المواد';
+
+  @override
+  String homeworkDueOn(String date) {
+    return 'التسليم $date';
+  }
+
+  @override
+  String get homeworkDueToday => 'التسليم اليوم';
+
+  @override
+  String homeworkWasDue(String date) {
+    return 'كان التسليم $date';
+  }
+
+  @override
+  String homeworkGiven(String date) {
+    return 'أُعطي $date';
+  }
+
+  @override
+  String get homeworkNew => 'جديد';
+
+  @override
+  String get noHomework => 'لا توجد واجبات بعد';
+
+  @override
+  String get noHomeworkHint => 'تظهر هنا الواجبات التي ترسلها المدرسة.';
+
+  @override
+  String get noHomeworkFiltered => 'لا توجد واجبات هنا';
+
+  @override
+  String get noHomeworkFilteredHint => 'جرّب تصفية أو مادة أخرى.';
+
+  @override
+  String get viewHomework => 'عرض الواجبات';
+
+  @override
+  String get messages => 'الرسائل';
 
   @override
   String get changePassword => 'تغيير كلمة المرور';
@@ -739,22 +1441,302 @@ class AppLocalizationsAr extends AppLocalizations {
   String get aboutSchool => 'عن مدارس المحبة';
 
   @override
-  String get markAllRead => 'تحديد الكل كمقروء';
+  String get complaints => 'الشكاوى';
 
   @override
-  String get allParents => 'كل أولياء الأمور';
+  String get newComplaint => 'شكوى جديدة';
 
   @override
-  String get yesterday => 'أمس';
+  String get complaintPrivacyNote => 'لا يرى شكواك إلا أنت والمدرسة.';
 
   @override
-  String get earlier => 'سابقًا';
+  String get complaintCategory => 'التصنيف';
 
   @override
-  String get unread => 'غير مقروء';
+  String get chooseCategory => 'اختر التصنيف';
 
   @override
-  String get sendUsAMessage => 'أرسل لنا رسالة';
+  String get categoryRequired => 'حقل التصنيف مطلوب.';
+
+  @override
+  String get complaintAbout => 'بخصوص';
+
+  @override
+  String get complaintGeneral => 'عام';
+
+  @override
+  String get complaintGeneralHint =>
+      'اختر «عام» إذا لم تكن الشكوى عن طفل واحد.';
+
+  @override
+  String get complaintDescription => 'الوصف';
+
+  @override
+  String get complaintDescriptionHint => 'أخبرنا بما حدث، ومتى وأين';
+
+  @override
+  String get descriptionRequired => 'حقل الوصف مطلوب.';
+
+  @override
+  String get complaintAttachments => 'المرفقات';
+
+  @override
+  String get optionalNote => '(اختياري)';
+
+  @override
+  String get addFile => 'إضافة ملف';
+
+  @override
+  String attachmentsCount(int count, int max) {
+    return '$count / $max ملفات';
+  }
+
+  @override
+  String attachmentFormats(String types) {
+    return 'الصيغ المسموح بها: $types.';
+  }
+
+  @override
+  String attachmentMaxFileSize(int megabytes) {
+    return 'الحد الأقصى لحجم الملف: $megabytes ميجابايت لكل ملف.';
+  }
+
+  @override
+  String attachmentMaxTotalSize(int megabytes) {
+    return 'الحد الأقصى للحجم الإجمالي: $megabytes ميجابايت.';
+  }
+
+  @override
+  String attachmentLimitsShort(String types, int megabytes, int total) {
+    return '$types · حتى $megabytes ميجابايت للملف · $total ميجابايت إجمالًا';
+  }
+
+  @override
+  String attachmentsRoomLeft(int count, int megabytes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'يمكنك إضافة $count ملفًا آخر · حتى $megabytes ميجابايت للملف',
+      few: 'يمكنك إضافة $count ملفات أخرى · حتى $megabytes ميجابايت للملف',
+      two: 'يمكنك إضافة ملفين آخرين · حتى $megabytes ميجابايت للملف',
+      one: 'يمكنك إضافة ملف واحد آخر · حتى $megabytes ميجابايت للملف',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String attachmentsSpaceLeft(String left, int total) {
+    return 'متبقٍ $left من $total ميجابايت';
+  }
+
+  @override
+  String attachmentsMaxReached(int max) {
+    return 'وصلت إلى الحد الأقصى للمرفقات ($max ملفات).';
+  }
+
+  @override
+  String attachmentsTotalFull(int total) {
+    return 'استخدمت الحد الإجمالي $total ميجابايت. احذف ملفًا لتضيف غيره.';
+  }
+
+  @override
+  String attachmentTooLarge(String size, int max) {
+    return 'حجم الملف كبير ($size ميجابايت). الحد الأقصى $max ميجابايت';
+  }
+
+  @override
+  String attachmentTypeNotAllowed(String types) {
+    return 'نوع الملف غير مسموح به. المسموح: $types.';
+  }
+
+  @override
+  String attachmentOverTotal(int total, String left) {
+    return 'يتجاوز الحد الإجمالي $total ميجابايت. المتبقي $left ميجابايت.';
+  }
+
+  @override
+  String attachmentOverTotalFull(int total) {
+    return 'يتجاوز الحد الإجمالي $total ميجابايت.';
+  }
+
+  @override
+  String get attachmentRejected => 'تعذّر قبول هذا الملف';
+
+  @override
+  String attachmentUploading(int percent) {
+    return 'جارٍ الرفع… $percent%';
+  }
+
+  @override
+  String get attachPhoto => 'صورة من المعرض';
+
+  @override
+  String get attachDocument => 'ملف PDF أو Word';
+
+  @override
+  String get couldNotOpenFiles => 'تعذّر فتح الصور أو الملفات. حاول مرة أخرى.';
+
+  @override
+  String tooManyAttachments(int count) {
+    return 'يمكنك إرفاق $count ملفات بحد أقصى.';
+  }
+
+  @override
+  String attachmentNotAllowed(String types, int megabytes) {
+    return 'الملفات المسموح بها $types، بحد أقصى $megabytes ميجابايت للملف.';
+  }
+
+  @override
+  String removeAttachment(String name) {
+    return 'إزالة $name';
+  }
+
+  @override
+  String fileSizeKb(String size) {
+    return '$size كيلوبايت';
+  }
+
+  @override
+  String fileSizeMb(String size) {
+    return '$size ميجابايت';
+  }
+
+  @override
+  String get submitComplaint => 'إرسال الشكوى';
+
+  @override
+  String get complaintSubmitted => 'تم إرسال شكواك.';
+
+  @override
+  String get complaintReference => 'رقم الشكوى';
+
+  @override
+  String get viewComplaint => 'عرض الشكوى';
+
+  @override
+  String get backToComplaints => 'العودة إلى الشكاوى';
+
+  @override
+  String complaintsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count شكوى',
+      few: '$count شكاوى',
+      two: 'شكويان',
+      one: 'شكوى واحدة',
+      zero: 'لا توجد شكاوى',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String openCount(int count) {
+    return '$count مفتوحة';
+  }
+
+  @override
+  String get filterOpen => 'مفتوحة';
+
+  @override
+  String get filterClosed => 'مغلقة';
+
+  @override
+  String get noComplaintsHere => 'لا توجد شكاوى هنا';
+
+  @override
+  String get noComplaintsSubtitle => 'ستظهر هنا الشكاوى التي ترسلها.';
+
+  @override
+  String complaintsPageNote(int page, int lastPage, int total) {
+    return 'صفحة $page من $lastPage · الإجمالي $total';
+  }
+
+  @override
+  String submittedOn(String date) {
+    return 'أُرسلت $date';
+  }
+
+  @override
+  String lastUpdateOn(String date) {
+    return 'آخر تحديث $date';
+  }
+
+  @override
+  String get statusSubmitted => 'تم الإرسال';
+
+  @override
+  String get statusUnderReview => 'قيد المراجعة';
+
+  @override
+  String get statusAwaitingReply => 'في انتظار ردك';
+
+  @override
+  String get statusResolved => 'تم الحل';
+
+  @override
+  String get statusRejected => 'مرفوضة';
+
+  @override
+  String get complaint => 'شكوى';
+
+  @override
+  String get complaintDetails => 'التفاصيل';
+
+  @override
+  String get submittedAt => 'تاريخ الإرسال';
+
+  @override
+  String get lastUpdate => 'آخر تحديث';
+
+  @override
+  String get yourComplaint => 'شكواك';
+
+  @override
+  String get statusHistory => 'سجل الحالة';
+
+  @override
+  String get complaintUpdates => 'التحديثات';
+
+  @override
+  String get schoolAdministration => 'إدارة المدرسة';
+
+  @override
+  String get schoolInitials => 'م';
+
+  @override
+  String get tapToOpen => 'اضغط للفتح';
+
+  @override
+  String get openInAnotherApp => 'فتح في تطبيق آخر';
+
+  @override
+  String get cantShowFile => 'تعذّر عرض هذا الملف هنا.';
+
+  @override
+  String get checkingFile => 'جارٍ فحص الملف…';
+
+  @override
+  String get addAReply => 'أضف ردًا';
+
+  @override
+  String get replyHint => 'اكتب مزيدًا من التفاصيل للمدرسة';
+
+  @override
+  String get replySent => 'تم إرسال ردك.';
+
+  @override
+  String get attach => 'إرفاق';
+
+  @override
+  String get sendReply => 'إرسال الرد';
+
+  @override
+  String get complaintClosedNote =>
+      'تم إغلاق هذه الشكوى. يمكنك إرسال شكوى جديدة.';
+
+  @override
+  String get cantOpenFile => 'لا يوجد تطبيق على هذا الهاتف يفتح هذا الملف.';
 
   @override
   String get writeToUs => 'راسلنا';
@@ -823,10 +1805,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get messageHint => 'اكتب رسالتك هنا…';
 
   @override
-  String get sendMessage => 'إرسال الرسالة';
+  String get sendMessage => 'إرسال رسالة';
 
   @override
   String get checkHighlightedFields => 'من فضلك راجع الحقول المحددة.';
+
+  @override
+  String loginLockedFor(String time) {
+    return 'محاولات خاطئة كثيرة. حاول مرة أخرى بعد $time.';
+  }
 
   @override
   String get messageSentTitle => 'تم إرسال رسالتك!';

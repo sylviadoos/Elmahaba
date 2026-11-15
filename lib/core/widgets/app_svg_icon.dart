@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:vector_graphics/vector_graphics_compat.dart'
+    show RenderingStrategy;
 
 /// SVG icon from `assets/icons/`, e.g. `AppSvgIcon(AppIcons.navHome)`.
 ///
@@ -27,6 +29,11 @@ class AppSvgIcon extends StatelessWidget {
       width: size,
       height: size,
       matchTextDirection: matchTextDirection,
+      // Drawn once to an image (shared by every icon of the same size) and
+      // tinted as it's copied. Drawn as shapes, a tinted icon would be
+      // painted off screen first each time (`saveLayer`): a few on every
+      // chat message, each frame of a scroll.
+      renderingStrategy: RenderingStrategy.raster,
       colorFilter: tint == null
           ? null
           : ColorFilter.mode(tint, BlendMode.srcIn),

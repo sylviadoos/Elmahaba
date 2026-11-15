@@ -69,6 +69,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expiredToken => 'Session expired, please log in again';
 
   @override
+  String get accountWithdrawn =>
+      'Your account is no longer available because the student is no longer enrolled at the school. Please contact the school.';
+
+  @override
   String get phoneNumberIsNotValid => 'This phone number is not valid';
 
   @override
@@ -115,6 +119,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logout => 'Log out';
+
+  @override
+  String get logOutTitle => 'Log out?';
+
+  @override
+  String get logOutMessage =>
+      'You\'ll need your mobile number and password to log in again.';
+
+  @override
+  String get deleteMyAccount => 'Delete my account';
+
+  @override
+  String get deleteAccountTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountMessage =>
+      'Your account, your linked children and your settings will be deleted. The school keeps your chat and complaint records.';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get accountDeleted => 'Your account was deleted';
 
   @override
   String get home => 'Home';
@@ -197,17 +227,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetPassword => 'Reset password';
 
   @override
-  String get passwordMustNotBeEmpty =>
-      'Password must not be empty and must contain at least 6 characters, one uppercase letter, and one number';
+  String get passwordTooShort => 'Password must be at least 8 characters';
 
   @override
   String get enterYourPassword => 'Enter your password';
 
   @override
   String get newPassword => 'New password';
-
-  @override
-  String get rememberMe => 'Remember me';
 
   @override
   String get continueButton => 'Continue';
@@ -422,10 +448,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginSubtitle =>
-      'Parents, log in to follow your child’s school day.';
-
-  @override
-  String get emailOrMobile => 'Email or mobile number';
+      'Parents, log in with the mobile number you gave the school to follow your child’s school day.';
 
   @override
   String get emailHint => 'parent@email.com';
@@ -450,19 +473,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get registerSubtitle =>
-      'Parent account — follow your children’s school day.';
-
-  @override
-  String get parentFullName => 'Parent’s full name';
-
-  @override
-  String get asOnNationalId => 'As on your national ID';
+      'Parent account — sign up with the mobile number you gave the school to follow your children’s school day.';
 
   @override
   String get phoneHint => '10 1234 5678';
 
   @override
-  String get passwordHint => 'At least 6 characters';
+  String get fullPhoneHint => '010 1234 5678';
+
+  @override
+  String get passwordHint => 'At least 8 characters';
+
+  @override
+  String get confirmPasswordHint => 'Type the password again';
+
+  @override
+  String get accountAlreadyExists =>
+      'An account already exists for this number. Please log in.';
+
+  @override
+  String get accountCreated => 'Your account has been created. Please log in.';
+
+  @override
+  String get phoneVerificationFailed =>
+      'We couldn’t verify your number. Please try again.';
+
+  @override
+  String get otpWrongCode =>
+      'That code isn’t right. Check the SMS and try again.';
+
+  @override
+  String get otpExpired => 'This code has expired. Please request a new one.';
+
+  @override
+  String get tooManyAttempts => 'Too many attempts. Please try again later.';
 
   @override
   String get agreePrefix => 'I agree to the ';
@@ -507,6 +551,96 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changeIt => 'Change it';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Enter the mobile number on your account and we’ll send you a code.';
+
+  @override
+  String get useRegisteredNumber => 'Use the same number you registered with.';
+
+  @override
+  String get sendCode => 'Send code';
+
+  @override
+  String get rememberedIt => 'Remembered it?';
+
+  @override
+  String get enterTheCode => 'Enter the code';
+
+  @override
+  String get resetCodeSentTo =>
+      'To reset your password, enter the 6-digit code we sent to ';
+
+  @override
+  String get setNewPassword => 'Set a new password';
+
+  @override
+  String get setNewPasswordSubtitle =>
+      'Choose a strong password you don’t use anywhere else.';
+
+  @override
+  String get enterNewPassword => 'Enter a new password';
+
+  @override
+  String get confirmNewPassword => 'Confirm new password';
+
+  @override
+  String get typeItAgain => 'Type it again';
+
+  @override
+  String get ruleEightCharacters => 'At least 8 characters';
+
+  @override
+  String get ruleHasLetter => 'Contains a letter';
+
+  @override
+  String get ruleHasNumber => 'Contains a number';
+
+  @override
+  String get rulePasswordsMatch => 'Both passwords match';
+
+  @override
+  String get saveNewPassword => 'Save new password';
+
+  @override
+  String get passwordChanged => 'Password changed';
+
+  @override
+  String get logInWithNewPassword =>
+      'You can now log in with your new password.';
+
+  @override
+  String get backToLogin => 'Back to log in';
+
+  @override
+  String get changePasswordSubtitle =>
+      'For your security, enter your current password first.';
+
+  @override
+  String get currentPassword => 'Current password';
+
+  @override
+  String get enterCurrentPassword => 'Enter your current password';
+
+  @override
+  String get forgotCurrentPassword => 'Forgot your current password?';
+
+  @override
+  String get ruleNewPasswordsMatch => 'Both new passwords match';
+
+  @override
+  String get ruleDifferentFromCurrent => 'Different from the current password';
+
+  @override
+  String get passwordUpdated => 'Password updated';
+
+  @override
+  String get useNewPasswordNextTime =>
+      'Next time you log in, use your new password.';
+
+  @override
+  String get backToSettings => 'Back to settings';
 
   @override
   String get lastStep => 'Last step';
@@ -554,21 +688,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linked => 'Linked';
 
   @override
-  String removeChild(String name) {
-    return 'Remove $name';
+  String get childLinked => 'Your child has been linked to your account.';
+
+  @override
+  String get linkCodeSentTo => 'A verification code will be sent to: ';
+
+  @override
+  String codeAttemptsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tries left',
+      one: '1 try left',
+      zero: 'No tries left',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String get childLinkPending =>
+      'Request sent to the school. You’ll see your child once the school confirms it.';
 
   @override
   String get noChildrenYet => 'No children added yet';
 
   @override
   String get goodMorning => 'Good morning';
-
-  @override
-  String get myProfile => 'My profile';
-
-  @override
-  String get notifications => 'Notifications';
 
   @override
   String get today => 'Today';
@@ -594,52 +739,198 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String daysPresentIn(String month) {
-    return 'days present in $month';
+  String get needsYourAttention => 'Needs your attention';
+
+  @override
+  String get attendanceNotTaken => 'Attendance not taken yet';
+
+  @override
+  String get noResultsYet => 'No results yet';
+
+  @override
+  String get noFeesYet => 'No fees yet';
+
+  @override
+  String overdueInstallmentsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count overdue installments',
+      one: '1 overdue installment',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get ofTheYearPaid => 'of the year paid';
+  String feesDueOn(String date) {
+    return 'Due $date';
+  }
 
   @override
-  String get needsYourAttention => 'Needs your attention';
+  String feesOverdueSince(String date) {
+    return 'Overdue since $date';
+  }
+
+  @override
+  String get daysPresent => 'Days present';
+
+  @override
+  String messagesAndNotices(int messages, int notices) {
+    return 'Messages $messages · Notices $notices';
+  }
 
   @override
   String get chatGeneral => 'General';
 
   @override
+  String get chatNew => 'New';
+
+  @override
+  String get chatRead => 'Read';
+
+  @override
   String get chatPrivate => 'Private';
-
-  @override
-  String get chatPrivateOnlyYou => 'Private · only you see it';
-
-  @override
-  String get youReplied => 'You replied';
 
   @override
   String get you => 'You';
 
   @override
-  String get chatReplyHint =>
-      'Reply by choosing one of the options on each message';
+  String get yesterday => 'Yesterday';
 
   @override
-  String get term1 => 'Term 1';
+  String get noMessagesYet => 'No messages yet';
 
   @override
-  String get term2Soon => 'Term 2 · Soon';
+  String get noMessagesHint =>
+      'Messages from the school, and the ones you send, show here.';
 
   @override
-  String get term1Average => 'Term 1 average';
+  String get olderMessagesFailed => 'Couldn’t load older messages.';
 
   @override
-  String get reportCardPdf => 'Report card (PDF)';
+  String get send => 'Send';
+
+  @override
+  String get replyingTo => 'Replying to';
+
+  @override
+  String get inReplyTo => 'In reply to';
+
+  @override
+  String get cancelReply => 'Cancel reply';
+
+  @override
+  String get deletedMessage => 'This message was deleted';
+
+  @override
+  String get earlierMessage => 'An earlier message';
+
+  @override
+  String get edited => 'Edited';
+
+  @override
+  String get chatCantSend =>
+      'You can message the school while one of your children is enrolled.';
+
+  @override
+  String get chatClosed =>
+      'The chat is closed for now. You can still read messages.';
+
+  @override
+  String get messageAbout => 'About';
+
+  @override
+  String get viewAttendance => 'View attendance';
+
+  @override
+  String get viewResults => 'View results';
+
+  @override
+  String get viewFees => 'View fees';
+
+  @override
+  String get result => 'Result';
+
+  @override
+  String publishedOn(String date) {
+    return 'Published $date';
+  }
+
+  @override
+  String get finalResult => 'Final result';
+
+  @override
+  String attendancePercent(String percent) {
+    return 'Attendance $percent';
+  }
 
   @override
   String get subjects => 'Subjects';
 
   @override
-  String get teachersNote => 'Teacher’s note';
+  String get countedInFinalResult => 'Counted in the final result';
+
+  @override
+  String get otherSubjects => 'Other subjects';
+
+  @override
+  String get notCountedInFinalResult => 'Not counted in the final result';
+
+  @override
+  String get highLevel => 'High level';
+
+  @override
+  String get highLevelNote => 'Extra level, not counted in the final result';
+
+  @override
+  String get activities => 'Activities';
+
+  @override
+  String get certificate => 'Certificate';
+
+  @override
+  String get downloadCertificate => 'Download certificate (PDF)';
+
+  @override
+  String get certificateSaved => 'Certificate saved';
+
+  @override
+  String get certificateNotSaved => 'Couldn’t save the certificate. Try again.';
+
+  @override
+  String get certificateFailed => 'Couldn’t make the certificate. Try again.';
+
+  @override
+  String get monthlyResults => 'Monthly';
+
+  @override
+  String get latestResult => 'Latest result';
+
+  @override
+  String classRank(int rank) {
+    return 'Rank $rank';
+  }
+
+  @override
+  String get assessmentInitial => 'Initial';
+
+  @override
+  String get assessmentFinal => 'Final';
+
+  @override
+  String get assessmentStatus => 'Status';
+
+  @override
+  String get gradeExceeds => 'Exceeds Expectations';
+
+  @override
+  String get gradeMeets => 'Meets Expectations';
+
+  @override
+  String get gradePartiallyMeets => 'Partially Meets Expectations';
+
+  @override
+  String get gradeBelow => 'Below Expectations';
 
   @override
   String get present => 'Present';
@@ -648,13 +939,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get absent => 'Absent';
 
   @override
-  String get late => 'Late';
-
-  @override
   String get officialHoliday => 'Official holiday';
 
   @override
-  String get friSatOff => 'Fri & Sat off';
+  String get friSatOff => 'Weekend';
 
   @override
   String get thisMonth => 'This month';
@@ -666,32 +954,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nextMonth => 'Next month';
 
   @override
-  String schoolYear(String years) {
-    return 'School year $years';
+  String get attendanceWord => 'attendance';
+
+  @override
+  String attendedOfDays(int attended, int total) {
+    return '$attended of $total school days';
   }
 
   @override
-  String percentPaid(String percent) {
-    return '$percent paid';
+  String get excused => 'Excused';
+
+  @override
+  String get excusedOrMedical => 'Excused / medical';
+
+  @override
+  String get excusedAbsence => 'Excused absence';
+
+  @override
+  String reasonIs(String reason) {
+    return 'Reason: $reason';
   }
 
   @override
-  String get remaining => 'Remaining';
+  String get noReasonGiven => 'No reason given';
 
   @override
-  String paidAmount(String amount) {
-    return 'Paid $amount';
+  String holidayNoSchool(String name) {
+    return '$name · no school';
   }
 
   @override
-  String totalAmount(String amount) {
-    return 'Total $amount';
-  }
+  String get reply => 'Reply';
 
   @override
-  String payAmount(String amount) {
-    return 'Pay $amount';
-  }
+  String get noAbsencesThisMonth => 'No absences or late days this month.';
 
   @override
   String egpAmount(String amount) {
@@ -702,22 +998,220 @@ class AppLocalizationsEn extends AppLocalizations {
   String get allFeesPaid => 'All fees paid';
 
   @override
-  String get installments => 'Installments';
-
-  @override
   String get paid => 'Paid';
 
   @override
-  String get due => 'Due';
+  String accountNumber(String number) {
+    return 'Account $number';
+  }
 
   @override
-  String get receipts => 'Receipts';
+  String payFeesAmount(String amount) {
+    return 'Pay fees · $amount';
+  }
 
   @override
-  String get pdf => 'PDF';
+  String get preview => 'Preview';
 
   @override
-  String get editProfile => 'Edit profile';
+  String get downloadPdf => 'Download PDF';
+
+  @override
+  String get allParents => 'All parents';
+
+  @override
+  String get medicalExcuse => 'Medical excuse';
+
+  @override
+  String get submitExcuse => 'Submit excuse';
+
+  @override
+  String get viewExcuse => 'View excuse';
+
+  @override
+  String excuseStatusLine(String status) {
+    return 'Medical excuse · $status';
+  }
+
+  @override
+  String excuseSubmitBy(String date) {
+    return 'Excuse by $date';
+  }
+
+  @override
+  String get excuseUnderReview => 'Under review';
+
+  @override
+  String get excuseInfoRequired => 'Information needed';
+
+  @override
+  String get excuseAccepted => 'Accepted';
+
+  @override
+  String get excuseRejected => 'Rejected';
+
+  @override
+  String excuseForAbsence(String date) {
+    return 'For the absence on $date';
+  }
+
+  @override
+  String excuseSubmitUntil(String date) {
+    return 'You can send it until $date.';
+  }
+
+  @override
+  String get excuseNote => 'Note';
+
+  @override
+  String get excuseNoteHint => 'e.g. Doctor visit — fever';
+
+  @override
+  String get excuseDocuments => 'Medical documents';
+
+  @override
+  String excuseDocumentsRules(String types, int megabytes, int count) {
+    return '$types · up to $megabytes MB each · up to $count files';
+  }
+
+  @override
+  String get excuseDocumentRequired => 'Attach at least one document.';
+
+  @override
+  String get excuseSent => 'Your medical excuse has been sent.';
+
+  @override
+  String get excuseSubmittedByOther => 'Sent by the child\'s other parent';
+
+  @override
+  String get excuseRejectionReason => 'Why it was rejected';
+
+  @override
+  String get excuseInformationRequest => 'What the school needs';
+
+  @override
+  String get excuseAcceptedNote => 'The day now counts as medical leave.';
+
+  @override
+  String get addDocuments => 'Add documents';
+
+  @override
+  String get sendDocuments => 'Send documents';
+
+  @override
+  String get documentsSent =>
+      'Documents sent. The school will review the excuse again.';
+
+  @override
+  String get excuseHistory => 'History';
+
+  @override
+  String get excuseStepSubmitted => 'Excuse sent';
+
+  @override
+  String get excuseStepInfoRequested => 'The school asked for more';
+
+  @override
+  String get excuseStepDocumentsAdded => 'Documents added';
+
+  @override
+  String get excuseStepAccepted => 'Excuse accepted';
+
+  @override
+  String get excuseStepRejected => 'Excuse rejected';
+
+  @override
+  String get byParent => 'Parent';
+
+  @override
+  String get bySchool => 'School';
+
+  @override
+  String get feeStatement => 'Fee statement';
+
+  @override
+  String get feeStatementSaved => 'Fee statement saved';
+
+  @override
+  String get feeStatementNotSaved =>
+      'Couldn’t save the fee statement. Try again.';
+
+  @override
+  String get feeStatementFailed =>
+      'Couldn’t make the fee statement. Try again.';
+
+  @override
+  String get payFees => 'Pay fees';
+
+  @override
+  String get payFullAmount => 'Pay full amount';
+
+  @override
+  String get payInInstallments => 'Pay in installments';
+
+  @override
+  String get amountPayableNow => 'Amount payable now';
+
+  @override
+  String get tickInstallments => 'Tick the installments you want to pay';
+
+  @override
+  String get confirmOptionalFee => 'Confirm Optional Fee';
+
+  @override
+  String confirmOptionalFeeMessage(String fee, String amount) {
+    return 'Are you sure you want to pay this fee?\n$fee — $amount';
+  }
+
+  @override
+  String get yesPay => 'Yes, Pay';
+
+  @override
+  String get dropOptionalFee => 'Remove Optional Fee';
+
+  @override
+  String dropOptionalFeeMessage(String fee) {
+    return 'Are you sure you want to remove $fee from the fees?';
+  }
+
+  @override
+  String get yesDrop => 'Yes, Remove';
+
+  @override
+  String get tickEarlierInstallmentsFirst =>
+      'To preview or download the statement, tick the earlier unpaid installments too.';
+
+  @override
+  String dueOnAccount(String date, String account) {
+    return 'Due $date · Account $account';
+  }
+
+  @override
+  String get upcoming => 'Upcoming';
+
+  @override
+  String get overdue => 'Overdue';
+
+  @override
+  String get underSettlement => 'Under settlement';
+
+  @override
+  String get paymentInProgress => 'Payment in progress';
+
+  @override
+  String get payOnline => 'Pay online';
+
+  @override
+  String payOnlineAmount(String amount) {
+    return 'Pay online · $amount';
+  }
+
+  @override
+  String get paymentBySkoolex =>
+      'Payment is processed through the Skoolex school system';
+
+  @override
+  String get paymentPageFailed => 'Couldn’t open the payment page';
 
   @override
   String get myChildren => 'My children';
@@ -726,10 +1220,213 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addAChild => 'Add a child';
 
   @override
+  String get chooseChild => 'Choose a child';
+
+  @override
+  String get allChildren => 'All children';
+
+  @override
+  String get childDetails => 'Child details';
+
+  @override
+  String get childStudentInfo => 'Student';
+
+  @override
+  String get childSchoolInfo => 'School';
+
+  @override
+  String get childContactInfo => 'Contact';
+
+  @override
+  String get father => 'Father';
+
+  @override
+  String get mother => 'Mother';
+
+  @override
+  String get guardian => 'Guardian';
+
+  @override
+  String get studentCode => 'Student code';
+
+  @override
+  String get nationalId => 'National ID';
+
+  @override
+  String get dateOfBirth => 'Date of birth';
+
+  @override
+  String get age => 'Age';
+
+  @override
+  String yearsOld(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count years',
+      one: '1 year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get religion => 'Religion';
+
+  @override
+  String get nationality => 'Nationality';
+
+  @override
+  String get grade => 'Grade';
+
+  @override
+  String get schoolClass => 'Class';
+
+  @override
+  String get academicYear => 'Academic year';
+
+  @override
+  String get enrolledOn => 'Enrolled on';
+
+  @override
+  String get previousSchool => 'Previous school';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get homePhone => 'Home phone';
+
+  @override
+  String get job => 'Job';
+
+  @override
+  String get education => 'Education';
+
+  @override
+  String childrenLinked(int count) {
+    return '$count linked';
+  }
+
+  @override
+  String get linkAnotherChild => 'Link another child';
+
+  @override
   String get language => 'Language';
 
   @override
-  String get chatNotifications => 'Chat notifications';
+  String get notifications => 'Notifications';
+
+  @override
+  String get notificationKindsHint =>
+      'Choose what rings your phone. Everything still shows in the app.';
+
+  @override
+  String get notificationsOffNote =>
+      'Notifications are off. Turn them on to choose which ones ring.';
+
+  @override
+  String get announcements => 'Announcements';
+
+  @override
+  String get noAnnouncements => 'No announcements yet';
+
+  @override
+  String get noAnnouncementsHint => 'Announcements from the school show here.';
+
+  @override
+  String announcementsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count announcements',
+      one: '1 announcement',
+      zero: 'No announcements',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get announcementEnded => 'Ended';
+
+  @override
+  String announcementUntil(String date) {
+    return 'Until $date';
+  }
+
+  @override
+  String get homework => 'Homework';
+
+  @override
+  String homeworkCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count homework',
+      one: '1 homework',
+      zero: 'No homework',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get homeworkDueSoon => 'Due soon';
+
+  @override
+  String get homeworkUpcoming => 'Upcoming';
+
+  @override
+  String get homeworkDueTodayFilter => 'Due today';
+
+  @override
+  String get homeworkPast => 'Past';
+
+  @override
+  String get homeworkNoDueDate => 'No due date';
+
+  @override
+  String get allSubjects => 'All subjects';
+
+  @override
+  String homeworkDueOn(String date) {
+    return 'Due $date';
+  }
+
+  @override
+  String get homeworkDueToday => 'Due today';
+
+  @override
+  String homeworkWasDue(String date) {
+    return 'Was due $date';
+  }
+
+  @override
+  String homeworkGiven(String date) {
+    return 'Given $date';
+  }
+
+  @override
+  String get homeworkNew => 'New';
+
+  @override
+  String get noHomework => 'No homework yet';
+
+  @override
+  String get noHomeworkHint => 'Homework from the school shows here.';
+
+  @override
+  String get noHomeworkFiltered => 'No homework here';
+
+  @override
+  String get noHomeworkFilteredHint => 'Try another filter or subject.';
+
+  @override
+  String get viewHomework => 'View homework';
+
+  @override
+  String get messages => 'Messages';
 
   @override
   String get changePassword => 'Change password';
@@ -741,22 +1438,302 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutSchool => 'About Al Mahabbah';
 
   @override
-  String get markAllRead => 'Mark all read';
+  String get complaints => 'Complaints';
 
   @override
-  String get allParents => 'All parents';
+  String get newComplaint => 'New complaint';
 
   @override
-  String get yesterday => 'Yesterday';
+  String get complaintPrivacyNote =>
+      'Only you and the school can see your complaint.';
 
   @override
-  String get earlier => 'Earlier';
+  String get complaintCategory => 'Category';
 
   @override
-  String get unread => 'Unread';
+  String get chooseCategory => 'Choose a category';
 
   @override
-  String get sendUsAMessage => 'Send us a message';
+  String get categoryRequired => 'The category field is required.';
+
+  @override
+  String get complaintAbout => 'About';
+
+  @override
+  String get complaintGeneral => 'General';
+
+  @override
+  String get complaintGeneralHint =>
+      'Choose General if it isn’t about one child.';
+
+  @override
+  String get complaintDescription => 'Description';
+
+  @override
+  String get complaintDescriptionHint =>
+      'Tell us what happened, when and where';
+
+  @override
+  String get descriptionRequired => 'The description field is required.';
+
+  @override
+  String get complaintAttachments => 'Attachments';
+
+  @override
+  String get optionalNote => '(optional)';
+
+  @override
+  String get addFile => 'Add file';
+
+  @override
+  String attachmentsCount(int count, int max) {
+    return '$count / $max files';
+  }
+
+  @override
+  String attachmentFormats(String types) {
+    return 'Allowed formats: $types.';
+  }
+
+  @override
+  String attachmentMaxFileSize(int megabytes) {
+    return 'Maximum file size: $megabytes MB per file.';
+  }
+
+  @override
+  String attachmentMaxTotalSize(int megabytes) {
+    return 'Maximum total size: $megabytes MB.';
+  }
+
+  @override
+  String attachmentLimitsShort(String types, int megabytes, int total) {
+    return '$types · Max $megabytes MB per file · $total MB total';
+  }
+
+  @override
+  String attachmentsRoomLeft(int count, int megabytes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'You can add $count more · Max $megabytes MB each',
+      one: 'You can add 1 more · Max $megabytes MB each',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String attachmentsSpaceLeft(String left, int total) {
+    return '$left MB left of $total MB';
+  }
+
+  @override
+  String attachmentsMaxReached(int max) {
+    return 'You\'ve reached the maximum number of attachments ($max files).';
+  }
+
+  @override
+  String attachmentsTotalFull(int total) {
+    return 'You\'ve used the full $total MB. Remove a file to add another.';
+  }
+
+  @override
+  String attachmentTooLarge(String size, int max) {
+    return 'Too large ($size MB). Max size is $max MB';
+  }
+
+  @override
+  String attachmentTypeNotAllowed(String types) {
+    return 'File type not allowed. Allowed: $types.';
+  }
+
+  @override
+  String attachmentOverTotal(int total, String left) {
+    return 'Over the $total MB total. $left MB left.';
+  }
+
+  @override
+  String attachmentOverTotalFull(int total) {
+    return 'Over the $total MB total.';
+  }
+
+  @override
+  String get attachmentRejected => 'This file could not be accepted';
+
+  @override
+  String attachmentUploading(int percent) {
+    return 'Uploading… $percent%';
+  }
+
+  @override
+  String get attachPhoto => 'Photo from the gallery';
+
+  @override
+  String get attachDocument => 'PDF or Word file';
+
+  @override
+  String get couldNotOpenFiles =>
+      'Couldn’t open your photos or files. Please try again.';
+
+  @override
+  String tooManyAttachments(int count) {
+    return 'You can attach up to $count files.';
+  }
+
+  @override
+  String attachmentNotAllowed(String types, int megabytes) {
+    return 'Allowed files are $types, up to $megabytes MB each.';
+  }
+
+  @override
+  String removeAttachment(String name) {
+    return 'Remove $name';
+  }
+
+  @override
+  String fileSizeKb(String size) {
+    return '$size KB';
+  }
+
+  @override
+  String fileSizeMb(String size) {
+    return '$size MB';
+  }
+
+  @override
+  String get submitComplaint => 'Submit complaint';
+
+  @override
+  String get complaintSubmitted => 'Your complaint has been submitted.';
+
+  @override
+  String get complaintReference => 'Reference';
+
+  @override
+  String get viewComplaint => 'View complaint';
+
+  @override
+  String get backToComplaints => 'Back to complaints';
+
+  @override
+  String complaintsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count complaints',
+      one: '1 complaint',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String openCount(int count) {
+    return '$count open';
+  }
+
+  @override
+  String get filterOpen => 'Open';
+
+  @override
+  String get filterClosed => 'Closed';
+
+  @override
+  String get noComplaintsHere => 'No complaints here';
+
+  @override
+  String get noComplaintsSubtitle =>
+      'Complaints you submit will appear in this list.';
+
+  @override
+  String complaintsPageNote(int page, int lastPage, int total) {
+    return 'Page $page of $lastPage · $total total';
+  }
+
+  @override
+  String submittedOn(String date) {
+    return 'Submitted $date';
+  }
+
+  @override
+  String lastUpdateOn(String date) {
+    return 'Last update $date';
+  }
+
+  @override
+  String get statusSubmitted => 'Submitted';
+
+  @override
+  String get statusUnderReview => 'Under review';
+
+  @override
+  String get statusAwaitingReply => 'Awaiting your reply';
+
+  @override
+  String get statusResolved => 'Resolved';
+
+  @override
+  String get statusRejected => 'Rejected';
+
+  @override
+  String get complaint => 'Complaint';
+
+  @override
+  String get complaintDetails => 'Details';
+
+  @override
+  String get submittedAt => 'Submitted';
+
+  @override
+  String get lastUpdate => 'Last update';
+
+  @override
+  String get yourComplaint => 'Your complaint';
+
+  @override
+  String get statusHistory => 'Status history';
+
+  @override
+  String get complaintUpdates => 'Updates';
+
+  @override
+  String get schoolAdministration => 'School administration';
+
+  @override
+  String get schoolInitials => 'AM';
+
+  @override
+  String get tapToOpen => 'Tap to open';
+
+  @override
+  String get openInAnotherApp => 'Open in another app';
+
+  @override
+  String get cantShowFile => 'This file can’t be shown here.';
+
+  @override
+  String get checkingFile => 'Checking file…';
+
+  @override
+  String get addAReply => 'Add a reply';
+
+  @override
+  String get replyHint => 'Write more details for the school';
+
+  @override
+  String get replySent => 'Your reply has been sent.';
+
+  @override
+  String get attach => 'Attach';
+
+  @override
+  String get sendReply => 'Send reply';
+
+  @override
+  String get complaintClosedNote =>
+      'This complaint is closed. You can submit a new complaint.';
+
+  @override
+  String get cantOpenFile =>
+      'There’s no app on this phone that opens this file.';
 
   @override
   String get writeToUs => 'Write to us';
@@ -829,6 +1806,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkHighlightedFields => 'Please check the highlighted fields.';
+
+  @override
+  String loginLockedFor(String time) {
+    return 'Too many wrong attempts. Try again in $time.';
+  }
 
   @override
   String get messageSentTitle => 'Message sent!';

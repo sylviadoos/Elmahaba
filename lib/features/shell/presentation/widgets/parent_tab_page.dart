@@ -1,59 +1,87 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/child_tabs.dart';
+import 'package:al_mahhaba_school/core/widgets/app_back_button.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header.dart';
-import 'package:al_mahhaba_school/features/children/data/mock_children.dart';
-import 'package:al_mahhaba_school/features/home/data/mock_home.dart';
+import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
+import 'package:al_mahhaba_school/features/children/presentation/widgets/child_picker.dart';
+import 'package:al_mahhaba_school/features/complaints/presentation/widgets/complaints_button.dart';
+import 'package:al_mahhaba_school/features/profile/presentation/widgets/settings_button.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/main_nav_bar.dart';
 
-/// Frame of the Results / Attendance / Fees tabs: red header with the
-/// [title] and child switcher, scrolling [children], and the nav bar.
+/// Frame of the Results / Attendance / Fees tabs: red header with back
+/// (to Home), the [title], Profile and Complaints, and the child picker, and scrolling
+/// [children]. The nav bar is
+/// `ParentShellPage`'s, over it.
+///
+/// The picker shows the parent's real children; [selectedChild] is the one
+/// every page shows (`watchSelectedChildIndex`). With [onRefresh], pulling
+/// the page down asks again; it spins until that ends.
 class ParentTabPage extends StatelessWidget {
   const ParentTabPage({
     super.key,
     required this.title,
-    required this.tab,
     required this.selectedChild,
     required this.onChildSelected,
     required this.children,
+    this.onRefresh,
   });
 
   final String title;
-  final MainTab tab;
   final int selectedChild;
   final ValueChanged<int> onChildSelected;
   final List<Widget> children;
+  final RefreshCallback? onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    final navBottom = math.max(24.h, MediaQuery.paddingOf(context).bottom + 8);
-    final chatUnread = mockDashboards.fold(0, (sum, d) => sum + d.unread);
+    final parentChildren = context.watchChildren();
+    final onRefresh = this.onRefresh;
+    final content = SingleChildScrollView(
+      // Pulls down even when it all fits.
+      physics: onRefresh == null ? null : const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        6.h,
+        20.w,
+        MainNavBar.contentPadding(context),
+      ),
+      // Painted once: scrolling only moves it, rather than paint every card
+      // again each frame.
+      child: RepaintBoundary(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 18.h,
+          children: children,
+        ),
+      ),
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        body: Stack(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                RedHeader(
-                  horizontalPadding: 16,
-                  bottomPadding: 36,
-                  watermarkTop: 20,
-                  watermarkSize: const Size(200, 143),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: 12.h,
+            RedHeader(
+              horizontalPadding: 16,
+              bottomPadding: 36,
+              watermarkTop: 20,
+              watermarkSize: const Size(200, 143),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 12.h,
+                children: [
+                  Row(
+                    spacing: 8.w,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      // A tab is the first page of its own: back is Home.
+                      const AppBackButton(fallbackRoute: AppRoutes.home),
+                      Expanded(
                         child: Text(
                           title,
                           style: context.textTheme.headlineMedium?.copyWith(
@@ -64,40 +92,23 @@ class ParentTabPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      ChildTabs(
-                        tabs: [
-                          for (final child in mockChildren)
-                            ChildTab(name: child.firstName, grade: child.grade),
-                        ],
-                        selected: selectedChild,
-                        onSelected: onChildSelected,
-                      ),
+                      const SettingsButton(),
+                      const ComplaintsButton(),
                     ],
                   ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    // Bottom room so the last item scrolls above the nav bar.
-                    padding: EdgeInsets.fromLTRB(
-                      20.w,
-                      6.h,
-                      20.w,
-                      navBottom + 68.h + 24.h,
+                  if (parentChildren.isNotEmpty)
+                    ChildPicker(
+                      children: parentChildren,
+                      selected: selectedChild,
+                      onSelected: onChildSelected,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: 18.h,
-                      children: children,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-            Positioned(
-              left: 16.w,
-              right: 16.w,
-              bottom: navBottom,
-              child: MainNavBar(current: tab, chatUnread: chatUnread),
+            Expanded(
+              child: onRefresh == null
+                  ? content
+                  : RefreshIndicator(onRefresh: onRefresh, child: content),
             ),
           ],
         ),

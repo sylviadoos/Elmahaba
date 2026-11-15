@@ -1,6 +1,5 @@
 import 'package:al_mahhaba_school/features/news/domain/entities/news_details_entity.dart';
 
-/// [NewsDetailsEntity] read from `GET mobile/news/{slug}`.
 class NewsDetailsModel extends NewsDetailsEntity {
   const NewsDetailsModel({
     required super.id,

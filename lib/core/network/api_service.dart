@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/error/dio_exception_handler.dart';
 
@@ -8,11 +7,15 @@ import 'package:al_mahhaba_school/core/error/dio_exception_handler.dart';
 /// Each method returns the decoded response body (`Map` / `List`) and
 /// throws an `AppException` on failure. Paths come from `ApiEndpoints`.
 ///
+/// There is one per server (see `ApiNames`), registered in
+/// `CoreInjectableModule` — ask for the one you need by name:
+///
 /// ```dart
-/// final json = await apiService.post(ApiEndpoints.signin, data: body);
+/// MyRemoteDataSourceImpl(@Named(ApiNames.school) this._api);
+///
+/// final json = await _api.post(ApiEndpoints.login, data: body);
 /// return User.fromJson(json);
 /// ```
-@lazySingleton
 class ApiService {
   ApiService(this._dio);
 
@@ -117,6 +120,21 @@ class ApiService {
       cancelToken: cancelToken,
     ),
   );
+
+  /// Saves the file at [path] to [savePath] (an attachment…). Nothing is
+  /// left at [savePath] when it fails.
+  ///
+  /// ```dart
+  /// await apiService.download(
+  ///   ApiEndpoints.complaintAttachment(complaintId, attachmentId),
+  ///   file.path,
+  /// );
+  /// ```
+  Future<void> download(
+    String path,
+    String savePath, {
+    CancelToken? cancelToken,
+  }) => _request(() => _dio.download(path, savePath, cancelToken: cancelToken));
 
   Future<dynamic> _request(Future<Response<dynamic>> Function() send) async {
     try {

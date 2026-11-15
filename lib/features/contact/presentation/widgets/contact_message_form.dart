@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/extensions/string_extensions.dart';
 import 'package:al_mahhaba_school/core/utils/validators.dart';
 import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_select_field.dart';
@@ -23,20 +24,29 @@ class ContactMessageForm extends StatefulWidget {
     required this.isSending,
     required this.serverErrors,
     required this.onSubmit,
+    this.firstName = '',
+    this.lastName = '',
+    this.phone = '',
   });
 
   final bool isSending;
   final Map<String, String> serverErrors;
   final ValueChanged<ContactMessageEntity> onSubmit;
 
+  /// What the fields start with (what's known of a signed-in parent); all
+  /// can be changed. [phone] as typed after +20, e.g. "1201234154".
+  final String firstName;
+  final String lastName;
+  final String phone;
+
   @override
   State<ContactMessageForm> createState() => _ContactMessageFormState();
 }
 
 class _ContactMessageFormState extends State<ContactMessageForm> {
-  final _firstName = TextEditingController();
-  final _lastName = TextEditingController();
-  final _phone = TextEditingController();
+  late final _firstName = TextEditingController(text: widget.firstName);
+  late final _lastName = TextEditingController(text: widget.lastName);
+  late final _phone = TextEditingController(text: widget.phone);
   final _email = TextEditingController();
   final _message = TextEditingController();
   EducationType? _educationType;
@@ -79,25 +89,19 @@ class _ContactMessageFormState extends State<ContactMessageForm> {
     super.dispose();
   }
 
-  /// "1012345678" (after the +20) or "01012345678" → "01012345678".
-  String get _localPhone {
-    final digits = _phone.text.trim();
-    if (digits.isEmpty || digits.startsWith('0')) return digits;
-    return '0$digits';
-  }
-
   void _clearError(_Field field) {
     if (_errors.containsKey(field)) setState(() => _errors.remove(field));
   }
 
   void _submit() {
     String? messageOf(ValidationError? error) => error?.message(context);
+    final phone = _phone.text.localPhone;
     final email = _email.text.trim();
 
     final errors = <_Field, String?>{
       _Field.firstName: messageOf(Validators.validateName(_firstName.text)),
       _Field.lastName: messageOf(Validators.validateName(_lastName.text)),
-      _Field.phone: messageOf(Validators.validatePhoneNumber(_localPhone)),
+      _Field.phone: messageOf(Validators.validatePhoneNumber(phone)),
       _Field.email: email.isEmpty
           ? null
           : messageOf(Validators.validateEmail(email)),
@@ -120,7 +124,7 @@ class _ContactMessageFormState extends State<ContactMessageForm> {
         lastName: _lastName.text.trim(),
         educationType: _educationType,
         stage: _stage,
-        phone: _localPhone,
+        phone: phone,
         email: email,
         message: _message.text.trim(),
       ),

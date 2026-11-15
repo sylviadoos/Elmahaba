@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
+import 'package:al_mahhaba_school/config/routes/home_on_back.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
@@ -21,6 +22,9 @@ enum AppBackButtonStyle {
 
 /// Round 44 px back button. Goes back, or to [fallbackRoute] when there's
 /// nothing to go back to (e.g. the page was opened directly).
+///
+/// On a parent page it goes Home instead, with the phone's own back
+/// button: see [HomeOnBack].
 class AppBackButton extends StatelessWidget {
   const AppBackButton({
     super.key,
@@ -43,8 +47,11 @@ class AppBackButton extends StatelessWidget {
     };
 
     final button = IconButton(
-      onPressed: () =>
-          context.canPop() ? context.pop() : context.go(fallbackRoute),
+      onPressed: () => switch (HomeOnBack.of(context)) {
+        true => context.go(AppRoutes.home),
+        false when context.canPop() => context.pop(),
+        false => context.go(fallbackRoute),
+      },
       tooltip: context.l10n.back,
       style: IconButton.styleFrom(
         backgroundColor: background,

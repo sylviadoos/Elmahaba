@@ -3,40 +3,84 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
-import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
-import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
-import 'package:al_mahhaba_school/core/widgets/dashed_border.dart';
-import 'package:al_mahhaba_school/features/attendance/data/mock_attendance.dart';
+import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_status.dart';
+import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/widgets/calendar_day_cell.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/widgets/calendar_legend.dart';
+import 'package:al_mahhaba_school/features/attendance/presentation/widgets/month_switcher.dart';
 
-/// Month grid (weeks start on Sunday) with each school day colored by
-/// attendance, month arrows and a legend.
+/// The month's grid (weeks start on Sunday): each day colored by what it
+/// was, the month arrows and a legend. [onNext] is null on the latest month.
 class MonthCalendar extends StatelessWidget {
-  const MonthCalendar({super.key, required this.month, required this.days});
+  const MonthCalendar({
+    super.key,
+    required this.attendance,
+    this.excuseDates = const {},
+    required this.onPrevious,
+    required this.onNext,
+  });
 
-  final DateTime month;
+  final MonthAttendanceEntity attendance;
 
-  /// Status of day 1, 2, 3… of [month].
-  final List<DayStatus> days;
+  /// The days the parent sent an excuse for, at midnight: an absence on
+  /// one shows as excused, not red.
+  final Set<DateTime> excuseDates;
+  final VoidCallback onPrevious;
+  final VoidCallback? onNext;
+
+  /// Holidays first, then the recorded days, then the school's weekly days
+  /// off.
+  CalendarDay _dayOf(DateTime date) {
+    bool sameDay(DateTime other) =>
+        other.year == date.year &&
+        other.month == date.month &&
+        other.day == date.day;
+
+    if (attendance.holidays.any((holiday) => sameDay(holiday.date))) {
+      return CalendarDay.holiday;
+    }
+    final record = attendance.records.where((r) => sameDay(r.date));
+    switch (record.firstOrNull?.status) {
+      case AttendanceStatus.present:
+        return CalendarDay.present;
+      case AttendanceStatus.absent:
+        // Red until an excuse is sent for it.
+        return excuseDates.contains(date)
+            ? CalendarDay.excused
+            : CalendarDay.absent;
+      case AttendanceStatus.excused:
+        return CalendarDay.excused;
+      case AttendanceStatus.unknown || null:
+        break;
+    }
+    return attendance.weekendWeekdays.contains(date.weekday)
+        ? CalendarDay.weekend
+        : CalendarDay.other;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final locale = Localizations.localeOf(context).toString();
+    final month = attendance.month;
     // Sunday-first column of the 1st (DateTime.weekday is 1 = Monday).
     final leadingBlanks = DateTime(month.year, month.month).weekday % 7;
     final cells = <Widget>[
       for (var i = 0; i < leadingBlanks; i++) const SizedBox.shrink(),
-      for (final (index, status) in days.indexed)
-        _DayCell(
+      for (
+        var day = 1;
+        day <= DateUtils.getDaysInMonth(month.year, month.month);
+        day++
+      )
+        CalendarDayCell(
           label: DateFormat.d(
             locale,
-          ).format(DateTime(month.year, month.month, index + 1)),
-          status: status,
+          ).format(DateTime(month.year, month.month, day)),
+          day: _dayOf(DateTime(month.year, month.month, day)),
         ),
     ];
     // A Sunday, so the header reads Sun … Sat.
-    final firstSunday = DateTime(2026, 10, 4);
+    final aSunday = DateTime(2026, 10, 4);
 
     return Container(
       padding: EdgeInsets.all(16.r),
@@ -48,38 +92,14 @@ class MonthCalendar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12.h,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // TODO: load the previous month.
-              _MonthButton(
-                icon: AppIcons.chevronLeft,
-                tooltip: l10n.previousMonth,
-                onPressed: () {},
-              ),
-              Text(
-                DateFormat.yMMMM(locale).format(month),
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontSize: 16.sp,
-                  height: 1.3,
-                ),
-              ),
-              // The current month is the latest; nothing after it yet.
-              _MonthButton(
-                icon: AppIcons.chevronRight,
-                tooltip: l10n.nextMonth,
-              ),
-            ],
-          ),
+          MonthSwitcher(month: month, onPrevious: onPrevious, onNext: onNext),
           _WeekRow(
             children: [
               for (var i = 0; i < 7; i++)
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    DateFormat.E(
-                      locale,
-                    ).format(firstSunday.add(Duration(days: i))),
+                    DateFormat.E(locale).format(aSunday.add(Duration(days: i))),
                     style: context.textTheme.bodySmall?.copyWith(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -103,13 +123,14 @@ class MonthCalendar extends StatelessWidget {
                 ),
             ],
           ),
-          const _Legend(),
+          const CalendarLegend(),
         ],
       ),
     );
   }
 }
 
+/// Seven equal columns.
 class _WeekRow extends StatelessWidget {
   const _WeekRow({required this.children});
 
@@ -120,153 +141,6 @@ class _WeekRow extends StatelessWidget {
     return Row(
       spacing: 4.w,
       children: [for (final child in children) Expanded(child: child)],
-    );
-  }
-}
-
-class _DayCell extends StatelessWidget {
-  const _DayCell({required this.label, required this.status});
-
-  final String label;
-  final DayStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    final (background, color, weight) = switch (status) {
-      DayStatus.present => (
-        AppColors.blush,
-        AppColors.mahabbahRed,
-        FontWeight.w600,
-      ),
-      DayStatus.absent => (
-        AppColors.mahabbahRed,
-        AppColors.white,
-        FontWeight.w700,
-      ),
-      DayStatus.late => (null, AppColors.mahabbahRed, FontWeight.w600),
-      DayStatus.holiday => (
-        AppColors.gold,
-        AppColors.goldText,
-        FontWeight.w700,
-      ),
-      DayStatus.off => (null, AppColors.mist, FontWeight.w400),
-      DayStatus.future => (null, AppColors.slate, FontWeight.w400),
-    };
-    final radius = 10.r;
-
-    final cell = Container(
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      child: Text(
-        label,
-        style: context.textTheme.bodyMedium?.copyWith(
-          height: 1,
-          fontWeight: weight,
-          color: color,
-        ),
-      ),
-    );
-
-    return status == DayStatus.late
-        ? DashedBorder(radius: radius, child: cell)
-        : cell;
-  }
-}
-
-class _MonthButton extends StatelessWidget {
-  const _MonthButton({
-    required this.icon,
-    required this.tooltip,
-    this.onPressed,
-  });
-
-  final String icon;
-  final String tooltip;
-
-  /// Null shows the button greyed out.
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: onPressed,
-      tooltip: tooltip,
-      style: IconButton.styleFrom(
-        backgroundColor: AppColors.surface,
-        disabledBackgroundColor: AppColors.surface,
-        fixedSize: Size.square(44.r),
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-      ),
-      icon: AppSvgIcon(
-        icon,
-        size: 18.r,
-        color: onPressed == null ? AppColors.mist : AppColors.ink,
-        matchTextDirection: true,
-      ),
-    );
-  }
-}
-
-class _Legend extends StatelessWidget {
-  const _Legend();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final size = 12.r;
-    final radius = BorderRadius.circular(4.r);
-
-    Widget swatch(Color? color, {Color? border}) => Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: radius,
-        border: border == null ? null : Border.all(color: border),
-      ),
-    );
-
-    final items = [
-      (swatch(AppColors.blush, border: AppColors.rose), l10n.present),
-      (swatch(AppColors.mahabbahRed), l10n.absent),
-      (
-        DashedBorder(
-          radius: 4.r,
-          child: SizedBox.square(dimension: size),
-        ),
-        l10n.late,
-      ),
-      (swatch(AppColors.gold), l10n.officialHoliday),
-      (swatch(AppColors.surface), l10n.friSatOff),
-    ];
-
-    return Wrap(
-      spacing: 14.w,
-      runSpacing: 8.h,
-      children: [
-        for (final (marker, label) in items)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 6.w,
-            children: [
-              marker,
-              Text(
-                label,
-                style: context.textTheme.bodySmall?.copyWith(
-                  fontSize: 12.sp,
-                  color: AppColors.slate,
-                ),
-              ),
-            ],
-          ),
-      ],
     );
   }
 }

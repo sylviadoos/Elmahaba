@@ -1,0 +1,35 @@
+{
+  // Flutter runs. Servers are picked in AppConfig (comment out the ones you
+  // don't want). "+ Clarity" / "+ Sentry" also record the session / send
+  // errors (off in other debug runs).
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart"
+    },
+    {
+      "name": "Debug + Clarity",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define=CLARITY=true"]
+    },
+    {
+      "name": "Debug + Sentry",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define=SENTRY=true"]
+    },
+    {
+      "name": "Release",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "release"
+    }
+  ]
+}

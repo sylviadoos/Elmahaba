@@ -4,10 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 
-/// "+20" Egypt country code at the start of a mobile number field
-/// (`AppTextField.prefix`).
+/// Egypt country code at the start of a mobile number field
+/// (`AppTextField.prefix`): "+20" before "10 1234 5678", or "+2" before
+/// the full "010 1234 5678".
 class CountryCodePrefix extends StatelessWidget {
-  const CountryCodePrefix({super.key});
+  const CountryCodePrefix({super.key, this.code = '+20'});
+
+  final String code;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,7 @@ class CountryCodePrefix extends StatelessWidget {
         ),
       ),
       child: Text(
-        '+20',
+        code,
         textDirection: TextDirection.ltr,
         style: context.textTheme.bodyLarge?.copyWith(
           fontWeight: FontWeight.w600,

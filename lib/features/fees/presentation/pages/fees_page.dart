@@ -1,312 +1,190 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 
-import 'package:al_mahhaba_school/config/theme/app_colors.dart';
+import 'package:al_mahhaba_school/config/di/injectable_config.dart';
+import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
-import 'package:al_mahhaba_school/core/widgets/icon_box.dart';
-import 'package:al_mahhaba_school/core/widgets/progress_bar.dart';
-import 'package:al_mahhaba_school/core/widgets/section_title.dart';
-import 'package:al_mahhaba_school/features/fees/data/mock_fees.dart';
-import 'package:al_mahhaba_school/features/shell/presentation/widgets/main_nav_bar.dart';
+import 'package:al_mahhaba_school/core/widgets/confirm_dialog.dart';
+import 'package:al_mahhaba_school/core/widgets/state_message.dart';
+import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
+import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
+import 'package:al_mahhaba_school/features/children/presentation/widgets/no_children_state.dart';
+import 'package:al_mahhaba_school/features/fees/domain/entities/fee_entity.dart';
+import 'package:al_mahhaba_school/features/fees/domain/entities/fee_statement_entity.dart';
+import 'package:al_mahhaba_school/features/fees/presentation/extensions/money_text.dart';
+import 'package:al_mahhaba_school/features/fees/presentation/view_model/fees_event.dart';
+import 'package:al_mahhaba_school/features/fees/presentation/view_model/fees_state.dart';
+import 'package:al_mahhaba_school/features/fees/presentation/view_model/fees_view_model.dart';
+import 'package:al_mahhaba_school/features/fees/presentation/widgets/fee_statement_card.dart';
+import 'package:al_mahhaba_school/features/fees/presentation/widgets/fees_skeleton.dart';
+import 'package:al_mahhaba_school/features/fees/presentation/widgets/student_summary_card.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/parent_tab_page.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
-/// The school year's fees for the selected child: what's left to pay,
-/// installments and receipts.
-class FeesPage extends StatefulWidget {
+/// The selected child's fee statement: who it's for, the fees, the totals,
+/// and paying them.
+class FeesPage extends StatelessWidget {
   const FeesPage({super.key});
 
   @override
-  State<FeesPage> createState() => _FeesPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<FeesViewModel>(),
+      child: const _FeesView(),
+    );
+  }
 }
 
-class _FeesPageState extends State<FeesPage> {
-  int _selectedChild = 0;
+class _FeesView extends StatefulWidget {
+  const _FeesView();
+
+  @override
+  State<_FeesView> createState() => _FeesViewState();
+}
+
+class _FeesViewState extends State<_FeesView> {
+  @override
+  void initState() {
+    super.initState();
+    _loadStatement();
+  }
+
+  /// The selected child's statement; nothing to load without children.
+  void _loadStatement({bool refresh = false}) {
+    final child = context.read<ChildrenViewModel>().state.selectedChild;
+    if (child == null) return;
+    context.read<FeesViewModel>().doAction(
+      LoadFeesEvent(child.studentId, refresh: refresh),
+    );
+  }
+
+  /// Pay fees returns `true` once the statement changed (a payment
+  /// started) or turned out stale.
+  Future<void> _pay(FeeStatementEntity statement) async {
+    final changed = await context.push<bool>(
+      AppRoutes.feesPay,
+      extra: statement,
+    );
+    if (changed == true && mounted) _loadStatement(refresh: true);
+  }
+
+  /// Adds an optional fee to the statement or drops it, once the parent
+  /// says yes. The school changes it at once, so it's worth asking.
+  Future<void> _changeOptional(FeeEntity fee, bool add) async {
+    final l10n = context.l10n;
+    final child = context.read<ChildrenViewModel>().state.selectedChild;
+    if (child == null) return;
+    final confirmed = await ConfirmDialog.show(
+      context,
+      title: add ? l10n.confirmOptionalFee : l10n.dropOptionalFee,
+      message: add
+          ? l10n.confirmOptionalFeeMessage(fee.name, context.egp(fee.amount))
+          : l10n.dropOptionalFeeMessage(fee.name),
+      confirmLabel: add ? l10n.yesPay : l10n.yesDrop,
+    );
+    if (!confirmed || !mounted) return;
+    context.read<FeesViewModel>().doAction(
+      ChangeOptionalFeeEvent(
+        childId: child.studentId,
+        feeId: fee.id!,
+        add: add,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final items = mockFees[_selectedChild];
+    final childrenState = context.select(
+      (ChildrenViewModel viewModel) => viewModel.state.children,
+    );
+    final children = childrenState.data ?? const <ChildEntity>[];
 
-    return ParentTabPage(
-      title: l10n.fees,
-      tab: MainTab.fees,
-      selectedChild: _selectedChild,
-      onChildSelected: (index) => setState(() => _selectedChild = index),
+    return BlocListener<ChildrenViewModel, ChildrenState>(
+      // The children arrived or changed (a child linked, the list
+      // refreshed), or another one was picked, here or on another page.
+      listenWhen: (previous, current) =>
+          previous.children.data != current.children.data ||
+          current.showsOtherChildThan(previous),
+      listener: (context, state) => _loadStatement(),
+      child: ParentTabPage(
+        title: context.l10n.fees,
+        selectedChild: context.watchSelectedChildIndex(),
+        onChildSelected: (index) =>
+            context.selectChild(children[index].studentId),
+        children: [
+          if (children.isEmpty)
+            NoChildrenState(
+              children: childrenState,
+              loading: const FeesSkeleton(),
+            )
+          else
+            BlocConsumer<FeesViewModel, FeesState>(
+              // The school turned a change down — the fee is on the
+              // statement already, or a payment keeps it there.
+              listenWhen: (previous, current) =>
+                  previous.changeFailed != current.changeFailed &&
+                  current.changeFailed != null,
+              listener: (context, state) => context.showSnackBar(
+                state.changeFailed!.localizedMessage(context),
+                isError: true,
+              ),
+              builder: (context, state) => state.statement.when(
+                initial: () => const FeesSkeleton(),
+                loading: () => const FeesSkeleton(),
+                error: (exception) => StateMessage(
+                  icon: AppIcons.navFees,
+                  title: exception.localizedMessage(context),
+                  action: RetryOrLogInButton(
+                    exception: exception,
+                    onRetry: _loadStatement,
+                  ),
+                ),
+                success: (statement) =>
+                    _statement(context, statement, state.changingFeeId),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statement(
+    BuildContext context,
+    FeeStatementEntity statement,
+    int? changingFeeId,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 18.h,
       children: [
-        _SummaryCard(items),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 10.h,
-          children: [
-            SectionTitle(l10n.installments),
-            for (final item in items) _InstallmentRow(item),
-          ],
+        StudentSummaryCard(student: statement.student),
+        FeeStatementCard(
+          statement: statement,
+          onChangeOptional: _changeOptional,
+          changingFeeId: changingFeeId,
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 10.h,
           children: [
-            SectionTitle(l10n.receipts),
-            for (final item in items.where((i) => i.isPaid)) _ReceiptRow(item),
+            AppButton(
+              label: context.l10n.payFeesAmount(
+                context.egp(statement.remainingBalance),
+              ),
+              icon: AppSvgIcon(AppIcons.navFees, size: 20.r),
+              onPressed: () => _pay(statement),
+            ),
+            // StatementPdfButtons(statement: statement),
           ],
         ),
       ],
-    );
-  }
-}
-
-/// "EGP 15,000" / "١٥٬٠٠٠ ج.م"
-String _money(BuildContext context, int amount) {
-  final locale = Localizations.localeOf(context).toString();
-  return context.l10n.egpAmount(
-    NumberFormat.decimalPattern(locale).format(amount),
-  );
-}
-
-class _SummaryCard extends StatelessWidget {
-  const _SummaryCard(this.items);
-
-  final List<FeeItem> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final textTheme = context.textTheme;
-    final total = items.fold(0, (sum, i) => sum + i.amount);
-    final paid = items
-        .where((i) => i.isPaid)
-        .fold(0, (sum, i) => sum + i.amount);
-    final remaining = total - paid;
-    final caption = textTheme.bodySmall?.copyWith(color: AppColors.slate);
-
-    return Container(
-      padding: EdgeInsets.all(18.r),
-      decoration: BoxDecoration(
-        color: AppColors.blush,
-        borderRadius: BorderRadius.circular(22.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12.h,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(l10n.schoolYear(mockSchoolYear), style: caption),
-              ),
-              Text(
-                l10n.percentPaid('${(paid / total * 100).round()}%'),
-                style: caption?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.mahabbahRed,
-                ),
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 2.h,
-            children: [
-              Text(l10n.remaining, style: caption),
-              Text(
-                _money(context, remaining),
-                style: textTheme.titleLarge?.copyWith(
-                  fontSize: 28.sp,
-                  height: 1.2,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          ProgressBar(
-            value: paid / total,
-            height: 8,
-            trackColor: AppColors.white,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(l10n.paidAmount(_money(context, paid)), style: caption),
-              Text(l10n.totalAmount(_money(context, total)), style: caption),
-            ],
-          ),
-          if (remaining > 0)
-            ElevatedButton(
-              // TODO: online payment.
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                minimumSize: Size.fromHeight(48.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14.r),
-                ),
-                textStyle: textTheme.labelLarge?.copyWith(fontSize: 15.sp),
-              ),
-              child: Text(l10n.payAmount(_money(context, remaining))),
-            )
-          else
-            Container(
-              height: 48.h,
-              decoration: BoxDecoration(
-                color: AppColors.white,
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 8.w,
-                children: [
-                  AppSvgIcon(
-                    AppIcons.check,
-                    size: 18.r,
-                    color: AppColors.mahabbahRed,
-                  ),
-                  Text(
-                    l10n.allFeesPaid,
-                    style: textTheme.labelLarge?.copyWith(
-                      fontSize: 15.sp,
-                      color: AppColors.mahabbahRed,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InstallmentRow extends StatelessWidget {
-  const _InstallmentRow(this.item);
-
-  final FeeItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final textTheme = context.textTheme;
-    final bold = textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600);
-
-    return Container(
-      padding: EdgeInsets.all(12.r),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.line),
-      ),
-      child: Row(
-        spacing: 12.w,
-        children: [
-          IconBox(AppIcons.navFees, size: 40.r, iconSize: 18.r, radius: 12.r),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 2.h,
-              children: [
-                Text(item.name, style: bold),
-                Text(
-                  item.when,
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 12.sp,
-                    color: AppColors.slate,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            spacing: 4.h,
-            children: [
-              Text(_money(context, item.amount), style: bold),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                decoration: ShapeDecoration(
-                  color: item.isPaid ? AppColors.blush : AppColors.mahabbahRed,
-                  shape: const StadiumBorder(),
-                ),
-                child: Text(
-                  item.isPaid ? l10n.paid : l10n.due,
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 11.sp,
-                    height: 1.3,
-                    fontWeight: FontWeight.w600,
-                    color: item.isPaid
-                        ? AppColors.mahabbahRed
-                        : AppColors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReceiptRow extends StatelessWidget {
-  const _ReceiptRow(this.item);
-
-  final FeeItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
-
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16.r),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        // TODO: open the receipt PDF.
-        onTap: () {},
-        child: Padding(
-          padding: EdgeInsets.all(12.r),
-          child: Row(
-            spacing: 12.w,
-            children: [
-              IconBox(
-                AppIcons.fileReport,
-                size: 40.r,
-                iconSize: 18.r,
-                radius: 12.r,
-                background: AppColors.white,
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 2.h,
-                  children: [
-                    Text(
-                      item.name,
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      item.when,
-                      style: textTheme.bodySmall?.copyWith(
-                        fontSize: 12.sp,
-                        color: AppColors.slate,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                context.l10n.pdf,
-                style: textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.actionRed,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

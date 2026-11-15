@@ -71,7 +71,9 @@ class RedHeader extends StatelessWidget {
   }
 }
 
-/// The faded, tilted logo in the corner of the red headers.
+/// The faded, tilted logo in the corner of the red headers. Faded in its
+/// own colors, not by an `Opacity` over it, which would paint it off screen
+/// first every time the header is painted.
 class HeaderWatermark extends StatelessWidget {
   const HeaderWatermark({super.key, required this.size});
 
@@ -81,15 +83,12 @@ class HeaderWatermark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
-      child: Opacity(
-        opacity: 0.09,
-        child: Transform.rotate(
-          angle: -12 * math.pi / 180,
-          child: SvgPicture.asset(
-            AppImages.logoMarkWhite,
-            width: size.width.r,
-            height: size.height.r,
-          ),
+      child: Transform.rotate(
+        angle: -12 * math.pi / 180,
+        child: SvgPicture.asset(
+          AppImages.logoMarkWatermark,
+          width: size.width.r,
+          height: size.height.r,
         ),
       ),
     );
@@ -97,6 +96,8 @@ class HeaderWatermark extends StatelessWidget {
 }
 
 /// Wavy bottom edge of the red headers, in the [color] of the page below.
+/// White and the surface color have their own drawing; any other is tinted,
+/// which paints it off screen first.
 class HeaderWave extends StatelessWidget {
   const HeaderWave({super.key, this.color = AppColors.white});
 
@@ -104,13 +105,18 @@ class HeaderWave extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final asset = switch (color) {
+      AppColors.white => AppImages.headerWave,
+      AppColors.surface => AppImages.headerWaveSurface,
+      _ => null,
+    };
     return SvgPicture.asset(
-      AppImages.headerWave,
+      asset ?? AppImages.headerWave,
       height: 26.r,
       fit: BoxFit.fill,
-      colorFilter: color == AppColors.white
-          ? null
-          : ColorFilter.mode(color, BlendMode.srcIn),
+      colorFilter: asset == null
+          ? ColorFilter.mode(color, BlendMode.srcIn)
+          : null,
     );
   }
 }

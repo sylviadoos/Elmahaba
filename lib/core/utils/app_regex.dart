@@ -22,8 +22,8 @@ abstract final class AppRegExp {
     return RegExp(r"^[0-9]{6}$").hasMatch(otp);
   }
 
-  /// At least 6 characters, one uppercase letter and one number.
+  /// At least 8 characters — the school API's rule.
   static bool isPasswordValid(String password) {
-    return RegExp(r"^(?=.*?[A-Z])(?=.*?[0-9]).{6,}$").hasMatch(password);
+    return RegExp(r"^.{8,}$").hasMatch(password);
   }
 }

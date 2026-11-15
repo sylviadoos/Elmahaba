@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,9 +12,11 @@ import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
+import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_bloc.dart';
 
 /// Layout shared by the visitor pages: a [header] that scrolls with the
-/// page, the page sections, and a "Log in" button pinned to the bottom.
+/// page, the page sections, and a "Log in" button pinned to the bottom —
+/// once the school says parents can log in ([AppStatusBloc]).
 class VisitorPage extends StatelessWidget {
   const VisitorPage({
     super.key,
@@ -21,10 +24,14 @@ class VisitorPage extends StatelessWidget {
     required this.children,
     this.spacing = 24,
     this.topPadding = 8,
+    this.showLogin = true,
   });
 
   final Widget header;
   final List<Widget> children;
+
+  /// False hides "Log in", e.g. when opened by a signed-in parent.
+  final bool showLogin;
 
   /// Gap between sections, in design pixels.
   final double spacing;
@@ -38,7 +45,10 @@ class VisitorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final buttonBottom = math.max(28.h, bottomInset + 12);
-    const showLogin = AppConfig.parentAccountEnabled;
+    final showLogin =
+        AppConfig.parentAccountEnabled &&
+        this.showLogin &&
+        context.select<AppStatusBloc, bool>((bloc) => bloc.state);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,

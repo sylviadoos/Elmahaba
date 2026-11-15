@@ -18,6 +18,7 @@
   "serverError": "Server error, please try again later!",
   "unexpectedError": "An unexpected error occurred",
   "expiredToken": "Session expired, please log in again",
+  "accountWithdrawn": "Your account is no longer available because the student is no longer enrolled at the school. Please contact the school.",
   "phoneNumberIsNotValid": "This phone number is not valid",
   "thisFieldIsRequired": "This field is required",
   "error": "Error",
@@ -34,6 +35,14 @@
   "darkMode": "Dark mode",
   "lightMode": "Light mode",
   "logout": "Log out",
+  "logOutTitle": "Log out?",
+  "logOutMessage": "You'll need your mobile number and password to log in again.",
+  "deleteMyAccount": "Delete my account",
+  "deleteAccountTitle": "Delete your account?",
+  "deleteAccountMessage": "Your account, your linked children and your settings will be deleted. The school keeps your chat and complaint records.",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "accountDeleted": "Your account was deleted",
   "home": "Home",
   "profile": "Profile",
   "hi": "Hi",
@@ -60,10 +69,9 @@
   "loading": "Loading",
   "confirm": "Confirm",
   "resetPassword": "Reset password",
-  "passwordMustNotBeEmpty": "Password must not be empty and must contain at least 6 characters, one uppercase letter, and one number",
+  "passwordTooShort": "Password must be at least 8 characters",
   "enterYourPassword": "Enter your password",
   "newPassword": "New password",
-  "rememberMe": "Remember me",
   "continueButton": "Continue",
   "skip": "Skip",
   "next": "Next",
@@ -141,8 +149,7 @@
   "appliedThroughWebsite": "Applied through our website?",
   "confirmationEmailNote": "You should receive a confirmation email. If it doesn’t arrive within 24 hours, check your Spam folder or message the school’s official page.",
   "otherLanguage": "عربي",
-  "loginSubtitle": "Parents, log in to follow your child’s school day.",
-  "emailOrMobile": "Email or mobile number",
+  "loginSubtitle": "Parents, log in with the mobile number you gave the school to follow your child’s school day.",
   "emailHint": "parent@email.com",
   "showPassword": "Show password",
   "hidePassword": "Hide password",
@@ -150,11 +157,17 @@
   "newParent": "New parent?",
   "createAnAccount": "Create an account",
   "createAccount": "Create account",
-  "registerSubtitle": "Parent account — follow your children’s school day.",
-  "parentFullName": "Parent’s full name",
-  "asOnNationalId": "As on your national ID",
+  "registerSubtitle": "Parent account — sign up with the mobile number you gave the school to follow your children’s school day.",
   "phoneHint": "10 1234 5678",
-  "passwordHint": "At least 6 characters",
+  "fullPhoneHint": "010 1234 5678",
+  "passwordHint": "At least 8 characters",
+  "confirmPasswordHint": "Type the password again",
+  "accountAlreadyExists": "An account already exists for this number. Please log in.",
+  "accountCreated": "Your account has been created. Please log in.",
+  "phoneVerificationFailed": "We couldn’t verify your number. Please try again.",
+  "otpWrongCode": "That code isn’t right. Check the SMS and try again.",
+  "otpExpired": "This code has expired. Please request a new one.",
+  "tooManyAttempts": "Too many attempts. Please try again later.",
   "agreePrefix": "I agree to the ",
   "terms": "Terms",
   "agreeAnd": " and ",
@@ -176,6 +189,35 @@
   "verify": "Verify",
   "wrongNumber": "Wrong number?",
   "changeIt": "Change it",
+  "forgotPasswordSubtitle": "Enter the mobile number on your account and we’ll send you a code.",
+  "useRegisteredNumber": "Use the same number you registered with.",
+  "sendCode": "Send code",
+  "rememberedIt": "Remembered it?",
+  "enterTheCode": "Enter the code",
+  "resetCodeSentTo": "To reset your password, enter the 6-digit code we sent to ",
+  "setNewPassword": "Set a new password",
+  "setNewPasswordSubtitle": "Choose a strong password you don’t use anywhere else.",
+  "newPassword": "New password",
+  "enterNewPassword": "Enter a new password",
+  "confirmNewPassword": "Confirm new password",
+  "typeItAgain": "Type it again",
+  "ruleEightCharacters": "At least 8 characters",
+  "ruleHasLetter": "Contains a letter",
+  "ruleHasNumber": "Contains a number",
+  "rulePasswordsMatch": "Both passwords match",
+  "saveNewPassword": "Save new password",
+  "passwordChanged": "Password changed",
+  "logInWithNewPassword": "You can now log in with your new password.",
+  "backToLogin": "Back to log in",
+  "changePasswordSubtitle": "For your security, enter your current password first.",
+  "currentPassword": "Current password",
+  "enterCurrentPassword": "Enter your current password",
+  "forgotCurrentPassword": "Forgot your current password?",
+  "ruleNewPasswordsMatch": "Both new passwords match",
+  "ruleDifferentFromCurrent": "Different from the current password",
+  "passwordUpdated": "Password updated",
+  "useNewPasswordNextTime": "Next time you log in, use your new password.",
+  "backToSettings": "Back to settings",
   "lastStep": "Last step",
   "addYourChildren": "Add your children",
   "addChildrenSubtitle": "Link each child with their national ID number. You can add more than one.",
@@ -201,18 +243,19 @@
     }
   },
   "linked": "Linked",
-  "removeChild": "Remove {name}",
-  "@removeChild": {
+  "childLinked": "Your child has been linked to your account.",
+  "linkCodeSentTo": "A verification code will be sent to: ",
+  "codeAttemptsLeft": "{count, plural, =0{No tries left} =1{1 try left} other{{count} tries left}}",
+  "@codeAttemptsLeft": {
     "placeholders": {
-      "name": {
-        "type": "String"
+      "count": {
+        "type": "int"
       }
     }
   },
+  "childLinkPending": "Request sent to the school. You’ll see your child once the school confirms it.",
   "noChildrenYet": "No children added yet",
   "goodMorning": "Good morning",
-  "myProfile": "My profile",
-  "notifications": "Notifications",
   "today": "Today",
   "results": "Results",
   "attendance": "Attendance",
@@ -227,77 +270,156 @@
       }
     }
   },
-  "daysPresentIn": "days present in {month}",
-  "@daysPresentIn": {
-    "placeholders": {
-      "month": {
-        "type": "String"
-      }
-    }
-  },
-  "ofTheYearPaid": "of the year paid",
   "needsYourAttention": "Needs your attention",
-  "chatGeneral": "General",
-  "chatPrivate": "Private",
-  "chatPrivateOnlyYou": "Private · only you see it",
-  "youReplied": "You replied",
-  "you": "You",
-  "chatReplyHint": "Reply by choosing one of the options on each message",
-  "term1": "Term 1",
-  "term2Soon": "Term 2 · Soon",
-  "term1Average": "Term 1 average",
-  "reportCardPdf": "Report card (PDF)",
-  "subjects": "Subjects",
-  "teachersNote": "Teacher’s note",
-  "present": "Present",
-  "absent": "Absent",
-  "late": "Late",
-  "officialHoliday": "Official holiday",
-  "friSatOff": "Fri & Sat off",
-  "thisMonth": "This month",
-  "previousMonth": "Previous month",
-  "nextMonth": "Next month",
-  "schoolYear": "School year {years}",
-  "@schoolYear": {
+  "attendanceNotTaken": "Attendance not taken yet",
+  "noResultsYet": "No results yet",
+  "noFeesYet": "No fees yet",
+  "overdueInstallmentsCount": "{count, plural, =1{1 overdue installment} other{{count} overdue installments}}",
+  "@overdueInstallmentsCount": {
     "placeholders": {
-      "years": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "feesDueOn": "Due {date}",
+  "@feesDueOn": {
+    "placeholders": {
+      "date": {
         "type": "String"
       }
     }
   },
-  "percentPaid": "{percent} paid",
-  "@percentPaid": {
+  "feesOverdueSince": "Overdue since {date}",
+  "@feesOverdueSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "daysPresent": "Days present",
+  "messagesAndNotices": "Messages {messages} · Notices {notices}",
+  "@messagesAndNotices": {
+    "placeholders": {
+      "messages": {
+        "type": "int"
+      },
+      "notices": {
+        "type": "int"
+      }
+    }
+  },
+  "chatGeneral": "General",
+  "chatNew": "New",
+  "chatRead": "Read",
+  "chatPrivate": "Private",
+  "you": "You",
+  "yesterday": "Yesterday",
+  "noMessagesYet": "No messages yet",
+  "noMessagesHint": "Messages from the school, and the ones you send, show here.",
+  "olderMessagesFailed": "Couldn’t load older messages.",
+  "send": "Send",
+  "replyingTo": "Replying to",
+  "inReplyTo": "In reply to",
+  "cancelReply": "Cancel reply",
+  "deletedMessage": "This message was deleted",
+  "earlierMessage": "An earlier message",
+  "edited": "Edited",
+  "chatCantSend": "You can message the school while one of your children is enrolled.",
+  "chatClosed": "The chat is closed for now. You can still read messages.",
+  "messageAbout": "About",
+  "viewAttendance": "View attendance",
+  "viewResults": "View results",
+  "viewFees": "View fees",
+  "result": "Result",
+  "publishedOn": "Published {date}",
+  "@publishedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "finalResult": "Final result",
+  "attendancePercent": "Attendance {percent}",
+  "@attendancePercent": {
     "placeholders": {
       "percent": {
         "type": "String"
       }
     }
   },
-  "remaining": "Remaining",
-  "paidAmount": "Paid {amount}",
-  "@paidAmount": {
+  "subjects": "Subjects",
+  "countedInFinalResult": "Counted in the final result",
+  "otherSubjects": "Other subjects",
+  "notCountedInFinalResult": "Not counted in the final result",
+  "highLevel": "High level",
+  "highLevelNote": "Extra level, not counted in the final result",
+  "activities": "Activities",
+  "certificate": "Certificate",
+  "downloadCertificate": "Download certificate (PDF)",
+  "certificateSaved": "Certificate saved",
+  "certificateNotSaved": "Couldn’t save the certificate. Try again.",
+  "certificateFailed": "Couldn’t make the certificate. Try again.",
+  "monthlyResults": "Monthly",
+  "latestResult": "Latest result",
+  "classRank": "Rank {rank}",
+  "@classRank": {
     "placeholders": {
-      "amount": {
+      "rank": {
+        "type": "int"
+      }
+    }
+  },
+  "assessmentInitial": "Initial",
+  "assessmentFinal": "Final",
+  "assessmentStatus": "Status",
+  "gradeExceeds": "Exceeds Expectations",
+  "gradeMeets": "Meets Expectations",
+  "gradePartiallyMeets": "Partially Meets Expectations",
+  "gradeBelow": "Below Expectations",
+  "present": "Present",
+  "absent": "Absent",
+  "officialHoliday": "Official holiday",
+  "friSatOff": "Weekend",
+  "thisMonth": "This month",
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "attendanceWord": "attendance",
+  "attendedOfDays": "{attended} of {total} school days",
+  "@attendedOfDays": {
+    "placeholders": {
+      "attended": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "excused": "Excused",
+  "excusedOrMedical": "Excused / medical",
+  "excusedAbsence": "Excused absence",
+  "reasonIs": "Reason: {reason}",
+  "@reasonIs": {
+    "placeholders": {
+      "reason": {
         "type": "String"
       }
     }
   },
-  "totalAmount": "Total {amount}",
-  "@totalAmount": {
+  "noReasonGiven": "No reason given",
+  "holidayNoSchool": "{name} · no school",
+  "@holidayNoSchool": {
     "placeholders": {
-      "amount": {
+      "name": {
         "type": "String"
       }
     }
   },
-  "payAmount": "Pay {amount}",
-  "@payAmount": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
+  "reply": "Reply",
+  "noAbsencesThisMonth": "No absences or late days this month.",
   "egpAmount": "EGP {amount}",
   "@egpAmount": {
     "placeholders": {
@@ -307,25 +429,540 @@
     }
   },
   "allFeesPaid": "All fees paid",
-  "installments": "Installments",
   "paid": "Paid",
-  "due": "Due",
-  "receipts": "Receipts",
-  "pdf": "PDF",
-  "editProfile": "Edit profile",
+  "accountNumber": "Account {number}",
+  "@accountNumber": {
+    "placeholders": {
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "payFeesAmount": "Pay fees · {amount}",
+  "@payFeesAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "preview": "Preview",
+  "downloadPdf": "Download PDF",
+  "allParents": "All parents",
+  "medicalExcuse": "Medical excuse",
+  "submitExcuse": "Submit excuse",
+  "viewExcuse": "View excuse",
+  "excuseStatusLine": "Medical excuse · {status}",
+  "@excuseStatusLine": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "excuseSubmitBy": "Excuse by {date}",
+  "@excuseSubmitBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "excuseUnderReview": "Under review",
+  "excuseInfoRequired": "Information needed",
+  "excuseAccepted": "Accepted",
+  "excuseRejected": "Rejected",
+  "excuseForAbsence": "For the absence on {date}",
+  "@excuseForAbsence": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "excuseSubmitUntil": "You can send it until {date}.",
+  "@excuseSubmitUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "excuseNote": "Note",
+  "excuseNoteHint": "e.g. Doctor visit — fever",
+  "excuseDocuments": "Medical documents",
+  "excuseDocumentsRules": "{types} · up to {megabytes} MB each · up to {count} files",
+  "@excuseDocumentsRules": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      },
+      "megabytes": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "excuseDocumentRequired": "Attach at least one document.",
+  "excuseSent": "Your medical excuse has been sent.",
+  "excuseSubmittedByOther": "Sent by the child's other parent",
+  "excuseRejectionReason": "Why it was rejected",
+  "excuseInformationRequest": "What the school needs",
+  "excuseAcceptedNote": "The day now counts as medical leave.",
+  "addDocuments": "Add documents",
+  "sendDocuments": "Send documents",
+  "documentsSent": "Documents sent. The school will review the excuse again.",
+  "excuseHistory": "History",
+  "excuseStepSubmitted": "Excuse sent",
+  "excuseStepInfoRequested": "The school asked for more",
+  "excuseStepDocumentsAdded": "Documents added",
+  "excuseStepAccepted": "Excuse accepted",
+  "excuseStepRejected": "Excuse rejected",
+  "byParent": "Parent",
+  "bySchool": "School",
+  "feeStatement": "Fee statement",
+  "feeStatementSaved": "Fee statement saved",
+  "feeStatementNotSaved": "Couldn’t save the fee statement. Try again.",
+  "feeStatementFailed": "Couldn’t make the fee statement. Try again.",
+  "payFees": "Pay fees",
+  "payFullAmount": "Pay full amount",
+  "payInInstallments": "Pay in installments",
+  "amountPayableNow": "Amount payable now",
+  "tickInstallments": "Tick the installments you want to pay",
+  "confirmOptionalFee": "Confirm Optional Fee",
+  "confirmOptionalFeeMessage": "Are you sure you want to pay this fee?\n{fee} — {amount}",
+  "@confirmOptionalFeeMessage": {
+    "placeholders": { "fee": { "type": "String" }, "amount": { "type": "String" } }
+  },
+  "yesPay": "Yes, Pay",
+  "dropOptionalFee": "Remove Optional Fee",
+  "dropOptionalFeeMessage": "Are you sure you want to remove {fee} from the fees?",
+  "@dropOptionalFeeMessage": {
+    "placeholders": { "fee": { "type": "String" } }
+  },
+  "yesDrop": "Yes, Remove",
+  "tickEarlierInstallmentsFirst": "To preview or download the statement, tick the earlier unpaid installments too.",
+  "dueOnAccount": "Due {date} · Account {account}",
+  "@dueOnAccount": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "upcoming": "Upcoming",
+  "overdue": "Overdue",
+  "underSettlement": "Under settlement",
+  "paymentInProgress": "Payment in progress",
+  "payOnline": "Pay online",
+  "payOnlineAmount": "Pay online · {amount}",
+  "@payOnlineAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentBySkoolex": "Payment is processed through the Skoolex school system",
+  "paymentPageFailed": "Couldn’t open the payment page",
   "myChildren": "My children",
   "addAChild": "Add a child",
+  "chooseChild": "Choose a child",
+  "allChildren": "All children",
+  "childDetails": "Child details",
+  "childStudentInfo": "Student",
+  "childSchoolInfo": "School",
+  "childContactInfo": "Contact",
+  "father": "Father",
+  "mother": "Mother",
+  "guardian": "Guardian",
+  "studentCode": "Student code",
+  "nationalId": "National ID",
+  "dateOfBirth": "Date of birth",
+  "age": "Age",
+  "yearsOld": "{count, plural, =1{1 year} other{{count} years}}",
+  "@yearsOld": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gender": "Gender",
+  "religion": "Religion",
+  "nationality": "Nationality",
+  "grade": "Grade",
+  "schoolClass": "Class",
+  "academicYear": "Academic year",
+  "enrolledOn": "Enrolled on",
+  "previousSchool": "Previous school",
+  "address": "Address",
+  "homePhone": "Home phone",
+  "job": "Job",
+  "education": "Education",
+  "childrenLinked": "{count} linked",
+  "@childrenLinked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "linkAnotherChild": "Link another child",
   "language": "Language",
-  "chatNotifications": "Chat notifications",
+  "notifications": "Notifications",
+  "notificationKindsHint": "Choose what rings your phone. Everything still shows in the app.",
+  "notificationsOffNote": "Notifications are off. Turn them on to choose which ones ring.",
+  "announcements": "Announcements",
+  "noAnnouncements": "No announcements yet",
+  "noAnnouncementsHint": "Announcements from the school show here.",
+  "announcementsCount": "{count, plural, =0{No announcements} =1{1 announcement} other{{count} announcements}}",
+  "@announcementsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "announcementEnded": "Ended",
+  "announcementUntil": "Until {date}",
+  "@announcementUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homework": "Homework",
+  "homeworkCount": "{count, plural, =0{No homework} =1{1 homework} other{{count} homework}}",
+  "@homeworkCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeworkDueSoon": "Due soon",
+  "homeworkUpcoming": "Upcoming",
+  "homeworkDueTodayFilter": "Due today",
+  "homeworkPast": "Past",
+  "homeworkNoDueDate": "No due date",
+  "allSubjects": "All subjects",
+  "homeworkDueOn": "Due {date}",
+  "@homeworkDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkDueToday": "Due today",
+  "homeworkWasDue": "Was due {date}",
+  "@homeworkWasDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkGiven": "Given {date}",
+  "@homeworkGiven": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeworkNew": "New",
+  "noHomework": "No homework yet",
+  "noHomeworkHint": "Homework from the school shows here.",
+  "noHomeworkFiltered": "No homework here",
+  "noHomeworkFilteredHint": "Try another filter or subject.",
+  "viewHomework": "View homework",
+  "messages": "Messages",
   "changePassword": "Change password",
   "contactTheSchool": "Contact the school",
   "aboutSchool": "About Al Mahabbah",
-  "markAllRead": "Mark all read",
-  "allParents": "All parents",
-  "yesterday": "Yesterday",
-  "earlier": "Earlier",
-  "unread": "Unread",
-  "sendUsAMessage": "Send us a message",
+  "complaints": "Complaints",
+  "newComplaint": "New complaint",
+  "complaintPrivacyNote": "Only you and the school can see your complaint.",
+  "complaintCategory": "Category",
+  "chooseCategory": "Choose a category",
+  "categoryRequired": "The category field is required.",
+  "complaintAbout": "About",
+  "complaintGeneral": "General",
+  "complaintGeneralHint": "Choose General if it isn’t about one child.",
+  "complaintDescription": "Description",
+  "complaintDescriptionHint": "Tell us what happened, when and where",
+  "descriptionRequired": "The description field is required.",
+  "complaintAttachments": "Attachments",
+  "optionalNote": "(optional)",
+  "addFile": "Add file",
+  "attachmentsCount": "{count} / {max} files",
+  "@attachmentsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentFormats": "Allowed formats: {types}.",
+  "@attachmentFormats": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentMaxFileSize": "Maximum file size: {megabytes} MB per file.",
+  "@attachmentMaxFileSize": {
+    "placeholders": {
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentMaxTotalSize": "Maximum total size: {megabytes} MB.",
+  "@attachmentMaxTotalSize": {
+    "placeholders": {
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentLimitsShort": "{types} · Max {megabytes} MB per file · {total} MB total",
+  "@attachmentLimitsShort": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      },
+      "megabytes": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentsRoomLeft": "{count, plural, =1{You can add 1 more · Max {megabytes} MB each} other{You can add {count} more · Max {megabytes} MB each}}",
+  "@attachmentsRoomLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentsSpaceLeft": "{left} MB left of {total} MB",
+  "@attachmentsSpaceLeft": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentsMaxReached": "You've reached the maximum number of attachments ({max} files).",
+  "@attachmentsMaxReached": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentsTotalFull": "You've used the full {total} MB. Remove a file to add another.",
+  "@attachmentsTotalFull": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentTooLarge": "Too large ({size} MB). Max size is {max} MB",
+  "@attachmentTooLarge": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentTypeNotAllowed": "File type not allowed. Allowed: {types}.",
+  "@attachmentTypeNotAllowed": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentOverTotal": "Over the {total} MB total. {left} MB left.",
+  "@attachmentOverTotal": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "attachmentOverTotalFull": "Over the {total} MB total.",
+  "@attachmentOverTotalFull": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentRejected": "This file could not be accepted",
+  "attachmentUploading": "Uploading… {percent}%",
+  "@attachmentUploading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "attachPhoto": "Photo from the gallery",
+  "attachDocument": "PDF or Word file",
+  "couldNotOpenFiles": "Couldn’t open your photos or files. Please try again.",
+  "tooManyAttachments": "You can attach up to {count} files.",
+  "@tooManyAttachments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attachmentNotAllowed": "Allowed files are {types}, up to {megabytes} MB each.",
+  "@attachmentNotAllowed": {
+    "placeholders": {
+      "types": {
+        "type": "String"
+      },
+      "megabytes": {
+        "type": "int"
+      }
+    }
+  },
+  "removeAttachment": "Remove {name}",
+  "@removeAttachment": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "fileSizeKb": "{size} KB",
+  "@fileSizeKb": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "fileSizeMb": "{size} MB",
+  "@fileSizeMb": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "submitComplaint": "Submit complaint",
+  "complaintSubmitted": "Your complaint has been submitted.",
+  "complaintReference": "Reference",
+  "viewComplaint": "View complaint",
+  "backToComplaints": "Back to complaints",
+  "complaintsCount": "{count, plural, =1{1 complaint} other{{count} complaints}}",
+  "@complaintsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "openCount": "{count} open",
+  "@openCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filterOpen": "Open",
+  "filterClosed": "Closed",
+  "noComplaintsHere": "No complaints here",
+  "noComplaintsSubtitle": "Complaints you submit will appear in this list.",
+  "complaintsPageNote": "Page {page} of {lastPage} · {total} total",
+  "@complaintsPageNote": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "lastPage": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "submittedOn": "Submitted {date}",
+  "@submittedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "lastUpdateOn": "Last update {date}",
+  "@lastUpdateOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "statusSubmitted": "Submitted",
+  "statusUnderReview": "Under review",
+  "statusAwaitingReply": "Awaiting your reply",
+  "statusResolved": "Resolved",
+  "statusRejected": "Rejected",
+  "complaint": "Complaint",
+  "complaintDetails": "Details",
+  "submittedAt": "Submitted",
+  "lastUpdate": "Last update",
+  "yourComplaint": "Your complaint",
+  "statusHistory": "Status history",
+  "complaintUpdates": "Updates",
+  "schoolAdministration": "School administration",
+  "schoolInitials": "AM",
+  "tapToOpen": "Tap to open",
+  "openInAnotherApp": "Open in another app",
+  "cantShowFile": "This file can’t be shown here.",
+  "checkingFile": "Checking file…",
+  "addAReply": "Add a reply",
+  "replyHint": "Write more details for the school",
+  "replySent": "Your reply has been sent.",
+  "attach": "Attach",
+  "sendReply": "Send reply",
+  "complaintClosedNote": "This complaint is closed. You can submit a new complaint.",
+  "cantOpenFile": "There’s no app on this phone that opens this file.",
   "writeToUs": "Write to us",
   "sendMessageSubtitle": "We’ll get back to you as soon as we can",
   "firstName": "First name",
@@ -350,6 +987,15 @@
   "messageHint": "Write your message here…",
   "sendMessage": "Send message",
   "checkHighlightedFields": "Please check the highlighted fields.",
+  "loginLockedFor": "Too many wrong attempts. Try again in {time}.",
+  "@loginLockedFor": {
+    "description": "Under Log in while the number is locked; time counts down, e.g. 04:59.",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "messageSentTitle": "Message sent!",
   "messageSentSubtitle": "Thank you! The school will get back to you soon.",
   "done": "Done"

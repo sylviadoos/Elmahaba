@@ -22,6 +22,7 @@ class AppSelectField<T> extends StatelessWidget {
     this.errorText,
     this.height = 54,
     this.labelGap = 8,
+    this.labelWeight = FontWeight.w500,
   });
 
   final String? label;
@@ -46,6 +47,9 @@ class AppSelectField<T> extends StatelessWidget {
   final double height;
   final double labelGap;
 
+  /// Most designs label fields at 500; a few at 600.
+  final FontWeight labelWeight;
+
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
@@ -66,7 +70,7 @@ class AppSelectField<T> extends StatelessWidget {
                 child: Text(
                   label,
                   style: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: labelWeight,
                   ),
                 ),
               ),

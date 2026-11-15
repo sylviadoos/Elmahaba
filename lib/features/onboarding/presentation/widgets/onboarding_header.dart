@@ -6,10 +6,11 @@ import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
+import 'package:al_mahhaba_school/core/widgets/language_button.dart';
 import 'package:al_mahhaba_school/features/onboarding/presentation/widgets/onboarding_illustration.dart';
 
-/// Pink top area of an onboarding slide: the top bar, the Lottie and the
-/// wavy bottom edge. The Lotties are drawn for exactly this 390 × 500 area.
+/// Pink top area of an onboarding slide: the top bar (the logo or back, the
+/// language switch and Skip), the Lottie and the wavy bottom edge. The Lotties are drawn for exactly this 390 × 500 area.
 class OnboardingHeader extends StatelessWidget {
   const OnboardingHeader({
     super.key,
@@ -66,6 +67,7 @@ class OnboardingHeader extends StatelessWidget {
               left: 20.w,
               right: 20.w,
               child: Row(
+                spacing: 8.w,
                 children: [
                   if (onBack == null)
                     SvgPicture.asset(
@@ -76,6 +78,7 @@ class OnboardingHeader extends StatelessWidget {
                   else
                     _BackButton(onPressed: onBack!),
                   const Spacer(),
+                  const LanguageButton(style: LanguageButtonStyle.onPink),
                   if (onSkip != null) _SkipButton(onPressed: onSkip!),
                 ],
               ),

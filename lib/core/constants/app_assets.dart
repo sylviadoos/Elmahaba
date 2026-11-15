@@ -12,8 +12,21 @@ abstract final class AppAssets {
 /// Images. `.svg` → `SvgPicture.asset`, others → `Image.asset`.
 abstract final class AppImages {
   static const String headerWave = '${AppAssets.images}/header_wave.svg';
+
+  /// [headerWave] in `AppColors.surface`.
+  static const String headerWaveSurface =
+      '${AppAssets.images}/header_wave_surface.svg';
+
+  /// [logoMarkWhite] at 9%, for the red headers' corner.
+  static const String logoMarkWatermark =
+      '${AppAssets.images}/logo_mark_watermark.svg';
   static const String logoMarkRed = '${AppAssets.images}/logo_mark_red.svg';
   static const String logoMarkWhite = '${AppAssets.images}/logo_mark_white.svg';
+
+  /// The monthly examination certificate, blank (1491 × 1055, from the
+  /// school's A4 landscape PDF): the app writes the marks on it.
+  static const String monthlyCertificate =
+      '${AppAssets.images}/monthly_certificate.jpg';
   static const String newsBeeDegree = '${AppAssets.images}/news_bee_degree.jpg';
   static const String newsBirthdays = '${AppAssets.images}/news_birthdays.jpg';
   static const String sparkle = '${AppAssets.images}/sparkle.svg';
@@ -29,6 +42,7 @@ abstract final class AppImages {
 
 /// SVG icons — show with `AppSvgIcon(AppIcons.navHome)`.
 abstract final class AppIcons {
+  static const String alertCircle = '${AppAssets.icons}/ic_alert_circle.svg';
   static const String arrowLeft = '${AppAssets.icons}/ic_arrow_left.svg';
   static const String arrowRight = '${AppAssets.icons}/ic_arrow_right.svg';
   static const String awardLegacy = '${AppAssets.icons}/ic_award_legacy.svg';
@@ -43,11 +57,14 @@ abstract final class AppIcons {
   static const String check = '${AppAssets.icons}/ic_check.svg';
   static const String chevronLeft = '${AppAssets.icons}/ic_chevron_left.svg';
   static const String chevronRight = '${AppAssets.icons}/ic_chevron_right.svg';
+  static const String close = '${AppAssets.icons}/ic_close.svg';
+  static const String complaint = '${AppAssets.icons}/ic_complaints.svg';
   static const String download = '${AppAssets.icons}/ic_download.svg';
   static const String edit = '${AppAssets.icons}/ic_edit.svg';
   static const String eye = '${AppAssets.icons}/ic_eye.svg';
   static const String eyeOff = '${AppAssets.icons}/ic_eye_off.svg';
   static const String eyeVision = '${AppAssets.icons}/ic_eye_vision.svg';
+  static const String file = '${AppAssets.icons}/ic_file.svg';
   static const String fileReport = '${AppAssets.icons}/ic_file_report.svg';
   static const String globeLanguage =
       '${AppAssets.icons}/ic_globe_language.svg';
@@ -57,6 +74,7 @@ abstract final class AppIcons {
   static const String idCard = '${AppAssets.icons}/ic_id_card.svg';
   static const String info = '${AppAssets.icons}/ic_info.svg';
   static const String lock = '${AppAssets.icons}/ic_lock.svg';
+  static const String lockReset = '${AppAssets.icons}/ic_lock_reset.svg';
   static const String lockPrivate = '${AppAssets.icons}/ic_lock_private.svg';
   static const String logIn = '${AppAssets.icons}/ic_log_in.svg';
   static const String logOut = '${AppAssets.icons}/ic_log_out.svg';
@@ -72,8 +90,13 @@ abstract final class AppIcons {
   static const String navResults = '${AppAssets.icons}/ic_nav_results.svg';
   static const String navigate = '${AppAssets.icons}/ic_navigate.svg';
   static const String news = '${AppAssets.icons}/ic_news.svg';
+  static const String paperclip = '${AppAssets.icons}/ic_paperclip.svg';
   static const String phone = '${AppAssets.icons}/ic_phone.svg';
+  static const String photo = '${AppAssets.icons}/ic_photo.svg';
   static const String plus = '${AppAssets.icons}/ic_plus.svg';
+  static const String reply = '${AppAssets.icons}/ic_reply.svg';
+  static const String send = '${AppAssets.icons}/ic_send.svg';
+  static const String settings = '${AppAssets.icons}/ic_settings.svg';
   static const String shieldCheck = '${AppAssets.icons}/ic_shield_check.svg';
   static const String smartphoneOtp =
       '${AppAssets.icons}/ic_smartphone_otp.svg';
@@ -86,6 +109,7 @@ abstract final class AppIcons {
       '${AppAssets.icons}/ic_target_mission.svg';
   static const String trash = '${AppAssets.icons}/ic_trash.svg';
   static const String user = '${AppAssets.icons}/ic_user.svg';
+  static const String userFilled = '${AppAssets.icons}/ic_user_filled.svg';
 }
 
 /// Lottie animations — `Lottie.asset(AppLottie.splash)`.

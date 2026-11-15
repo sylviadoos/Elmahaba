@@ -7,6 +7,10 @@ import 'package:al_mahhaba_school/config/app_config.dart';
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_router.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
+import 'package:al_mahhaba_school/core/notifications/notification_service.dart';
+import 'package:al_mahhaba_school/features/app_status/data/data_sources/app_status_remote_data_source.dart';
+import 'package:al_mahhaba_school/features/app_status/data/models/app_status_model.dart';
+import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/login_page.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/pages/chat_page.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/pages/fees_page.dart';
@@ -17,10 +21,53 @@ import 'package:al_mahhaba_school/features/splash/presentation/pages/splash_page
 import 'package:al_mahhaba_school/features/about/presentation/pages/about_page.dart';
 import 'package:al_mahhaba_school/features/explore/presentation/pages/explore_page.dart';
 
+/// Firebase isn't set up in tests; the OTP page that needs it isn't opened.
+class _NoPhoneVerification implements PhoneVerificationDataSource {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+/// No server in tests: the school takes parents.
+class _ParentsWelcome implements AppStatusRemoteDataSource {
+  @override
+  Future<AppStatusModel> getAppStatus() async =>
+      const AppStatusModel(enabled: true);
+}
+
+/// Firebase isn't set up in tests: a phone without pushes.
+class _NoNotifications implements NotificationService {
+  @override
+  Future<void> init() async {}
+
+  @override
+  Future<String?> getToken() async => null;
+
+  @override
+  Stream<String> get onTokenRefresh => const Stream.empty();
+
+  @override
+  Stream<Map<String, dynamic>> get onTap => const Stream.empty();
+
+  @override
+  Stream<Map<String, dynamic>> get onReceived => const Stream.empty();
+
+  @override
+  Future<void> deleteToken() async {}
+}
+
 void main() {
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
     await configureDependencies();
+    getIt
+      ..unregister<PhoneVerificationDataSource>()
+      ..registerLazySingleton<PhoneVerificationDataSource>(
+        _NoPhoneVerification.new,
+      )
+      ..unregister<NotificationService>()
+      ..registerLazySingleton<NotificationService>(_NoNotifications.new)
+      ..unregister<AppStatusRemoteDataSource>()
+      ..registerLazySingleton<AppStatusRemoteDataSource>(_ParentsWelcome.new);
   });
 
   Future<void> settle(WidgetTester tester) async {
@@ -92,16 +139,21 @@ void main() {
       await settle(tester);
       expect(find.byType(LoginPage), findsOneWidget);
 
-      // No real authentication yet.
+      // Empty fields are caught before calling the API.
       await tester.tap(find.widgetWithText(ElevatedButton, 'Log in'));
       await settle(tester);
-      expect(find.byType(HomePage), findsOneWidget);
-      expect(find.text('Needs your attention'), findsOneWidget);
+      expect(find.byType(LoginPage), findsOneWidget);
+      expect(find.text('This field is required'), findsNWidgets(2));
 
-      await tester.tap(find.text('Reply: bring the Science book tomorrow'));
+      // Signing in needs the server: open Home directly (no children, so
+      // no dashboard to load).
+      appRouter.go(AppRoutes.home);
+      await settle(tester);
+      expect(find.byType(HomePage), findsOneWidget);
+
+      await tester.tap(find.text('Chat'));
       await settle(tester);
       expect(find.byType(ChatPage), findsOneWidget);
-      expect(find.text('You replied'), findsOneWidget);
 
       // Back to Home, then switch tabs from the nav bar.
       await tester.tap(find.byTooltip('Back'));
@@ -111,12 +163,10 @@ void main() {
       await tester.tap(find.text('Results').last);
       await settle(tester);
       expect(find.byType(ResultsPage), findsOneWidget);
-      expect(find.text('Subjects'), findsOneWidget);
 
       await tester.tap(find.text('Fees').last);
       await settle(tester);
       expect(find.byType(FeesPage), findsOneWidget);
-      expect(find.text('Installments'), findsOneWidget);
     },
   );
 }
