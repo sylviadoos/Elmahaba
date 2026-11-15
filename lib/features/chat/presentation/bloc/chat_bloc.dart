@@ -110,11 +110,14 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     ),
   );
 
-  /// The items marked read, or being marked, so none is sent twice.
-  final Set<String> _marked = {};
+  /// The items marked read, or being marked, so none is sent twice — each
+  /// with the child it was read for (null: "All"): an item about two
+  /// children is marked once for each.
+  final Set<(int?, String)> _marked = {};
 
-  /// Items seen since the last request, marked read once [_markTimer] ends.
-  final Set<String> _seen = {};
+  /// Items seen since the last request, with the child shown then; marked
+  /// read once [_markTimer] ends.
+  final Set<(int?, String)> _seen = {};
   Timer? _markTimer;
 
   /// The message being written. Kept when sending fails, so sending it
@@ -294,7 +297,8 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
 
   /// Gathered for a moment, then marked read together.
   void _onItemSeen(ItemSeenIntent intent, Emitter<ChatState> emit) {
-    if (_marked.contains(intent.key) || !_seen.add(intent.key)) return;
+    final seen = (state.studentId, intent.key);
+    if (_marked.contains(seen) || !_seen.add(seen)) return;
     _markTimer?.cancel();
     _markTimer = Timer(_markDelay, _markSeen);
   }
@@ -304,12 +308,26 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
   /// badge on Chat.
   Future<void> _markSeen() async {
     if (_seen.isEmpty) return;
-    final keys = _seen.toSet();
+    final seen = _seen.toSet();
     _seen.clear();
-    _marked.addAll(keys);
-    // Not after leaving: there's nothing on screen to change.
+    _marked.addAll(seen);
+    // Usually one child; more when the parent switched before the timer.
+    final children = {for (final (studentId, _) in seen) studentId};
+    await Future.wait([
+      for (final studentId in children)
+        _markSeenFor(studentId, {
+          for (final (child, key) in seen)
+            if (child == studentId) key,
+        }),
+    ]);
+  }
+
+  /// [keys], seen in [studentId]'s chat, marked read for them.
+  Future<void> _markSeenFor(int? studentId, Set<String> keys) async {
+    // Not after leaving, nor once another child's chat is shown: the same
+    // item may still be new there.
     void show(bool isRead, {int? unread}) {
-      if (!isClosed) {
+      if (!isClosed && state.studentId == studentId) {
         add(ItemsReadChangedIntent(keys, isRead: isRead, unread: unread));
       }
     }
@@ -317,12 +335,12 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     show(true);
     // Read for the child shown, as the school asks of every chat request:
     // an item about two children stays new for the other. On "All", none.
-    final result = await _markRead(keys.toList(), studentId: state.studentId);
+    final result = await _markRead(keys.toList(), studentId: studentId);
     result.when(
       success: (unread) => show(true, unread: unread),
       failure: (exception) {
         // New again, and tried again when they come on screen again.
-        _marked.removeAll(keys);
+        _marked.removeAll({for (final key in keys) (studentId, key)});
         show(false);
         debugPrint('Marking chat items read: $exception');
       },

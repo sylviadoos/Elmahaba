@@ -70,7 +70,16 @@ class _HomeViewState extends State<_HomeView> {
 
   /// Spins until the school answered (or Home closed).
   Future<void> _pullToRefresh() async {
-    final bloc = context.read<HomeBloc>()..add(const RefreshHomeIntent());
+    final bloc = context.read<HomeBloc>();
+    // The two cases `RefreshHomeIntent` answers with nothing at all: no
+    // child to ask about, or none asked for yet. Waiting on a state that
+    // never comes would leave the indicator spinning for good.
+    final state = bloc.state;
+    if (state.childId == null ||
+        state.dashboard.state == StateType.initial) {
+      return;
+    }
+    bloc.add(const RefreshHomeIntent());
     await bloc.stream.firstWhere(
       (state) =>
           !state.isRefreshing && state.dashboard.state != StateType.loading,

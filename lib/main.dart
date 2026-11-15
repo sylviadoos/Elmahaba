@@ -85,6 +85,8 @@ Future<void> _runReportingToSentry(Widget app) async {
 /// school hears about crashes on parents' phones. Debug runs report to the
 /// console only; a developer's own crashes aren't the school's problem.
 Future<void> _reportCrashes() async {
+  // Crashlytics has no web version; Sentry covers the web.
+  if (kIsWeb) return;
   final crashlytics = FirebaseCrashlytics.instance;
   await crashlytics.setCrashlyticsCollectionEnabled(!kDebugMode);
   if (kDebugMode) return;

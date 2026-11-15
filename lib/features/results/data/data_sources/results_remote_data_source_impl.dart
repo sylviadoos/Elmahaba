@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/network/api_endpoints.dart';
@@ -29,9 +30,33 @@ class ResultsRemoteDataSourceImpl implements ResultsRemoteDataSource {
             )
             as Map<String, dynamic>;
     return [
-      for (final result in jsonObjects(json[ApiKeys.data]))
-        // One without its id couldn't be told apart.
-        if (result['result_id'] is int) ResultDetailsModel.fromJson(result),
+      for (final result in jsonObjects(json[ApiKeys.data])) ?_read(result),
     ];
+  }
+
+  /// One result, or null when the school sent it in a shape the app can't
+  /// read. On its own, so one bad result costs only itself: the child's
+  /// other results still reach the parent, rather than the whole page
+  /// failing over one of them.
+  ///
+  /// What was dropped is logged — never swallowed quietly — so it shows up
+  /// while testing instead of looking like the school published nothing.
+  ResultDetailsModel? _read(Map<String, dynamic> result) {
+    // One without its id couldn't be told apart, or opened.
+    final id = result['result_id'];
+    if (id is! int) {
+      debugPrint(
+        'Results: a result was left out — its "result_id" is '
+        '${id == null ? 'missing' : '${id.runtimeType}, not an int'}.',
+      );
+      return null;
+    }
+    try {
+      return ResultDetailsModel.fromJson(result);
+    } catch (error, stackTrace) {
+      // The id only: the marks themselves don't belong in a log.
+      debugPrint('Results: result $id could not be read: $error\n$stackTrace');
+      return null;
+    }
   }
 }

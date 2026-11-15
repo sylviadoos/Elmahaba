@@ -38,7 +38,13 @@ class _ParentShellPageState extends State<ParentShellPage> {
     // Signed in: the badge on Chat and the dot on Complaints. Both are
     // asked for again as notifications arrive (`BadgeRefresher`), and the
     // badge as another child is picked.
-    context.loadChatUnread();
+    //
+    // Not when the tabs open on Home: it asks for the same dashboard and
+    // passes the count on, so this would be that request twice. Nothing is
+    // over the tabs yet, so the branch shown is the page shown.
+    if (widget.navigationShell.currentIndex != _home) {
+      context.loadChatUnread();
+    }
   }
 
   void _open(BuildContext context, MainTab tab) {

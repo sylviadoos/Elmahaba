@@ -1,4 +1,4 @@
-import 'package:clarity_flutter/clarity_flutter.dart';
+import 'package:al_mahhaba_school/core/analytics/clarity.dart';
 import 'package:flutter/widgets.dart';
 
 /// What anyone may see (the school's own pages: Explore, News…), shown as
