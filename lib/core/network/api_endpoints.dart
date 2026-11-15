@@ -38,6 +38,13 @@ abstract final class ApiEndpoints {
 
   static const String children = 'v1/parent/children';
   static const String linkChild = 'v1/parent/children/link';
+
+  /// POST `{verification_token, code}`: links the child [linkChild] texted
+  /// a code for (`otp_required`).
+  static const String linkChildVerify = 'v1/parent/children/link/verify-otp';
+
+  /// POST `{verification_token}`: texts that code again.
+  static const String linkChildResend = 'v1/parent/children/link/resend-otp';
   static String childDetails(int childId) =>
       'v1/parent/children/$childId/details';
 

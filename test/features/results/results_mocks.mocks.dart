@@ -6,17 +6,19 @@
 
 import 'dart:async' as _i3;
 
-import 'package:al_mahhaba_school/core/base/cancel_handle.dart' as _i12;
+import 'package:al_mahhaba_school/core/base/cancel_handle.dart' as _i13;
 import 'package:al_mahhaba_school/core/base/result.dart' as _i4;
-import 'package:al_mahhaba_school/core/base/upload_progress.dart' as _i15;
+import 'package:al_mahhaba_school/core/base/upload_progress.dart' as _i16;
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart'
-    as _i16;
+    as _i17;
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_item_entity.dart'
-    as _i13;
+    as _i14;
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart'
+    as _i12;
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_read_entity.dart'
     as _i11;
 import 'package:al_mahhaba_school/features/chat/domain/entities/new_chat_message_entity.dart'
-    as _i14;
+    as _i15;
 import 'package:al_mahhaba_school/features/chat/domain/repos/chat_repo.dart'
     as _i10;
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart'
@@ -130,20 +132,20 @@ class MockHomeRepo extends _i1.Mock implements _i8.HomeRepo {
 /// See the documentation for Mockito's code generation for more information.
 class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
   @override
-  _i3.Stream<int> get onMarkedRead =>
+  _i3.Stream<_i11.ChatReadEntity> get onMarkedRead =>
       (super.noSuchMethod(
             Invocation.getter(#onMarkedRead),
-            returnValue: _i3.Stream<int>.empty(),
-            returnValueForMissingStub: _i3.Stream<int>.empty(),
+            returnValue: _i3.Stream<_i11.ChatReadEntity>.empty(),
+            returnValueForMissingStub: _i3.Stream<_i11.ChatReadEntity>.empty(),
           )
-          as _i3.Stream<int>);
+          as _i3.Stream<_i11.ChatReadEntity>);
 
   @override
-  _i3.Future<_i4.Result<_i11.ChatPageEntity>> getChat({
+  _i3.Future<_i4.Result<_i12.ChatPageEntity>> getChat({
     int? studentId,
     String? before,
     int? limit,
-    _i12.CancelHandle? cancel,
+    _i13.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#getChat, [], {
@@ -152,8 +154,8 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
               #limit: limit,
               #cancel: cancel,
             }),
-            returnValue: _i3.Future<_i4.Result<_i11.ChatPageEntity>>.value(
-              _i6.dummyValue<_i4.Result<_i11.ChatPageEntity>>(
+            returnValue: _i3.Future<_i4.Result<_i12.ChatPageEntity>>.value(
+              _i6.dummyValue<_i4.Result<_i12.ChatPageEntity>>(
                 this,
                 Invocation.method(#getChat, [], {
                   #studentId: studentId,
@@ -164,8 +166,8 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
               ),
             ),
             returnValueForMissingStub:
-                _i3.Future<_i4.Result<_i11.ChatPageEntity>>.value(
-                  _i6.dummyValue<_i4.Result<_i11.ChatPageEntity>>(
+                _i3.Future<_i4.Result<_i12.ChatPageEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i12.ChatPageEntity>>(
                     this,
                     Invocation.method(#getChat, [], {
                       #studentId: studentId,
@@ -176,32 +178,32 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
                   ),
                 ),
           )
-          as _i3.Future<_i4.Result<_i11.ChatPageEntity>>);
+          as _i3.Future<_i4.Result<_i12.ChatPageEntity>>);
 
   @override
-  _i3.Future<_i4.Result<int>> getUnreadCount() =>
+  _i3.Future<_i4.Result<int>> getUnreadCount({required int? studentId}) =>
       (super.noSuchMethod(
-            Invocation.method(#getUnreadCount, []),
+            Invocation.method(#getUnreadCount, [], {#studentId: studentId}),
             returnValue: _i3.Future<_i4.Result<int>>.value(
               _i6.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#getUnreadCount, []),
+                Invocation.method(#getUnreadCount, [], {#studentId: studentId}),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<int>>.value(
               _i6.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#getUnreadCount, []),
+                Invocation.method(#getUnreadCount, [], {#studentId: studentId}),
               ),
             ),
           )
           as _i3.Future<_i4.Result<int>>);
 
   @override
-  _i3.Future<_i4.Result<_i13.ChatItemEntity>> sendMessage(
-    _i14.NewChatMessageEntity? message, {
-    _i15.UploadProgressCallback? onProgress,
-    _i12.CancelHandle? cancel,
+  _i3.Future<_i4.Result<_i14.ChatItemEntity>> sendMessage(
+    _i15.NewChatMessageEntity? message, {
+    _i16.UploadProgressCallback? onProgress,
+    _i13.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -209,8 +211,8 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
               [message],
               {#onProgress: onProgress, #cancel: cancel},
             ),
-            returnValue: _i3.Future<_i4.Result<_i13.ChatItemEntity>>.value(
-              _i6.dummyValue<_i4.Result<_i13.ChatItemEntity>>(
+            returnValue: _i3.Future<_i4.Result<_i14.ChatItemEntity>>.value(
+              _i6.dummyValue<_i4.Result<_i14.ChatItemEntity>>(
                 this,
                 Invocation.method(
                   #sendMessage,
@@ -220,8 +222,8 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
               ),
             ),
             returnValueForMissingStub:
-                _i3.Future<_i4.Result<_i13.ChatItemEntity>>.value(
-                  _i6.dummyValue<_i4.Result<_i13.ChatItemEntity>>(
+                _i3.Future<_i4.Result<_i14.ChatItemEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i14.ChatItemEntity>>(
                     this,
                     Invocation.method(
                       #sendMessage,
@@ -231,22 +233,22 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
                   ),
                 ),
           )
-          as _i3.Future<_i4.Result<_i13.ChatItemEntity>>);
+          as _i3.Future<_i4.Result<_i14.ChatItemEntity>>);
 
   @override
-  _i3.Future<_i4.Result<int>> markRead(List<String>? keys) =>
+  _i3.Future<_i4.Result<int>> markRead(List<String>? keys, {int? studentId}) =>
       (super.noSuchMethod(
-            Invocation.method(#markRead, [keys]),
+            Invocation.method(#markRead, [keys], {#studentId: studentId}),
             returnValue: _i3.Future<_i4.Result<int>>.value(
               _i6.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#markRead, [keys]),
+                Invocation.method(#markRead, [keys], {#studentId: studentId}),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<int>>.value(
               _i6.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#markRead, [keys]),
+                Invocation.method(#markRead, [keys], {#studentId: studentId}),
               ),
             ),
           )
@@ -254,14 +256,15 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
 
   @override
   _i3.Future<_i4.Result<String>> downloadAttachment(
-    _i16.ChatAttachmentEntity? attachment, {
-    _i12.CancelHandle? cancel,
+    _i17.ChatAttachmentEntity? attachment, {
+    int? studentId,
+    _i13.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #downloadAttachment,
               [attachment],
-              {#cancel: cancel},
+              {#studentId: studentId, #cancel: cancel},
             ),
             returnValue: _i3.Future<_i4.Result<String>>.value(
               _i6.dummyValue<_i4.Result<String>>(
@@ -269,7 +272,7 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
                 Invocation.method(
                   #downloadAttachment,
                   [attachment],
-                  {#cancel: cancel},
+                  {#studentId: studentId, #cancel: cancel},
                 ),
               ),
             ),
@@ -279,7 +282,7 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
                 Invocation.method(
                   #downloadAttachment,
                   [attachment],
-                  {#cancel: cancel},
+                  {#studentId: studentId, #cancel: cancel},
                 ),
               ),
             ),
@@ -288,14 +291,15 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
 
   @override
   _i3.Future<_i4.Result<String>> previewAttachment(
-    _i16.ChatAttachmentEntity? attachment, {
-    _i12.CancelHandle? cancel,
+    _i17.ChatAttachmentEntity? attachment, {
+    int? studentId,
+    _i13.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #previewAttachment,
               [attachment],
-              {#cancel: cancel},
+              {#studentId: studentId, #cancel: cancel},
             ),
             returnValue: _i3.Future<_i4.Result<String>>.value(
               _i6.dummyValue<_i4.Result<String>>(
@@ -303,7 +307,7 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
                 Invocation.method(
                   #previewAttachment,
                   [attachment],
-                  {#cancel: cancel},
+                  {#studentId: studentId, #cancel: cancel},
                 ),
               ),
             ),
@@ -313,7 +317,7 @@ class MockChatRepo extends _i1.Mock implements _i10.ChatRepo {
                 Invocation.method(
                   #previewAttachment,
                   [attachment],
-                  {#cancel: cancel},
+                  {#studentId: studentId, #cancel: cancel},
                 ),
               ),
             ),

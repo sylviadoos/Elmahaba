@@ -208,32 +208,38 @@ void main() {
   );
 
   blocTest<AnnouncementsBloc, AnnouncementsState>(
-    'seen: marked read together, once, and the chat badge updated',
+    'seen: marked read together, once, for the child shown',
     build: build,
+    seed: () => AnnouncementsState(studentId: omar.studentId),
     act: (bloc) => bloc
       ..add(const AnnouncementSeenIntent('event:40'))
       ..add(const AnnouncementSeenIntent('event:52'))
       ..add(const AnnouncementSeenIntent('event:40')),
     wait: const Duration(milliseconds: 500),
     verify: (_) {
-      verify(markRead(['event:40', 'event:52'])).called(1);
-      expect(
-        effects.whereType<AnnouncementsChatUnreadEffect>().single.count,
-        4,
-      );
+      verify(
+        markRead(['event:40', 'event:52'], studentId: omar.studentId),
+      ).called(1);
+      // The badge follows the read by itself (`ChatUnreadBloc`).
+      expect(effects, isEmpty);
     },
   );
 
   blocTest<AnnouncementsBloc, AnnouncementsState>(
-    'a file: downloaded, then opened',
+    'a file: downloaded for the child shown, then opened',
     setUp: () => when(
-      downloadAttachment(agendaFile, cancel: anyNamed('cancel')),
+      downloadAttachment(
+        agendaFile,
+        studentId: omar.studentId,
+        cancel: anyNamed('cancel'),
+      ),
     ).thenAnswer((_) async => const Success(data: '/files/agenda.pdf')),
     build: build,
+    seed: () => AnnouncementsState(studentId: omar.studentId),
     act: (bloc) => bloc.add(const OpenAnnouncementFileIntent(agendaFile)),
     expect: () => [
-      const AnnouncementsState(downloadingId: 77),
-      const AnnouncementsState(),
+      AnnouncementsState(studentId: omar.studentId, downloadingId: 77),
+      AnnouncementsState(studentId: omar.studentId),
     ],
     verify: (_) {
       final opened = effects.whereType<OpenAnnouncementFileEffect>().single;

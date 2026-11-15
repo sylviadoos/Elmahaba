@@ -19,7 +19,9 @@ abstract interface class ChatRemoteDataSource {
     CancelHandle? cancel,
   });
 
-  Future<int> getUnreadCount();
+  /// What [studentId]'s chat has unread, the general items included (the
+  /// school asks for the child: 422 `validation_failed` without one).
+  Future<int> getUnreadCount({required int studentId});
 
   /// Fails with a 422 `ServerException`: `text_or_attachment_required`,
   /// `file_type_or_size_not_allowed`, `too_many_attachments`,
@@ -31,14 +33,19 @@ abstract interface class ChatRemoteDataSource {
     CancelHandle? cancel,
   });
 
-  /// Returns what's still unread.
-  Future<int> markRead(List<String> keys);
+  /// Returns what's still unread. [studentId] is the child the parent was
+  /// reading about (the chat's, homework, results, announcements): one item
+  /// can be about two of their children, and reading it for one leaves it
+  /// new for the other. None only on the chat's "All".
+  Future<int> markRead(List<String> keys, {int? studentId});
 
   /// Saves the file in the app's temporary folder (once: a saved one is
   /// reused) and returns its path. The file comes by a signed link, without
-  /// the token.
+  /// the token. [studentId] is the child whose page it's on; without one
+  /// (the chat's "All") the school looks in every child's.
   Future<String> downloadAttachment(
     ChatAttachmentEntity attachment, {
+    int? studentId,
     CancelHandle? cancel,
   });
 }

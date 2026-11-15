@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,12 +12,15 @@ import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/widgets/app_button.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
+import 'package:al_mahhaba_school/features/children/domain/entities/link_child_result_entity.dart';
+import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart';
 import 'package:al_mahhaba_school/features/children/presentation/pages/add_children_page.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_event.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 
 import '../../../../helpers/test_app.dart';
+import '../../children_fixtures.dart';
 import 'add_children_page_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<ChildrenViewModel>()])
@@ -63,6 +68,14 @@ void main() {
         GoRoute(
           path: AppRoutes.home,
           builder: (_, _) => const Scaffold(body: Text('Home')),
+        ),
+        GoRoute(
+          path: AppRoutes.linkChildCode,
+          builder: (_, state) => Scaffold(
+            body: Text(
+              'Code to ${(state.extra! as LinkVerificationEntity).maskedPhone}',
+            ),
+          ),
         ),
       ],
     );
@@ -144,5 +157,25 @@ void main() {
     verify(
       childrenViewModel.doAction(argThat(isA<LoadChildrenEvent>())),
     ).called(1);
+  });
+
+  testWidgets('a code texted to the child'
+      's phone: its page opens, the ID '
+      'stays', (tester) async {
+    final states = StreamController<ChildrenState>.broadcast();
+    addTearDown(states.close);
+    when(childrenViewModel.stream).thenAnswer((_) => states.stream);
+    await pumpPage(tester);
+    await typeId(tester, '30101010101010');
+
+    final codeSent = ChildrenState(
+      children: const BaseState.success([_rovanio]),
+      link: BaseState.success(ChildLinkCodeSent(verification)),
+    );
+    when(childrenViewModel.state).thenReturn(codeSent);
+    states.add(codeSent);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Code to ••• ••• 4567'), findsOneWidget);
   });
 }

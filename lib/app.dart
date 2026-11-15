@@ -18,7 +18,6 @@ import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_s
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/badge_refresher.dart';
 
 class AlMahhabaApp extends StatelessWidget {
@@ -37,8 +36,6 @@ class AlMahhabaApp extends StatelessWidget {
           BlocProvider(create: (_) => getIt<ChildrenViewModel>()),
           // The badge on Chat, which the chat updates as it's read.
           BlocProvider(create: (_) => getIt<ChatUnreadBloc>()),
-          // The dot on Complaints, taken off as the parent opens them.
-          BlocProvider(create: (_) => getIt<ComplaintUpdatesBloc>()),
           // Whether visitors get "Log in": asked at launch, so it's known by
           // the first visitor page.
           BlocProvider(

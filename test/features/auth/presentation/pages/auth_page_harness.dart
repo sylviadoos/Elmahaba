@@ -13,7 +13,6 @@ import 'package:al_mahhaba_school/features/auth/domain/use_cases/logout_use_case
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/auth_view_model.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 
 import '../../../../helpers/result_dummy.dart';
@@ -42,7 +41,6 @@ class AuthPageHarness {
   final parentViewModel = MockParentViewModel();
   final childrenViewModel = MockChildrenViewModel();
   final chatUnreadViewModel = MockChatUnreadBloc();
-  final complaintUpdatesBloc = MockComplaintUpdatesBloc();
 
   /// The `extra` each stand-in page was opened with, by path.
   final extras = <String, Object?>{};
@@ -100,7 +98,6 @@ class AuthPageHarness {
           BlocProvider<ParentViewModel>.value(value: parentViewModel),
           BlocProvider<ChildrenViewModel>.value(value: childrenViewModel),
           BlocProvider<ChatUnreadBloc>.value(value: chatUnreadViewModel),
-          BlocProvider<ComplaintUpdatesBloc>.value(value: complaintUpdatesBloc),
         ],
       ),
     );

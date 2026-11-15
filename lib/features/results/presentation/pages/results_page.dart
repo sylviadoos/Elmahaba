@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
+import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
@@ -23,7 +25,8 @@ import 'package:al_mahhaba_school/features/shell/presentation/widgets/parent_tab
 
 /// The selected child's results: the newest one published shows first, and
 /// a filter above it picks any other — a month or a term. Under a month's,
-/// the certificate to download, with every month of the year on it.
+/// the certificate to download, with every month of the year on it. Kept
+/// up to date while it shows (see [PageRefresher]).
 class ResultsPage extends StatelessWidget {
   const ResultsPage({super.key});
 
@@ -60,6 +63,11 @@ class _ResultsViewState extends State<_ResultsView> {
     );
   }
 
+  /// One published since shows: the tab stays alive under the others, so
+  /// what it loaded may be old by the time it shows again.
+  Future<void> _refresh() =>
+      context.read<ResultsViewModel>().doAction(const RefreshResultsEvent());
+
   @override
   Widget build(BuildContext context) {
     final childrenState = context.select(
@@ -74,20 +82,27 @@ class _ResultsViewState extends State<_ResultsView> {
           previous.children.data != current.children.data ||
           current.showsOtherChildThan(previous),
       listener: (context, state) => _loadResults(),
-      child: ParentTabPage(
-        title: context.l10n.results,
-        selectedChild: context.watchSelectedChildIndex(),
-        onChildSelected: (index) =>
-            context.selectChild(children[index].studentId),
-        children: [
-          if (children.isEmpty)
-            NoChildrenState(
-              children: childrenState,
-              loading: const ResultsSkeleton(),
-            )
-          else
-            _results(context),
-        ],
+      // Asked again as a notification arrives (a result published), the
+      // app comes back, or the tab shows again; pulling down asks too.
+      child: PageRefresher(
+        path: AppRoutes.results,
+        onRefresh: _refresh,
+        child: ParentTabPage(
+          title: context.l10n.results,
+          selectedChild: context.watchSelectedChildIndex(),
+          onChildSelected: (index) =>
+              context.selectChild(children[index].studentId),
+          onRefresh: _refresh,
+          children: [
+            if (children.isEmpty)
+              NoChildrenState(
+                children: childrenState,
+                loading: const ResultsSkeleton(),
+              )
+            else
+              _results(context),
+          ],
+        ),
       ),
     );
   }

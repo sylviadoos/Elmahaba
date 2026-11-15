@@ -25,7 +25,6 @@ import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.d
 import 'package:al_mahhaba_school/features/auth/domain/repos/auth_repo.dart';
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_data_source.dart';
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart';
-import 'package:al_mahhaba_school/features/complaints/data/data_sources/complaints_local_data_source.dart';
 
 @LazySingleton(as: AuthRepo)
 class AuthRepoImpl implements AuthRepo {
@@ -35,7 +34,6 @@ class AuthRepoImpl implements AuthRepo {
     this._phoneVerification,
     this._childrenLocalDataSource,
     this._chatLocalDataSource,
-    this._complaintsLocalDataSource,
   );
 
   final AuthRemoteDataSource _remoteDataSource;
@@ -47,10 +45,6 @@ class AuthRepoImpl implements AuthRepo {
 
   /// The chats kept in memory are forgotten with it.
   final ChatLocalDataSource _chatLocalDataSource;
-
-  /// How far they had read their complaints goes with it: the next
-  /// parent's complaints aren't this one's.
-  final ComplaintsLocalDataSource _complaintsLocalDataSource;
 
   @override
   Future<Result<RegisterEligibilityEntity>> checkPhone(
@@ -167,6 +161,5 @@ class AuthRepoImpl implements AuthRepo {
     await _localDataSource.clearToken();
     await _localDataSource.clearParent();
     await _childrenLocalDataSource.clearChildren();
-    await _complaintsLocalDataSource.clearSeenUpdate();
   }
 }

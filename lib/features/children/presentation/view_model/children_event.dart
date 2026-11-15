@@ -1,3 +1,4 @@
+import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_request_entity.dart';
 
 sealed class ChildrenEvent {
@@ -33,4 +34,12 @@ final class LinkChildEvent extends ChildrenEvent {
   const LinkChildEvent(this.request);
 
   final LinkChildRequestEntity request;
+}
+
+/// The parent entered the code the school texted for [child]: it's linked,
+/// so it shows everywhere, and the list is asked for again.
+final class ChildLinkVerifiedEvent extends ChildrenEvent {
+  const ChildLinkVerifiedEvent(this.child);
+
+  final ChildEntity child;
 }

@@ -51,11 +51,15 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<int> getUnreadCount() async {
+  Future<int> getUnreadCount({required int studentId}) async {
     // { "status": "success", "data": { "messages": 1, "group_messages": 0,
     //   "events": 1, "total": 2 } }
     final json =
-        await _api.get(ApiEndpoints.chatUnreadCount) as Map<String, dynamic>;
+        await _api.get(
+              ApiEndpoints.chatUnreadCount,
+              queryParameters: {'student_id': studentId},
+            )
+            as Map<String, dynamic>;
     final data = json[ApiKeys.data] as Map<String, dynamic>? ?? const {};
     return data['total'] as int? ?? 0;
   }
@@ -79,11 +83,14 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<int> markRead(List<String> keys) async {
+  Future<int> markRead(List<String> keys, {int? studentId}) async {
     // { "status": "success", "data": { "marked": 2, "not_found": [],
     //   "unread": 0 } }
     final json =
-        await _api.post(ApiEndpoints.chatRead, data: {'items': keys})
+        await _api.post(
+              ApiEndpoints.chatRead,
+              data: {'items': keys, 'student_id': ?studentId},
+            )
             as Map<String, dynamic>;
     final data = json[ApiKeys.data] as Map<String, dynamic>? ?? const {};
     return data['unread'] as int? ?? 0;
@@ -92,6 +99,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   @override
   Future<String> downloadAttachment(
     ChatAttachmentEntity attachment, {
+    int? studentId,
     CancelHandle? cancel,
   }) async {
     final folder = await getTemporaryDirectory();
@@ -104,6 +112,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final json =
           await _api.get(
                 ApiEndpoints.chatAttachment(attachment.id),
+                queryParameters: {'student_id': ?studentId},
                 cancelToken: cancel?.token,
               )
               as Map<String, dynamic>;

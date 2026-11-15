@@ -9,6 +9,7 @@ import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_dat
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/chat/data/models/chat_page_model.dart';
 import 'package:al_mahhaba_school/features/chat/data/repos/chat_repo_impl.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_read_entity.dart';
 
 import '../../../../helpers/result_matchers.dart';
 import '../../chat_fixtures.dart';
@@ -150,25 +151,70 @@ void main() {
   });
 
   group('markRead', () {
-    test(
-      'the school confirmed: what\'s still unread, told to every page',
-      () async {
-        when(
-          remoteDataSource.markRead(['event:40']),
-        ).thenAnswer((_) async => 2);
-        final told = <int>[];
-        final listening = repo.onMarkedRead.listen(told.add);
-        addTearDown(listening.cancel);
+    test('the school confirmed: for whom and what\'s still unread, told to '
+        'every page', () async {
+      when(
+        remoteDataSource.markRead(['event:40'], studentId: 1208),
+      ).thenAnswer((_) async => 2);
+      final told = <ChatReadEntity>[];
+      final listening = repo.onMarkedRead.listen(told.add);
+      addTearDown(listening.cancel);
 
-        expect(await repo.markRead(['event:40']), isSuccess<int>(2));
-        await Future<void>.delayed(Duration.zero);
-        expect(told, [2]);
-      },
-    );
+      expect(
+        await repo.markRead(['event:40'], studentId: 1208),
+        isSuccess<int>(2),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(told, [const ChatReadEntity(studentId: 1208, unread: 2)]);
+    });
+
+    test('a file: asked for the child whose page it\'s on', () async {
+      when(
+        remoteDataSource.downloadAttachment(
+          any,
+          studentId: anyNamed('studentId'),
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) async => '/tmp/77_trip-form.pdf');
+
+      await repo.downloadAttachment(attachment, studentId: 1208);
+
+      verify(
+        remoteDataSource.downloadAttachment(
+          attachment,
+          studentId: 1208,
+          cancel: anyNamed('cancel'),
+        ),
+      ).called(1);
+    });
+
+    test('read on one child\'s page: the school is told whose', () async {
+      when(
+        remoteDataSource.markRead(any, studentId: anyNamed('studentId')),
+      ).thenAnswer((_) async => 1);
+
+      await repo.markRead(['event:41'], studentId: 1208);
+
+      // The same item can be about another child of theirs, and that
+      // one's is still new.
+      verify(
+        remoteDataSource.markRead(['event:41'], studentId: 1208),
+      ).called(1);
+    });
+
+    test('read on the chat\'s "All": no child', () async {
+      when(
+        remoteDataSource.markRead(any, studentId: anyNamed('studentId')),
+      ).thenAnswer((_) async => 0);
+
+      await repo.markRead(['event:41']);
+
+      verify(remoteDataSource.markRead(['event:41'])).called(1);
+    });
 
     test('it failed: nothing told', () async {
       when(remoteDataSource.markRead(any)).thenThrow(const NetworkException());
-      final told = <int>[];
+      final told = <ChatReadEntity>[];
       final listening = repo.onMarkedRead.listen(told.add);
       addTearDown(listening.cancel);
 

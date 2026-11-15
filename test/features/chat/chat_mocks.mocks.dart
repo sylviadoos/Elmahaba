@@ -15,6 +15,8 @@ import 'package:al_mahhaba_school/features/chat/domain/entities/chat_item_entity
     as _i10;
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart'
     as _i5;
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_read_entity.dart'
+    as _i19;
 import 'package:al_mahhaba_school/features/chat/domain/entities/new_chat_message_entity.dart'
     as _i11;
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/download_chat_attachment_use_case.dart'
@@ -150,19 +152,19 @@ class MockSendChatMessageUseCase extends _i1.Mock
 class MockMarkChatReadUseCase extends _i1.Mock
     implements _i13.MarkChatReadUseCase {
   @override
-  _i3.Future<_i4.Result<int>> call(List<String>? keys) =>
+  _i3.Future<_i4.Result<int>> call(List<String>? keys, {int? studentId}) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [keys]),
+            Invocation.method(#call, [keys], {#studentId: studentId}),
             returnValue: _i3.Future<_i4.Result<int>>.value(
               _i7.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#call, [keys]),
+                Invocation.method(#call, [keys], {#studentId: studentId}),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<int>>.value(
               _i7.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#call, [keys]),
+                Invocation.method(#call, [keys], {#studentId: studentId}),
               ),
             ),
           )
@@ -177,20 +179,33 @@ class MockDownloadChatAttachmentUseCase extends _i1.Mock
   @override
   _i3.Future<_i4.Result<String>> call(
     _i15.ChatAttachmentEntity? attachment, {
+    int? studentId,
     _i6.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [attachment], {#cancel: cancel}),
+            Invocation.method(
+              #call,
+              [attachment],
+              {#studentId: studentId, #cancel: cancel},
+            ),
             returnValue: _i3.Future<_i4.Result<String>>.value(
               _i7.dummyValue<_i4.Result<String>>(
                 this,
-                Invocation.method(#call, [attachment], {#cancel: cancel}),
+                Invocation.method(
+                  #call,
+                  [attachment],
+                  {#studentId: studentId, #cancel: cancel},
+                ),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<String>>.value(
               _i7.dummyValue<_i4.Result<String>>(
                 this,
-                Invocation.method(#call, [attachment], {#cancel: cancel}),
+                Invocation.method(
+                  #call,
+                  [attachment],
+                  {#studentId: studentId, #cancel: cancel},
+                ),
               ),
             ),
           )
@@ -203,19 +218,19 @@ class MockDownloadChatAttachmentUseCase extends _i1.Mock
 class MockGetChatUnreadCountUseCase extends _i1.Mock
     implements _i16.GetChatUnreadCountUseCase {
   @override
-  _i3.Future<_i4.Result<int>> call() =>
+  _i3.Future<_i4.Result<int>> call({required int? studentId}) =>
       (super.noSuchMethod(
-            Invocation.method(#call, []),
+            Invocation.method(#call, [], {#studentId: studentId}),
             returnValue: _i3.Future<_i4.Result<int>>.value(
               _i7.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#call, []),
+                Invocation.method(#call, [], {#studentId: studentId}),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<int>>.value(
               _i7.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#call, []),
+                Invocation.method(#call, [], {#studentId: studentId}),
               ),
             ),
           )
@@ -230,20 +245,33 @@ class MockPreviewChatAttachmentUseCase extends _i1.Mock
   @override
   _i3.Future<_i4.Result<String>> call(
     _i15.ChatAttachmentEntity? attachment, {
+    int? studentId,
     _i6.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [attachment], {#cancel: cancel}),
+            Invocation.method(
+              #call,
+              [attachment],
+              {#studentId: studentId, #cancel: cancel},
+            ),
             returnValue: _i3.Future<_i4.Result<String>>.value(
               _i7.dummyValue<_i4.Result<String>>(
                 this,
-                Invocation.method(#call, [attachment], {#cancel: cancel}),
+                Invocation.method(
+                  #call,
+                  [attachment],
+                  {#studentId: studentId, #cancel: cancel},
+                ),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<String>>.value(
               _i7.dummyValue<_i4.Result<String>>(
                 this,
-                Invocation.method(#call, [attachment], {#cancel: cancel}),
+                Invocation.method(
+                  #call,
+                  [attachment],
+                  {#studentId: studentId, #cancel: cancel},
+                ),
               ),
             ),
           )
@@ -256,11 +284,11 @@ class MockPreviewChatAttachmentUseCase extends _i1.Mock
 class MockWatchChatReadsUseCase extends _i1.Mock
     implements _i18.WatchChatReadsUseCase {
   @override
-  _i3.Stream<int> call() =>
+  _i3.Stream<_i19.ChatReadEntity> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i3.Stream<int>.empty(),
-            returnValueForMissingStub: _i3.Stream<int>.empty(),
+            returnValue: _i3.Stream<_i19.ChatReadEntity>.empty(),
+            returnValueForMissingStub: _i3.Stream<_i19.ChatReadEntity>.empty(),
           )
-          as _i3.Stream<int>);
+          as _i3.Stream<_i19.ChatReadEntity>);
 }

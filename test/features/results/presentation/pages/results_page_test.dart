@@ -8,23 +8,23 @@ import 'package:mockito/mockito.dart';
 
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/l10n/translations/app_localizations.dart';
+import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
 import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart';
 import 'package:al_mahhaba_school/features/results/presentation/pages/results_page.dart';
 import 'package:al_mahhaba_school/features/results/presentation/view_model/results_view_model.dart';
 import 'package:al_mahhaba_school/features/results/presentation/widgets/result_filter_chip.dart';
 
 import '../../../../helpers/fake_file_picker.dart';
+import '../../../../helpers/fake_pushes.dart';
 import '../../../../helpers/result_dummy.dart';
 import '../../../../helpers/test_app.dart';
 import '../../../auth/auth_mocks.mocks.dart';
-import '../../../complaints/complaints_mocks.mocks.dart';
 import '../../results_fixtures.dart';
 import '../../results_mocks.mocks.dart';
 
@@ -35,6 +35,7 @@ void main() {
   late MockMarkLatestResultReadUseCase markLatestRead;
   late MockChildrenViewModel childrenViewModel;
   late MockChatUnreadBloc chatUnreadBloc;
+  late FakePushes pushes;
 
   setUpAll(() {
     provideResultDummy<List<ResultDetailsEntity>>();
@@ -49,6 +50,8 @@ void main() {
     getIt.registerFactory<ResultsViewModel>(
       () => ResultsViewModel(getResults, markLatestRead),
     );
+    pushes = useFakePushes();
+    addTearDown(pushes.close);
     when(
       markLatestRead(any),
     ).thenAnswer((_) async => const Success(data: null));
@@ -68,7 +71,13 @@ void main() {
     tester.usePhoneScreen();
     when(getResults(any)).thenAnswer((_) async => results);
     final router = GoRouter(
-      routes: [GoRoute(path: '/', builder: (_, _) => const ResultsPage())],
+      initialLocation: AppRoutes.results,
+      routes: [
+        GoRoute(
+          path: AppRoutes.results,
+          builder: (_, _) => const ResultsPage(),
+        ),
+      ],
     );
     addTearDown(router.dispose);
 
@@ -78,13 +87,6 @@ void main() {
         providers: [
           BlocProvider<ChildrenViewModel>.value(value: childrenViewModel),
           BlocProvider<ChatUnreadBloc>.value(value: chatUnreadBloc),
-          // The header's complaints button: no dot.
-          BlocProvider<ComplaintUpdatesBloc>(
-            create: (_) => ComplaintUpdatesBloc(
-              MockHasNewComplaintUpdatesUseCase(),
-              MockMarkComplaintsSeenUseCase(),
-            ),
-          ),
         ],
       ),
     );
@@ -96,6 +98,40 @@ void main() {
     of: find.byType(SingleChildScrollView).at(1),
     matching: find.text(label),
   );
+
+  group('November published while it was open', () {
+    void novemberPublished() => when(
+      getResults(any),
+    ).thenAnswer((_) async => Success(data: allResults));
+
+    testWidgets('the notification comes: November shows, no leaving', (
+      tester,
+    ) async {
+      await pump(tester, Success(data: [october, firstTerm]));
+      expect(find.text(november.title), findsNothing);
+
+      novemberPublished();
+      pushes.arrive(const {'type': 'result'});
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text(november.title), findsOneWidget);
+    });
+
+    testWidgets('pulled down: November shows', (tester) async {
+      await pump(tester, Success(data: [october, firstTerm]));
+
+      novemberPublished();
+      await tester.fling(
+        find.byType(SingleChildScrollView).first,
+        const Offset(0, 400),
+        1000,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text(november.title), findsOneWidget);
+    });
+  });
 
   testWidgets('the newest shows first, with every result in the filter', (
     tester,

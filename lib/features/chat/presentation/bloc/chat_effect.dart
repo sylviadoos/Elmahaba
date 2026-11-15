@@ -33,13 +33,6 @@ final class ShowErrorEffect extends ChatEffect {
   final AppException exception;
 }
 
-/// What's still unread in the whole chat, for the badge on Chat.
-final class UnreadChangedEffect extends ChatEffect {
-  const UnreadChangedEffect(this.count);
-
-  final int count;
-}
-
 /// The parent picked the child with [studentId]: every page shows them now.
 final class ChildPickedEffect extends ChatEffect {
   const ChildPickedEffect(this.studentId);

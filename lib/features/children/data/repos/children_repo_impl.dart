@@ -8,6 +8,7 @@ import 'package:al_mahhaba_school/features/children/domain/entities/child_detail
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_request_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_result_entity.dart';
+import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/repos/children_repo.dart';
 
 @LazySingleton(as: ChildrenRepo)
@@ -39,14 +40,34 @@ class ChildrenRepoImpl implements ChildrenRepo {
     final result = await _remoteDataSource.linkChild(
       LinkChildRequestModel.fromEntity(request),
     );
-    if (result case ChildLinked(:final child)) {
-      final saved = await _localDataSource.getSavedChildren();
-      await _localDataSource.saveChildren([
-        for (final other in saved)
-          if (other.studentId != child.studentId) other,
-        child,
-      ]);
-    }
+    if (result case ChildLinked(:final child)) await _save(child);
     return result;
   });
+
+  @override
+  Future<Result<ChildEntity>> verifyChildLink({
+    required String token,
+    required String code,
+  }) => Result.guard(() async {
+    final child = await _remoteDataSource.verifyChildLink(
+      token: token,
+      code: code,
+    );
+    await _save(child);
+    return child;
+  });
+
+  @override
+  Future<Result<LinkVerificationEntity>> resendChildLinkCode(String token) =>
+      Result.guard(() => _remoteDataSource.resendChildLinkCode(token));
+
+  /// A child just linked joins the saved ones (in place, if it was there).
+  Future<void> _save(ChildEntity child) async {
+    final saved = await _localDataSource.getSavedChildren();
+    await _localDataSource.saveChildren([
+      for (final other in saved)
+        if (other.studentId != child.studentId) other,
+      child,
+    ]);
+  }
 }

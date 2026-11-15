@@ -27,6 +27,7 @@ import 'package:al_mahhaba_school/features/profile/presentation/view_model/profi
 import 'package:al_mahhaba_school/features/profile/presentation/view_model/profile_view_model.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/delete_account_button.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/log_out_button.dart';
+import 'package:al_mahhaba_school/features/profile/presentation/widgets/my_children_section.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/notification_preferences_sheet.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/profile_card.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/settings_header.dart';
@@ -178,6 +179,10 @@ class _SettingsViewState extends State<_SettingsView> {
                         onTap: () =>
                             context.push(AppRoutes.profile, extra: profile),
                       ),
+                      // Here rather than inside the profile: the parent
+                      // opens a child without going through their own
+                      // page first.
+                      const MyChildrenSection(),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [

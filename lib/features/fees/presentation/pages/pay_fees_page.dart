@@ -24,6 +24,7 @@ import 'package:al_mahhaba_school/features/fees/domain/entities/fee_installment_
 import 'package:al_mahhaba_school/features/fees/domain/entities/fee_statement_entity.dart';
 import 'package:al_mahhaba_school/features/fees/domain/fees_error_codes.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/extensions/money_text.dart';
+import 'package:al_mahhaba_school/features/fees/presentation/extensions/pay_online_message.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/statement_labels.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/view_model/pay_fees_event.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/view_model/pay_fees_state.dart';
@@ -84,7 +85,7 @@ class _PayFeesViewState extends State<_PayFeesView> {
   }
 
   void _onError(AppException exception) {
-    context.showSnackBar(exception.localizedMessage(context), isError: true);
+    context.showSnackBar(exception.payOnlineMessage(context), isError: true);
     if (exception is UnauthorizedException) {
       context.logOut();
     } else if (exception case ServerException(

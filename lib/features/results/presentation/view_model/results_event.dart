@@ -11,6 +11,13 @@ final class LoadResultsEvent extends ResultsEvent {
   final int childId;
 }
 
+/// Asks again for the results shown, which stay meanwhile (and if it
+/// fails): the school may have published one since. A new one shows, as
+/// when Results opens; else the one picked stays.
+final class RefreshResultsEvent extends ResultsEvent {
+  const RefreshResultsEvent();
+}
+
 /// Shows the result with this id: a month or a term picked in the filter.
 final class SelectResultEvent extends ResultsEvent {
   const SelectResultEvent(this.resultId);

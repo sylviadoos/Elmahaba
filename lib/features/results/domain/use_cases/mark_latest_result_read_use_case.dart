@@ -30,7 +30,9 @@ class MarkLatestResultReadUseCase {
       final isRead = listed?.isRead ?? latest.isRead;
       final chatKey = listed?.chatKey ?? latest.chatKey;
       if (isRead || chatKey == null) return const Success(data: null);
-      final marked = await _chatRepo.markRead([chatKey]);
+      // Whose result it is: the same item can be about another child of
+      // theirs, and that one's is still new.
+      final marked = await _chatRepo.markRead([chatKey], studentId: childId);
       return marked.map((_) {});
     });
   }

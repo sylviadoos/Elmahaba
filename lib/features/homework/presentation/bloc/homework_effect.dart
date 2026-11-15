@@ -23,14 +23,6 @@ final class ShowHomeworkErrorEffect extends HomeworkEffect {
   final AppException exception;
 }
 
-/// What's still unread in the whole chat (homework is in it), for the
-/// badge on Chat.
-final class ChatUnreadChangedEffect extends HomeworkEffect {
-  const ChatUnreadChangedEffect(this.count);
-
-  final int count;
-}
-
 /// The parent picked the child with [studentId]: every page shows them now.
 final class HomeworkChildPickedEffect extends HomeworkEffect {
   const HomeworkChildPickedEffect(this.studentId);

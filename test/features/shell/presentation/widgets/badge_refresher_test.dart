@@ -11,14 +11,16 @@ import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/notifications/notification_service.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/badge_refresher.dart';
 
 import '../../../../helpers/result_dummy.dart';
+import '../../../announcements/announcements_fixtures.dart' show lina, omar;
 import '../../../auth/auth_fixtures.dart';
 import '../../../auth/auth_mocks.mocks.dart';
 import '../../../chat/chat_mocks.mocks.dart';
-import '../../../complaints/complaints_mocks.mocks.dart';
+import '../../../home/home_mocks.mocks.dart';
 
 /// Firebase isn't set up in tests: pushes arrive when [arrive] is called.
 class _Pushes implements NotificationService {
@@ -38,10 +40,16 @@ class _Pushes implements NotificationService {
 
 void main() {
   late _Pushes pushes;
-  late MockGetChatUnreadCountUseCase getChatUnread;
-  late MockHasNewComplaintUpdatesUseCase hasNewComplaints;
-  late MockMarkComplaintsSeenUseCase markComplaintsSeen;
+  late MockGetNewMessagesCountUseCase getChatUnread;
   late MockParentViewModel parentViewModel;
+  late MockChildrenViewModel childrenViewModel;
+  late StreamController<ChildrenState> children;
+
+  /// Omar's shown on every page.
+  const omarShown = ChildrenState(
+    children: BaseState.success([omar, lina]),
+    selectedId: 1208,
+  );
 
   setUpAll(() {
     provideResultDummy<int>();
@@ -50,12 +58,14 @@ void main() {
 
   setUp(() {
     pushes = _Pushes();
-    getChatUnread = MockGetChatUnreadCountUseCase();
-    hasNewComplaints = MockHasNewComplaintUpdatesUseCase();
-    markComplaintsSeen = MockMarkComplaintsSeenUseCase();
+    getChatUnread = MockGetNewMessagesCountUseCase();
     parentViewModel = MockParentViewModel();
-    when(getChatUnread()).thenAnswer((_) async => const Success(data: 3));
-    when(hasNewComplaints()).thenAnswer((_) async => const Success(data: true));
+    childrenViewModel = MockChildrenViewModel();
+    children = StreamController.broadcast();
+    addTearDown(children.close);
+    when(childrenViewModel.state).thenReturn(omarShown);
+    when(childrenViewModel.stream).thenAnswer((_) => children.stream);
+    when(getChatUnread(any)).thenAnswer((_) async => const Success(data: 3));
     getIt.registerSingleton<NotificationService>(pushes);
     addTearDown(getIt.reset);
     addTearDown(pushes.close);
@@ -71,13 +81,10 @@ void main() {
       MultiBlocProvider(
         providers: [
           BlocProvider<ParentViewModel>.value(value: parentViewModel),
+          BlocProvider<ChildrenViewModel>.value(value: childrenViewModel),
           BlocProvider(
             create: (_) =>
                 ChatUnreadBloc(getChatUnread, MockWatchChatReadsUseCase()),
-          ),
-          BlocProvider(
-            create: (_) =>
-                ComplaintUpdatesBloc(hasNewComplaints, markComplaintsSeen),
           ),
         ],
         child: const BadgeRefresher(
@@ -96,18 +103,33 @@ void main() {
   }
 
   void verifyAsked({required int times}) {
-    verify(getChatUnread()).called(times);
-    verify(hasNewComplaints()).called(times);
+    // The chat's count is the child shown's: the school asks for one.
+    verify(getChatUnread(1208)).called(times);
   }
 
   testWidgets('nothing is asked until something happens', (tester) async {
     await pumpApp(tester, signedIn: true);
 
-    verifyNever(getChatUnread());
-    verifyNever(hasNewComplaints());
+    verifyNever(getChatUnread(any));
   });
 
-  testWidgets('a notification arrives: both badges ask what is new', (
+  testWidgets('another child picked: the chat badge asks for theirs', (
+    tester,
+  ) async {
+    await pumpApp(tester, signedIn: true);
+
+    const linaShown = ChildrenState(
+      children: BaseState.success([omar, lina]),
+      selectedId: 1209,
+    );
+    when(childrenViewModel.state).thenReturn(linaShown);
+    children.add(linaShown);
+    await tester.pump();
+
+    verify(getChatUnread(1209)).called(1);
+  });
+
+  testWidgets('a notification arrives: the badge asks what is new', (
     tester,
   ) async {
     await pumpApp(tester, signedIn: true);
@@ -137,8 +159,7 @@ void main() {
     await tester.pump();
     await leaveAndReturn(tester);
 
-    verifyNever(getChatUnread());
-    verifyNever(hasNewComplaints());
+    verifyNever(getChatUnread(any));
   });
 
   testWidgets('gone from the screen: it stops listening', (tester) async {
@@ -148,7 +169,6 @@ void main() {
     pushes.arrive();
     await tester.pump();
 
-    verifyNever(getChatUnread());
-    verifyNever(hasNewComplaints());
+    verifyNever(getChatUnread(any));
   });
 }

@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/use_cases/get_month_attendance_use_case.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_read_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/watch_chat_reads_use_case.dart';
 import 'package:al_mahhaba_school/features/home/domain/use_cases/get_child_dashboard_use_case.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_intent.dart';
@@ -34,7 +35,7 @@ class HomeBloc extends Bloc<HomeIntent, HomeState> {
   /// This month's holidays and days off, for the Today card: the
   /// dashboard doesn't say whether today is one.
   final GetMonthAttendanceUseCase _getMonthAttendance;
-  late final StreamSubscription<int> _reads;
+  late final StreamSubscription<ChatReadEntity> _reads;
 
   /// Asked to refresh while the dashboard was on its way: that answer may
   /// be from before the change (the chat's read and Home's refresh go

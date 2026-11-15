@@ -4,10 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
-import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_intent.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_unread_context.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/main_nav_bar.dart';
 
 /// Home's branch, which back comes to from the other tabs.
@@ -38,11 +36,9 @@ class _ParentShellPageState extends State<ParentShellPage> {
   void initState() {
     super.initState();
     // Signed in: the badge on Chat and the dot on Complaints. Both are
-    // asked for again as notifications arrive (`BadgeRefresher`).
-    context.read<ChatUnreadBloc>().add(const LoadChatUnreadIntent());
-    context.read<ComplaintUpdatesBloc>().add(
-      const LoadComplaintUpdatesIntent(),
-    );
+    // asked for again as notifications arrive (`BadgeRefresher`), and the
+    // badge as another child is picked.
+    context.loadChatUnread();
   }
 
   void _open(BuildContext context, MainTab tab) {

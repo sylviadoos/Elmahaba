@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -9,8 +9,6 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/bloc_effect_listener.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
-import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
-import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_file_opener.dart';
 import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
@@ -79,9 +77,8 @@ class _HomeworkViewState extends State<_HomeworkView> {
           isError: true,
         );
         if (exception is UnauthorizedException) context.logOut();
-      // Homework read here comes off the badge on Chat.
-      case ChatUnreadChangedEffect(:final count):
-        context.read<ChatUnreadBloc>().add(SetChatUnreadIntent(count));
+      // Homework read here comes off the badge on Chat by itself
+      // (`ChatUnreadBloc` follows every read the school confirms).
       case HomeworkChildPickedEffect(:final studentId):
         context.selectChild(studentId);
     }

@@ -112,6 +112,80 @@ void main() {
     expect(viewModel.state.selected, november);
   });
 
+  group('asked again', () {
+    test(
+      'November published since: it shows, and Home stops calling it new',
+      () async {
+        // Opened before November's sheet was uploaded.
+        when(
+          getResults(any),
+        ).thenAnswer((_) async => Success(data: [october, firstTerm]));
+        await load();
+        await viewModel.doAction(SelectResultEvent(firstTerm.id));
+        clearInteractions(markLatestRead);
+
+        when(
+          getResults(any),
+        ).thenAnswer((_) async => Success(data: allResults));
+        await viewModel.doAction(const RefreshResultsEvent());
+        await Future<void>.delayed(Duration.zero);
+
+        expect(viewModel.state.results.data, allResults);
+        expect(viewModel.state.selected, november);
+        verify(markLatestRead(146)).called(1);
+      },
+    );
+
+    test('nothing new: the one picked stays, no skeleton meanwhile', () async {
+      await load();
+      await viewModel.doAction(SelectResultEvent(firstTerm.id));
+      clearInteractions(markLatestRead);
+      final states = <StateType>[];
+      final listening = viewModel.stream.listen(
+        (state) => states.add(state.results.state),
+      );
+      addTearDown(listening.cancel);
+
+      await viewModel.doAction(const RefreshResultsEvent());
+      await Future<void>.delayed(Duration.zero);
+
+      expect(viewModel.state.selected, firstTerm);
+      expect(states, isNot(contains(StateType.loading)));
+      verify(getResults(146)).called(2);
+      verifyNever(markLatestRead(any));
+    });
+
+    test('it fails: what was shown stays', () async {
+      await load();
+      when(
+        getResults(any),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException()));
+
+      await viewModel.doAction(const RefreshResultsEvent());
+
+      expect(viewModel.state.results.state, StateType.success);
+      expect(viewModel.state.selected, november);
+    });
+
+    test('it hadn\'t loaded: loaded, as "Try again"', () async {
+      when(
+        getResults(any),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException()));
+      await load();
+      when(getResults(any)).thenAnswer((_) async => Success(data: allResults));
+
+      await viewModel.doAction(const RefreshResultsEvent());
+
+      expect(viewModel.state.selected, november);
+    });
+
+    test('no child yet: nothing asked', () async {
+      await viewModel.doAction(const RefreshResultsEvent());
+
+      verifyNever(getResults(any));
+    });
+  });
+
   test('marking it read fails: the results stay', () async {
     when(
       markLatestRead(any),

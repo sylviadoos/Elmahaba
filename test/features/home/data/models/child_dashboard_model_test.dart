@@ -15,10 +15,7 @@ void main() {
 
     final attendance = dashboard.attendance;
     expect(attendance.todayStatus, 'absent');
-    expect(attendance.allowedAbsenceDays, 4);
-    expect(attendance.actualAbsenceDays, 1);
-    expect(attendance.remainingAbsenceDays, 3);
-    expect(attendance.exceededAbsenceDays, 0);
+    expect(attendance.presentDays, 3);
 
     final announcements = dashboard.announcements;
     expect(announcements.total, 3);
@@ -53,7 +50,7 @@ void main() {
 
     expect(dashboard.child, isNull);
     expect(dashboard.attendance.todayStatus, isNull);
-    expect(dashboard.attendance.allowedAbsenceDays, 0);
+    expect(dashboard.attendance.presentDays, 0);
     expect(dashboard.latestResult, isNull);
     expect(dashboard.fees, isNull);
     expect(dashboard.announcements.items, isEmpty);

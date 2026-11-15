@@ -1376,6 +1376,18 @@ abstract class AppLocalizations {
   /// **'Your child has been linked to your account.'**
   String get childLinked;
 
+  /// No description provided for @linkCodeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'A verification code will be sent to: '**
+  String get linkCodeSentTo;
+
+  /// No description provided for @codeAttemptsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No tries left} =1{1 try left} other{{count} tries left}}'**
+  String codeAttemptsLeft(int count);
+
   /// No description provided for @childLinkPending.
   ///
   /// In en, this message translates to:
@@ -1478,23 +1490,11 @@ abstract class AppLocalizations {
   /// **'Overdue since {date}'**
   String feesOverdueSince(String date);
 
-  /// No description provided for @daysAbsent.
+  /// No description provided for @daysPresent.
   ///
   /// In en, this message translates to:
-  /// **'Days absent'**
-  String get daysAbsent;
-
-  /// No description provided for @absenceDaysLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =0{No absence days left} =1{1 day left} other{{count} days left}}'**
-  String absenceDaysLeft(int count);
-
-  /// No description provided for @absenceDaysOver.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 day over the limit} other{{count} days over the limit}}'**
-  String absenceDaysOver(int count);
+  /// **'Days present'**
+  String get daysPresent;
 
   /// No description provided for @messagesAndNotices.
   ///
@@ -1699,6 +1699,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Activities'**
   String get activities;
+
+  /// No description provided for @certificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate'**
+  String get certificate;
 
   /// No description provided for @downloadCertificate.
   ///

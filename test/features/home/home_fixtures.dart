@@ -69,16 +69,19 @@ ChildDashboardEntity dashboardWith({
   List<AnnouncementEntity>? announcements,
   List<HomeworkEntity>? homework,
   List<LatestResultEntity>? results,
-  int absences = 1,
+  int presentDays = 3,
+  MessageCountsEntity messages = const MessageCountsEntity(
+    messages: 0,
+    notices: 0,
+    total: 0,
+  ),
 }) => ChildDashboardEntity(
   attendance: DashboardAttendanceEntity(
     todayStatus: 'present',
-    allowedAbsenceDays: 4,
-    actualAbsenceDays: absences,
-    remainingAbsenceDays: 4 - absences,
+    presentDays: presentDays,
   ),
   latestResult: termResult,
-  messages: const MessageCountsEntity(messages: 0, notices: 0, total: 0),
+  messages: messages,
   announcements: latest(announcements ?? [holiday, trip], unread: 1),
   homework: latest(homework ?? [mathSheet], unread: 1),
   results: latest(results ?? [termResult]),
@@ -100,13 +103,7 @@ const dashboardJson = <String, dynamic>{
     'class': 'A',
     'academic_year': '2026-2027',
   },
-  'attendance': {
-    'today': 'absent',
-    'allowed_absence_days': 4,
-    'actual_absence_days': 1,
-    'remaining_absence_days': 3,
-    'exceeded_absence_days': 0,
-  },
+  'attendance': {'today': 'absent', 'present_days': 3},
   'announcements': {
     'items': [
       {

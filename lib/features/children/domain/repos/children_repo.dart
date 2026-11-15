@@ -3,6 +3,7 @@ import 'package:al_mahhaba_school/features/children/domain/entities/child_detail
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_request_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_result_entity.dart';
+import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart';
 
 /// Never throws — errors come back as a `Failure`.
 abstract interface class ChildrenRepo {
@@ -21,4 +22,16 @@ abstract interface class ChildrenRepo {
   Future<Result<LinkChildResultEntity>> linkChild(
     LinkChildRequestEntity request,
   );
+
+  /// Links the child [linkChild] texted a code for ([ChildLinkCodeSent]),
+  /// with the [code] the parent entered. The child is added to the saved
+  /// ones.
+  Future<Result<ChildEntity>> verifyChildLink({
+    required String token,
+    required String code,
+  });
+
+  /// Texts the code of the check [token] again; the result is the same
+  /// check, with how many more codes can be asked for.
+  Future<Result<LinkVerificationEntity>> resendChildLinkCode(String token);
 }

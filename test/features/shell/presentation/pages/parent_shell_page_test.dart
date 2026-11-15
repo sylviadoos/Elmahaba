@@ -6,36 +6,36 @@ import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
+import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/pages/parent_shell_page.dart';
 
 import '../../../../helpers/result_dummy.dart';
 import '../../../../helpers/test_app.dart';
+import '../../../announcements/announcements_fixtures.dart' show omar;
+import '../../../auth/auth_mocks.mocks.dart';
 import '../../../chat/chat_mocks.mocks.dart';
-import '../../../complaints/complaints_mocks.mocks.dart';
+import '../../../home/home_mocks.mocks.dart';
 
 void main() {
   late GoRouter router;
-  late MockGetChatUnreadCountUseCase getChatUnread;
-  late MockHasNewComplaintUpdatesUseCase hasNewComplaints;
-  late MockMarkComplaintsSeenUseCase markComplaintsSeen;
+  late MockGetNewMessagesCountUseCase getChatUnread;
 
   setUpAll(() {
     provideResultDummy<int>();
-    provideResultDummy<bool>();
   });
 
   setUp(() {
-    getChatUnread = MockGetChatUnreadCountUseCase();
-    hasNewComplaints = MockHasNewComplaintUpdatesUseCase();
-    markComplaintsSeen = MockMarkComplaintsSeenUseCase();
-    when(getChatUnread()).thenAnswer((_) async => const Success(data: 0));
+    getChatUnread = MockGetNewMessagesCountUseCase();
+    when(getChatUnread(any)).thenAnswer((_) async => const Success(data: 0));
+    final childrenViewModel = MockChildrenViewModel();
     when(
-      hasNewComplaints(),
-    ).thenAnswer((_) async => const Success(data: false));
-
+      childrenViewModel.state,
+    ).thenReturn(const ChildrenState(children: BaseState.success([omar])));
+    when(childrenViewModel.stream).thenAnswer((_) => const Stream.empty());
     router = GoRouter(
       initialLocation: AppRoutes.home,
       routes: [
@@ -44,13 +44,10 @@ void main() {
           // they only need to be above the shell.
           builder: (_, _, shell) => MultiBlocProvider(
             providers: [
+              BlocProvider<ChildrenViewModel>.value(value: childrenViewModel),
               BlocProvider(
                 create: (_) =>
                     ChatUnreadBloc(getChatUnread, MockWatchChatReadsUseCase()),
-              ),
-              BlocProvider(
-                create: (_) =>
-                    ComplaintUpdatesBloc(hasNewComplaints, markComplaintsSeen),
               ),
             ],
             child: ParentShellPage(navigationShell: shell),

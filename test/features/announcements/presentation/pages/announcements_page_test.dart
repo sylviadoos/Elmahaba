@@ -51,7 +51,9 @@ void main() {
         MockPreviewChatAttachmentUseCase(),
       ),
     );
-    when(markRead(any)).thenAnswer((_) async => const Success(data: 0));
+    when(
+      markRead(any, studentId: anyNamed('studentId')),
+    ).thenAnswer((_) async => const Success(data: 0));
     when(chatUnreadBloc.stream).thenAnswer((_) => const Stream.empty());
     when(childrenViewModel.stream).thenAnswer((_) => const Stream.empty());
     when(childrenViewModel.state).thenReturn(
@@ -138,7 +140,7 @@ void main() {
     await pump(tester);
     await tester.pump(const Duration(milliseconds: 500));
 
-    verify(markRead(['event:40'])).called(1);
+    verify(markRead(['event:40'], studentId: omar.studentId)).called(1);
   });
 
   testWidgets('none yet: says so', (tester) async {

@@ -1,10 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/dashboard_attendance_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/latest_items_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/message_counts_entity.dart';
-import 'package:al_mahhaba_school/features/home/presentation/extensions/dashboard_chat_counts.dart';
+import 'package:al_mahhaba_school/features/home/domain/extensions/dashboard_chat_counts.dart';
 
 /// A dashboard saying [messages] and [notices] are unread in the chat, and
 /// listing so many unread announcements, homework and results.

@@ -12,6 +12,7 @@ import 'package:al_mahhaba_school/features/chat/data/models/new_chat_message_mod
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_item_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_read_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/new_chat_message_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/repos/chat_repo.dart';
 
@@ -52,8 +53,9 @@ class ChatRepoImpl implements ChatRepo {
       _localDataSource.newestPage(studentId);
 
   @override
-  Future<Result<int>> getUnreadCount() =>
-      Result.guard(_remoteDataSource.getUnreadCount);
+  Future<Result<int>> getUnreadCount({required int studentId}) => Result.guard(
+    () => _remoteDataSource.getUnreadCount(studentId: studentId),
+  );
 
   @override
   Future<Result<ChatItemEntity>> sendMessage(
@@ -69,33 +71,45 @@ class ChatRepoImpl implements ChatRepo {
   );
 
   /// One for the whole app run, like the repo: never closed.
-  final StreamController<int> _markedRead = StreamController.broadcast();
+  final StreamController<ChatReadEntity> _markedRead =
+      StreamController.broadcast();
 
   @override
-  Future<Result<int>> markRead(List<String> keys) => Result.guard(() async {
-    final unread = await _remoteDataSource.markRead(keys);
-    _markedRead.add(unread);
-    return unread;
-  });
+  Future<Result<int>> markRead(List<String> keys, {int? studentId}) =>
+      Result.guard(() async {
+        final unread = await _remoteDataSource.markRead(
+          keys,
+          studentId: studentId,
+        );
+        _markedRead.add(ChatReadEntity(studentId: studentId, unread: unread));
+        return unread;
+      });
 
   @override
-  Stream<int> get onMarkedRead => _markedRead.stream;
+  Stream<ChatReadEntity> get onMarkedRead => _markedRead.stream;
 
   @override
   Future<Result<String>> downloadAttachment(
     ChatAttachmentEntity attachment, {
+    int? studentId,
     CancelHandle? cancel,
   }) => Result.guard(
-    () => _remoteDataSource.downloadAttachment(attachment, cancel: cancel),
+    () => _remoteDataSource.downloadAttachment(
+      attachment,
+      studentId: studentId,
+      cancel: cancel,
+    ),
   );
 
   @override
   Future<Result<String>> previewAttachment(
     ChatAttachmentEntity attachment, {
+    int? studentId,
     CancelHandle? cancel,
   }) => Result.guard(() async {
     final path = await _remoteDataSource.downloadAttachment(
       attachment,
+      studentId: studentId,
       cancel: cancel,
     );
     return _pdfPreviewer.firstPage(path);

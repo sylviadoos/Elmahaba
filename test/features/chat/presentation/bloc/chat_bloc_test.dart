@@ -177,7 +177,7 @@ void main() {
     );
 
     blocTest<ChatBloc, ChatState>(
-      'items seen about the same time: one request, then the badge',
+      'items seen about the same time: one request (on "All", no child)',
       build: build,
       seed: loaded,
       act: (bloc) => bloc
@@ -187,10 +187,19 @@ void main() {
       wait: const Duration(milliseconds: 500),
       verify: (_) {
         verify(markRead(['message:41', 'message:42'])).called(1);
-        expect(effects, [
-          isA<UnreadChangedEffect>().having((e) => e.count, 'count', 0),
-        ]);
+        // The badge follows the read by itself (`ChatUnreadBloc`).
+        expect(effects, isEmpty);
       },
+    );
+
+    blocTest<ChatBloc, ChatState>(
+      'one child shown: read for them, as every chat request is',
+      build: build,
+      seed: () => loaded().copyWith(studentId: () => omar.studentId),
+      act: (bloc) => bloc.add(const ItemSeenIntent('message:41')),
+      wait: const Duration(milliseconds: 500),
+      verify: (_) =>
+          verify(markRead(['message:41'], studentId: omar.studentId)).called(1),
     );
 
     blocTest<ChatBloc, ChatState>(

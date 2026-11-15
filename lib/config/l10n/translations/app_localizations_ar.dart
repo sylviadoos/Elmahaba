@@ -689,6 +689,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get childLinked => 'تم ربط طفلك بحسابك.';
 
   @override
+  String get linkCodeSentTo => 'سيتم إرسال كود التحقق إلى: ';
+
+  @override
+  String codeAttemptsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'تبقّت $count محاولة',
+      few: 'تبقّت $count محاولات',
+      two: 'تبقّت محاولتان',
+      one: 'تبقّت محاولة واحدة',
+      zero: 'لم تتبقَّ محاولات',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get childLinkPending =>
       'تم إرسال طلبك للمدرسة. ستتمكن من رؤية طفلك بعد تأكيد المدرسة.';
 
@@ -758,34 +775,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get daysAbsent => 'أيام الغياب';
-
-  @override
-  String absenceDaysLeft(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'يتبقى $count يومًا',
-      few: 'يتبقى $count أيام',
-      two: 'يتبقى يومان',
-      one: 'يتبقى يوم واحد',
-      zero: 'لم يتبقَّ أيام غياب',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String absenceDaysOver(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'تجاوز الحد بـ$count يومًا',
-      few: 'تجاوز الحد بـ$count أيام',
-      two: 'تجاوز الحد بيومين',
-      one: 'تجاوز الحد بيوم واحد',
-    );
-    return '$_temp0';
-  }
+  String get daysPresent => 'أيام الحضور';
 
   @override
   String messagesAndNotices(int messages, int notices) {
@@ -894,6 +884,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get activities => 'الأنشطة';
+
+  @override
+  String get certificate => 'الشهادة';
 
   @override
   String get downloadCertificate => 'تنزيل الشهادة (PDF)';

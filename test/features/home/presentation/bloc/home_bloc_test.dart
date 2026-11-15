@@ -7,6 +7,7 @@ import 'package:mockito/mockito.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_read_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_counts_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/holiday_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart';
@@ -23,14 +24,14 @@ import '../../home_mocks.mocks.dart';
 void main() {
   late MockGetChildDashboardUseCase getDashboard;
   late MockGetMonthAttendanceUseCase getMonth;
-  late StreamController<int> reads;
+  late StreamController<ChatReadEntity> reads;
 
   final first = dashboardWith();
-  // Something changed at school: one more absence.
-  final changed = dashboardWith(absences: 2);
+  // Something changed at school: one more day present.
+  final changed = dashboardWith(presentDays: 4);
   final other = dashboardWith(homework: const []);
   // The parent read what was new.
-  final read = dashboardWith(absences: 3);
+  final read = dashboardWith(presentDays: 5);
 
   setUpAll(() {
     provideResultDummy<ChildDashboardEntity>();
@@ -171,7 +172,7 @@ void main() {
       // Back on Home: its refresh goes as the chat marks what was seen.
       bloc.add(const RefreshHomeIntent());
       await Future<void>.delayed(Duration.zero);
-      reads.add(0);
+      reads.add(const ChatReadEntity(unread: 0));
       await Future<void>.delayed(Duration.zero);
       // The school answered Home before it saved the read.
       pending.complete(Success(data: first));
@@ -189,7 +190,7 @@ void main() {
     setUp: () => answer(1, read),
     build: build,
     seed: () => shown(1, first),
-    act: (_) => reads.add(0),
+    act: (_) => reads.add(const ChatReadEntity(unread: 0)),
     expect: () => [shown(1, first, isRefreshing: true), shown(1, read)],
   );
 

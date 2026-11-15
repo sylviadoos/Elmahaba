@@ -62,10 +62,18 @@ class AnnouncementsBloc
   CancelHandle? _loadingMore;
   CancelHandle? _downloading;
 
-  /// The photos shown in the announcements.
+  /// The photos shown in the announcements, asked for the child shown.
   late final ChatImageLoads _imageLoads = ChatImageLoads(
-    download: _downloadAttachment.call,
-    preview: _previewAttachment.call,
+    download: (attachment, {cancel}) => _downloadAttachment(
+      attachment,
+      studentId: state.studentId,
+      cancel: cancel,
+    ),
+    preview: (attachment, {cancel}) => _previewAttachment(
+      attachment,
+      studentId: state.studentId,
+      cancel: cancel,
+    ),
   );
 
   /// The chat items marked read, or being marked, so none is sent twice.
@@ -248,9 +256,12 @@ class AnnouncementsBloc
     final keys = _seen.toList();
     _seen.clear();
     _marked.addAll(keys);
-    final result = await _markRead(keys);
+    // Whose announcements they are: the same item can be about another
+    // child of theirs, and that one's is still new.
+    final result = await _markRead(keys, studentId: state.studentId);
     result.when(
-      success: (unread) => emitEffect(AnnouncementsChatUnreadEffect(unread)),
+      // The badge on Chat follows it by itself.
+      success: (_) {},
       failure: (exception) {
         // Tried again when they come on screen again.
         _marked.removeAll(keys);
@@ -266,7 +277,11 @@ class AnnouncementsBloc
     if (state.downloadingId != null) return;
     final cancel = _downloading = CancelHandle();
     emit(state.copyWith(downloadingId: () => intent.attachment.id));
-    final result = await _downloadAttachment(intent.attachment, cancel: cancel);
+    final result = await _downloadAttachment(
+      intent.attachment,
+      studentId: state.studentId,
+      cancel: cancel,
+    );
     emit(state.copyWith(downloadingId: () => null));
     result.when(
       success: (path) =>

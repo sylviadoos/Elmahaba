@@ -13,8 +13,12 @@ import 'package:al_mahhaba_school/features/attendance/domain/use_cases/get_month
     as _i7;
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart'
     as _i5;
+import 'package:al_mahhaba_school/features/home/domain/repos/home_repo.dart'
+    as _i10;
 import 'package:al_mahhaba_school/features/home/domain/use_cases/get_child_dashboard_use_case.dart'
     as _i2;
+import 'package:al_mahhaba_school/features/home/domain/use_cases/get_new_messages_count_use_case.dart'
+    as _i9;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i6;
 
@@ -93,4 +97,56 @@ class MockGetMonthAttendanceUseCase extends _i1.Mock
                 ),
           )
           as _i3.Future<_i4.Result<_i8.MonthAttendanceEntity>>);
+}
+
+/// A class which mocks [GetNewMessagesCountUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockGetNewMessagesCountUseCase extends _i1.Mock
+    implements _i9.GetNewMessagesCountUseCase {
+  @override
+  _i3.Future<_i4.Result<int>> call(int? childId) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [childId]),
+            returnValue: _i3.Future<_i4.Result<int>>.value(
+              _i6.dummyValue<_i4.Result<int>>(
+                this,
+                Invocation.method(#call, [childId]),
+              ),
+            ),
+            returnValueForMissingStub: _i3.Future<_i4.Result<int>>.value(
+              _i6.dummyValue<_i4.Result<int>>(
+                this,
+                Invocation.method(#call, [childId]),
+              ),
+            ),
+          )
+          as _i3.Future<_i4.Result<int>>);
+}
+
+/// A class which mocks [HomeRepo].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockHomeRepo extends _i1.Mock implements _i10.HomeRepo {
+  @override
+  _i3.Future<_i4.Result<_i5.ChildDashboardEntity>> getChildDashboard(
+    int? childId,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#getChildDashboard, [childId]),
+            returnValue: _i3.Future<_i4.Result<_i5.ChildDashboardEntity>>.value(
+              _i6.dummyValue<_i4.Result<_i5.ChildDashboardEntity>>(
+                this,
+                Invocation.method(#getChildDashboard, [childId]),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i3.Future<_i4.Result<_i5.ChildDashboardEntity>>.value(
+                  _i6.dummyValue<_i4.Result<_i5.ChildDashboardEntity>>(
+                    this,
+                    Invocation.method(#getChildDashboard, [childId]),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<_i5.ChildDashboardEntity>>);
 }

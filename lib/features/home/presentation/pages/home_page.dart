@@ -10,11 +10,14 @@ import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_intent.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/children/presentation/widgets/no_children_state.dart';
+import 'package:al_mahhaba_school/features/home/domain/extensions/dashboard_chat_counts.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_bloc.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_intent.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_state.dart';
@@ -82,13 +85,39 @@ class _HomeViewState extends State<_HomeView> {
     );
     final children = childrenState.data ?? const <ChildEntity>[];
 
-    return BlocListener<ChildrenViewModel, ChildrenState>(
-      // The children arrived or changed (a child linked, the list
-      // refreshed), or another one was picked, here or on another page.
-      listenWhen: (previous, current) =>
-          previous.children.data != current.children.data ||
-          current.showsOtherChildThan(previous),
-      listener: (context, state) => _showSelectedChild(),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ChildrenViewModel, ChildrenState>(
+          // The children arrived or changed (a child linked, the list
+          // refreshed), or another one was picked, here or on another page.
+          listenWhen: (previous, current) =>
+              previous.children.data != current.children.data ||
+              current.showsOtherChildThan(previous),
+          listener: (context, state) => _showSelectedChild(),
+        ),
+        BlocListener<HomeBloc, HomeState>(
+          // A dashboard came: the badge on Chat says what its School chat
+          // card says, without asking again. Home learns of messages the
+          // badge doesn't — with message notifications off no push comes,
+          // and Home also asks when shown again or pulled down.
+          listenWhen: (previous, current) =>
+              current.dashboard.data != null &&
+              current.dashboard.data != previous.dashboard.data,
+          listener: (context, state) {
+            final selected = context
+                .read<ChildrenViewModel>()
+                .state
+                .selectedChild
+                ?.studentId;
+            final dashboard = state.dashboard.data;
+            // Only the selected child's: the badge counts theirs.
+            if (dashboard == null || state.childId != selected) return;
+            context.read<ChatUnreadBloc>().add(
+              SetChatUnreadIntent(dashboard.unreadChat.total),
+            );
+          },
+        ),
+      ],
       child: PageRefresher(
         path: AppRoutes.home,
         onRefresh: _refresh,

@@ -38,7 +38,7 @@ void main() {
     homeRepo = MockHomeRepo();
     chatRepo = MockChatRepo();
     when(
-      chatRepo.markRead(any),
+      chatRepo.markRead(any, studentId: anyNamed('studentId')),
     ).thenAnswer((_) async => const Success(data: 0));
     markLatestRead = MarkLatestResultReadUseCase(homeRepo, chatRepo);
   });
@@ -65,7 +65,7 @@ void main() {
 
     expect(await markLatestRead(146), isSuccess<void>(anything));
     verify(homeRepo.getChildDashboard(146));
-    verify(chatRepo.markRead(['event:34'])).called(1);
+    verify(chatRepo.markRead(['event:34'], studentId: 146)).called(1);
   });
 
   test('read already: nothing is sent', () async {
@@ -76,7 +76,7 @@ void main() {
 
     await markLatestRead(146);
 
-    verifyNever(chatRepo.markRead(any));
+    verifyNever(chatRepo.markRead(any, studentId: anyNamed('studentId')));
   });
 
   test('no chat item for it, or no result: nothing is sent', () async {
@@ -85,7 +85,7 @@ void main() {
     dashboardWith();
     await markLatestRead(146);
 
-    verifyNever(chatRepo.markRead(any));
+    verifyNever(chatRepo.markRead(any, studentId: anyNamed('studentId')));
   });
 
   test('Home can\'t be reached: fails, nothing is sent', () async {
@@ -94,6 +94,6 @@ void main() {
     ).thenAnswer((_) async => const Failure(exception: NetworkException()));
 
     expect(await markLatestRead(146), isFailure<NetworkException>());
-    verifyNever(chatRepo.markRead(any));
+    verifyNever(chatRepo.markRead(any, studentId: anyNamed('studentId')));
   });
 }

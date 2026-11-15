@@ -28,6 +28,8 @@ class ResultsViewModel extends BaseCubit<ResultsState, ResultsEvent, void> {
     switch (event) {
       case LoadResultsEvent(:final childId):
         await _load(childId);
+      case RefreshResultsEvent():
+        await _refresh();
       case SelectResultEvent(:final resultId):
         emit(state.copyWith(selectedId: resultId));
     }
@@ -49,6 +51,45 @@ class ResultsViewModel extends BaseCubit<ResultsState, ResultsEvent, void> {
       },
       failure: (exception) =>
           emit(state.copyWith(results: BaseState.error(exception))),
+    );
+  }
+
+  /// One refresh at a time.
+  bool _refreshing = false;
+
+  Future<void> _refresh() async {
+    final childId = state.childId;
+    if (childId == null) return;
+    // Didn't load: as "Try again".
+    if (state.results.state == StateType.error) return _load(childId);
+    final shown = state.results.data;
+    if (state.results.state != StateType.success ||
+        shown == null ||
+        _refreshing) {
+      return;
+    }
+    _refreshing = true;
+    final result = await _getResults(childId);
+    _refreshing = false;
+    // Another child was picked meanwhile: theirs is on its way.
+    if (isClosed || state.childId != childId) return;
+    result.when(
+      success: (results) {
+        final newest = results.firstOrNull?.id;
+        final published = newest != null && newest != shown.firstOrNull?.id;
+        emit(
+          ResultsState(
+            childId: childId,
+            results: BaseState.success(results),
+            // A new one: it shows, as when Results opens. Else the one
+            // picked stays (the newest when it's gone).
+            selectedId: published ? null : state.selectedId,
+          ),
+        );
+        if (published) unawaited(_markSeen(childId));
+      },
+      // Only a refresh: what's shown stays, the next one tries again.
+      failure: (exception) => debugPrint('Refreshing results: $exception'),
     );
   }
 

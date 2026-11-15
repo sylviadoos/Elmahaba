@@ -42,7 +42,9 @@ import 'package:al_mahhaba_school/features/onboarding/presentation/pages/onboard
 import 'package:al_mahhaba_school/features/profile/domain/entities/profile_entity.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/pages/profile_page.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/pages/settings_page.dart';
+import 'package:al_mahhaba_school/features/results/presentation/pages/certificate_preview_page.dart';
 import 'package:al_mahhaba_school/features/results/presentation/pages/results_page.dart';
+import 'package:al_mahhaba_school/features/results/presentation/pdf/certificate_pdf_file.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/pages/parent_shell_page.dart';
 import 'package:al_mahhaba_school/features/splash/presentation/pages/splash_page.dart';
 import 'package:al_mahhaba_school/features/about/presentation/pages/about_page.dart';
@@ -53,6 +55,8 @@ import 'package:al_mahhaba_school/features/excuses/presentation/pages/excuse_det
 import 'package:al_mahhaba_school/features/excuses/presentation/pages/new_excuse_page.dart';
 import 'package:al_mahhaba_school/features/explore/presentation/pages/explore_page.dart';
 import 'package:al_mahhaba_school/features/news/presentation/pages/news_article_page.dart';
+import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart';
+import 'package:al_mahhaba_school/features/children/presentation/pages/link_child_code_page.dart';
 import 'package:al_mahhaba_school/features/news/presentation/pages/news_page.dart';
 
 /// Screens that need a parent account (log in and everything after it).
@@ -64,6 +68,7 @@ const Set<String> _parentRoutes = {
   AppRoutes.register,
   AppRoutes.otp,
   AppRoutes.addChildren,
+  AppRoutes.linkChildCode,
   AppRoutes.home,
   AppRoutes.chat,
   AppRoutes.results,
@@ -74,6 +79,7 @@ const Set<String> _parentRoutes = {
   AppRoutes.feesPay,
   AppRoutes.feesCheckout,
   AppRoutes.feeStatementPreview,
+  AppRoutes.certificatePreview,
   AppRoutes.settings,
   AppRoutes.profile,
   AppRoutes.changePassword,
@@ -196,6 +202,16 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.addChildren,
       builder: (context, state) => const AddChildrenPage(),
     ),
+    GoRoute(
+      path: AppRoutes.linkChildCode,
+      // Needs the check linking started; opened any other way, start there.
+      // Back goes to Add children, not Home.
+      redirect: (context, state) =>
+          state.extra is LinkVerificationEntity ? null : AppRoutes.addChildren,
+      builder: (context, state) => LinkChildCodePage(
+        verification: state.extra! as LinkVerificationEntity,
+      ),
+    ),
     // The tabs, under the nav bar; in `ParentShellPage.tabs`' order.
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
@@ -304,13 +320,24 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           CheckoutPage(checkout: state.extra! as CheckoutEntity),
     ),
-    _parentPage(
+    // Not `_parentPage`: a preview is something opened over the page that
+    // made it, like the chat's photos, so back closes it and leaves that
+    // page where it was.
+    GoRoute(
       path: AppRoutes.feeStatementPreview,
       // Needs the PDF Fees made; opened any other way, go to Fees.
       redirect: (context, state) =>
           state.extra is FeeStatementPdfFile ? null : AppRoutes.fees,
       builder: (context, state) =>
           FeeStatementPreviewPage(file: state.extra! as FeeStatementPdfFile),
+    ),
+    GoRoute(
+      path: AppRoutes.certificatePreview,
+      // Needs the PDF Results made; opened any other way, go there.
+      redirect: (context, state) =>
+          state.extra is CertificatePdfFile ? null : AppRoutes.results,
+      builder: (context, state) =>
+          CertificatePreviewPage(file: state.extra! as CertificatePdfFile),
     ),
     _parentPage(
       path: AppRoutes.settings,

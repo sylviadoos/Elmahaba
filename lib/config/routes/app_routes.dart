@@ -21,6 +21,9 @@ abstract final class AppRoutes {
   static const String register = '/register';
   static const String otp = '/otp';
   static const String addChildren = '/add-children';
+
+  /// The code the school texted to a child's phone, to link them.
+  static const String linkChildCode = '/add-children/code';
   static const String home = '/home';
   static const String chat = '/chat';
 
@@ -41,6 +44,9 @@ abstract final class AppRoutes {
   static const String feesPay = '/fees/pay';
   static const String feesCheckout = '/fees/pay/checkout';
   static const String feeStatementPreview = '/fees/statement';
+
+  /// The monthly certificate PDF, to look over before downloading it.
+  static const String certificatePreview = '/results/certificate';
   static const String settings = '/settings';
   static const String profile = '/settings/profile';
   static const String changePassword = '/settings/change-password';

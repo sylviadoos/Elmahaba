@@ -9,6 +9,7 @@ import 'package:al_mahhaba_school/features/children/data/models/child_details_mo
 import 'package:al_mahhaba_school/features/children/data/models/child_model.dart';
 import 'package:al_mahhaba_school/features/children/data/models/link_child_request_model.dart';
 import 'package:al_mahhaba_school/features/children/data/models/link_child_result_model.dart';
+import 'package:al_mahhaba_school/features/children/data/models/link_verification_model.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_result_entity.dart';
 
 @LazySingleton(as: ChildrenRemoteDataSource)
@@ -49,6 +50,39 @@ class ChildrenRemoteDataSourceImpl implements ChildrenRemoteDataSource {
             as Map<String, dynamic>;
     return LinkChildResultModel.fromJson(
       json[ApiKeys.data] as Map<String, dynamic>,
+    );
+  }
+
+  @override
+  Future<ChildModel> verifyChildLink({
+    required String token,
+    required String code,
+  }) async {
+    // As linking: { "status": "success", "code": "child_linked",
+    //   "data": { "result": "linked", "child": {...} } }
+    final json =
+        await _api.post(
+              ApiEndpoints.linkChildVerify,
+              data: {'verification_token': token, 'code': code},
+            )
+            as Map<String, dynamic>;
+    final data = json[ApiKeys.data] as Map<String, dynamic>;
+    return ChildModel.fromJson(data['child'] as Map<String, dynamic>);
+  }
+
+  @override
+  Future<LinkVerificationModel> resendChildLinkCode(String token) async {
+    // As `otp_required`: { "status": "success",
+    //   "data": { "result": "otp_required", "verification": {...} } }
+    final json =
+        await _api.post(
+              ApiEndpoints.linkChildResend,
+              data: {'verification_token': token},
+            )
+            as Map<String, dynamic>;
+    final data = json[ApiKeys.data] as Map<String, dynamic>;
+    return LinkVerificationModel.fromJson(
+      data['verification'] as Map<String, dynamic>,
     );
   }
 }

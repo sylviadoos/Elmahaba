@@ -6,34 +6,36 @@
 
 import 'dart:async' as _i6;
 
-import 'package:al_mahhaba_school/core/base/result.dart' as _i7;
-import 'package:al_mahhaba_school/core/base/upload_progress.dart' as _i14;
-import 'package:al_mahhaba_school/features/complaints/data/data_sources/complaints_local_data_source.dart'
-    as _i17;
+import 'package:al_mahhaba_school/core/base/result.dart' as _i14;
+import 'package:al_mahhaba_school/core/base/upload_progress.dart' as _i9;
 import 'package:al_mahhaba_school/features/complaints/data/data_sources/complaints_remote_data_source.dart'
-    as _i11;
+    as _i5;
 import 'package:al_mahhaba_school/features/complaints/data/models/complaint_category_model.dart'
-    as _i12;
+    as _i7;
 import 'package:al_mahhaba_school/features/complaints/data/models/complaint_details_model.dart'
     as _i4;
 import 'package:al_mahhaba_school/features/complaints/data/models/complaint_model.dart'
     as _i3;
 import 'package:al_mahhaba_school/features/complaints/data/models/complaint_reply_model.dart'
-    as _i15;
+    as _i10;
 import 'package:al_mahhaba_school/features/complaints/data/models/complaints_page_model.dart'
     as _i2;
 import 'package:al_mahhaba_school/features/complaints/data/models/new_complaint_model.dart'
-    as _i13;
+    as _i8;
 import 'package:al_mahhaba_school/features/complaints/domain/entities/complaint_attachment_entity.dart'
+    as _i11;
+import 'package:al_mahhaba_school/features/complaints/domain/entities/complaint_details_entity.dart'
+    as _i15;
+import 'package:al_mahhaba_school/features/complaints/domain/entities/complaint_reply_entity.dart'
+    as _i17;
+import 'package:al_mahhaba_school/features/complaints/domain/use_cases/download_complaint_attachment_use_case.dart'
+    as _i18;
+import 'package:al_mahhaba_school/features/complaints/domain/use_cases/get_complaint_details_use_case.dart'
+    as _i13;
+import 'package:al_mahhaba_school/features/complaints/domain/use_cases/send_complaint_reply_use_case.dart'
     as _i16;
-import 'package:al_mahhaba_school/features/complaints/domain/entities/complaints_page_entity.dart'
-    as _i10;
-import 'package:al_mahhaba_school/features/complaints/domain/use_cases/has_new_complaint_updates_use_case.dart'
-    as _i5;
-import 'package:al_mahhaba_school/features/complaints/domain/use_cases/mark_complaints_seen_use_case.dart'
-    as _i9;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i8;
+import 'package:mockito/src/dummies.dart' as _i12;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -68,64 +70,24 @@ class _FakeComplaintDetailsModel_2 extends _i1.SmartFake
     : super(parent, parentInvocation);
 }
 
-/// A class which mocks [HasNewComplaintUpdatesUseCase].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockHasNewComplaintUpdatesUseCase extends _i1.Mock
-    implements _i5.HasNewComplaintUpdatesUseCase {
-  @override
-  _i6.Future<_i7.Result<bool>> call() =>
-      (super.noSuchMethod(
-            Invocation.method(#call, []),
-            returnValue: _i6.Future<_i7.Result<bool>>.value(
-              _i8.dummyValue<_i7.Result<bool>>(
-                this,
-                Invocation.method(#call, []),
-              ),
-            ),
-            returnValueForMissingStub: _i6.Future<_i7.Result<bool>>.value(
-              _i8.dummyValue<_i7.Result<bool>>(
-                this,
-                Invocation.method(#call, []),
-              ),
-            ),
-          )
-          as _i6.Future<_i7.Result<bool>>);
-}
-
-/// A class which mocks [MarkComplaintsSeenUseCase].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockMarkComplaintsSeenUseCase extends _i1.Mock
-    implements _i9.MarkComplaintsSeenUseCase {
-  @override
-  _i6.Future<void> call(_i10.ComplaintsPageEntity? shown) =>
-      (super.noSuchMethod(
-            Invocation.method(#call, [shown]),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
-          )
-          as _i6.Future<void>);
-}
-
 /// A class which mocks [ComplaintsRemoteDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockComplaintsRemoteDataSource extends _i1.Mock
-    implements _i11.ComplaintsRemoteDataSource {
+    implements _i5.ComplaintsRemoteDataSource {
   @override
-  _i6.Future<List<_i12.ComplaintCategoryModel>> getCategories() =>
+  _i6.Future<List<_i7.ComplaintCategoryModel>> getCategories() =>
       (super.noSuchMethod(
             Invocation.method(#getCategories, []),
-            returnValue: _i6.Future<List<_i12.ComplaintCategoryModel>>.value(
-              <_i12.ComplaintCategoryModel>[],
+            returnValue: _i6.Future<List<_i7.ComplaintCategoryModel>>.value(
+              <_i7.ComplaintCategoryModel>[],
             ),
             returnValueForMissingStub:
-                _i6.Future<List<_i12.ComplaintCategoryModel>>.value(
-                  <_i12.ComplaintCategoryModel>[],
+                _i6.Future<List<_i7.ComplaintCategoryModel>>.value(
+                  <_i7.ComplaintCategoryModel>[],
                 ),
           )
-          as _i6.Future<List<_i12.ComplaintCategoryModel>>);
+          as _i6.Future<List<_i7.ComplaintCategoryModel>>);
 
   @override
   _i6.Future<_i2.ComplaintsPageModel> getComplaints({required int? page}) =>
@@ -149,8 +111,8 @@ class MockComplaintsRemoteDataSource extends _i1.Mock
 
   @override
   _i6.Future<_i3.ComplaintModel> sendComplaint(
-    _i13.NewComplaintModel? complaint, {
-    _i14.UploadProgressCallback? onProgress,
+    _i8.NewComplaintModel? complaint, {
+    _i9.UploadProgressCallback? onProgress,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -204,8 +166,8 @@ class MockComplaintsRemoteDataSource extends _i1.Mock
   @override
   _i6.Future<_i4.ComplaintDetailsModel> sendReply(
     int? complaintId,
-    _i15.ComplaintReplyModel? reply, {
-    _i14.UploadProgressCallback? onProgress,
+    _i10.ComplaintReplyModel? reply, {
+    _i9.UploadProgressCallback? onProgress,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
@@ -240,12 +202,12 @@ class MockComplaintsRemoteDataSource extends _i1.Mock
   @override
   _i6.Future<String> downloadAttachment(
     int? complaintId,
-    _i16.ComplaintAttachmentEntity? attachment,
+    _i11.ComplaintAttachmentEntity? attachment,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#downloadAttachment, [complaintId, attachment]),
             returnValue: _i6.Future<String>.value(
-              _i8.dummyValue<String>(
+              _i12.dummyValue<String>(
                 this,
                 Invocation.method(#downloadAttachment, [
                   complaintId,
@@ -254,7 +216,7 @@ class MockComplaintsRemoteDataSource extends _i1.Mock
               ),
             ),
             returnValueForMissingStub: _i6.Future<String>.value(
-              _i8.dummyValue<String>(
+              _i12.dummyValue<String>(
                 this,
                 Invocation.method(#downloadAttachment, [
                   complaintId,
@@ -266,44 +228,100 @@ class MockComplaintsRemoteDataSource extends _i1.Mock
           as _i6.Future<String>);
 }
 
-/// A class which mocks [ComplaintsLocalDataSource].
+/// A class which mocks [GetComplaintDetailsUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockComplaintsLocalDataSource extends _i1.Mock
-    implements _i17.ComplaintsLocalDataSource {
+class MockGetComplaintDetailsUseCase extends _i1.Mock
+    implements _i13.GetComplaintDetailsUseCase {
   @override
-  _i6.Future<void> saveSeenUpdate(DateTime? updatedAt) =>
+  _i6.Future<_i14.Result<_i15.ComplaintDetailsEntity>> call(int? complaintId) =>
       (super.noSuchMethod(
-            Invocation.method(#saveSeenUpdate, [updatedAt]),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            Invocation.method(#call, [complaintId]),
+            returnValue:
+                _i6.Future<_i14.Result<_i15.ComplaintDetailsEntity>>.value(
+                  _i12.dummyValue<_i14.Result<_i15.ComplaintDetailsEntity>>(
+                    this,
+                    Invocation.method(#call, [complaintId]),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i6.Future<_i14.Result<_i15.ComplaintDetailsEntity>>.value(
+                  _i12.dummyValue<_i14.Result<_i15.ComplaintDetailsEntity>>(
+                    this,
+                    Invocation.method(#call, [complaintId]),
+                  ),
+                ),
           )
-          as _i6.Future<void>);
+          as _i6.Future<_i14.Result<_i15.ComplaintDetailsEntity>>);
+}
 
+/// A class which mocks [SendComplaintReplyUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSendComplaintReplyUseCase extends _i1.Mock
+    implements _i16.SendComplaintReplyUseCase {
   @override
-  Map<int, DateTime> getOwnUpdates() =>
+  _i6.Future<_i14.Result<_i15.ComplaintDetailsEntity>> call(
+    int? complaintId,
+    _i17.ComplaintReplyEntity? reply, {
+    _i9.UploadProgressCallback? onProgress,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#getOwnUpdates, []),
-            returnValue: <int, DateTime>{},
-            returnValueForMissingStub: <int, DateTime>{},
+            Invocation.method(
+              #call,
+              [complaintId, reply],
+              {#onProgress: onProgress},
+            ),
+            returnValue:
+                _i6.Future<_i14.Result<_i15.ComplaintDetailsEntity>>.value(
+                  _i12.dummyValue<_i14.Result<_i15.ComplaintDetailsEntity>>(
+                    this,
+                    Invocation.method(
+                      #call,
+                      [complaintId, reply],
+                      {#onProgress: onProgress},
+                    ),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i6.Future<_i14.Result<_i15.ComplaintDetailsEntity>>.value(
+                  _i12.dummyValue<_i14.Result<_i15.ComplaintDetailsEntity>>(
+                    this,
+                    Invocation.method(
+                      #call,
+                      [complaintId, reply],
+                      {#onProgress: onProgress},
+                    ),
+                  ),
+                ),
           )
-          as Map<int, DateTime>);
+          as _i6.Future<_i14.Result<_i15.ComplaintDetailsEntity>>);
+}
 
+/// A class which mocks [DownloadComplaintAttachmentUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockDownloadComplaintAttachmentUseCase extends _i1.Mock
+    implements _i18.DownloadComplaintAttachmentUseCase {
   @override
-  _i6.Future<void> saveOwnUpdates(Map<int, DateTime>? updates) =>
+  _i6.Future<_i14.Result<String>> call(
+    int? complaintId,
+    _i11.ComplaintAttachmentEntity? attachment,
+  ) =>
       (super.noSuchMethod(
-            Invocation.method(#saveOwnUpdates, [updates]),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            Invocation.method(#call, [complaintId, attachment]),
+            returnValue: _i6.Future<_i14.Result<String>>.value(
+              _i12.dummyValue<_i14.Result<String>>(
+                this,
+                Invocation.method(#call, [complaintId, attachment]),
+              ),
+            ),
+            returnValueForMissingStub: _i6.Future<_i14.Result<String>>.value(
+              _i12.dummyValue<_i14.Result<String>>(
+                this,
+                Invocation.method(#call, [complaintId, attachment]),
+              ),
+            ),
           )
-          as _i6.Future<void>);
-
-  @override
-  _i6.Future<void> clearSeenUpdate() =>
-      (super.noSuchMethod(
-            Invocation.method(#clearSeenUpdate, []),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
-          )
-          as _i6.Future<void>);
+          as _i6.Future<_i14.Result<String>>);
 }

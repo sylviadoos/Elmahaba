@@ -6,10 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/core/notifications/notification_service.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
-import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
-import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_intent.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_intent.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_unread_context.dart';
+import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 
 /// Keeps the badge on Chat and the dot on Complaints right while the app
 /// runs: each notification that arrives asks the school what's new, and so
@@ -56,15 +56,25 @@ class _BadgeRefresherState extends State<BadgeRefresher>
     if (state == AppLifecycleState.resumed) _refresh();
   }
 
+  /// Nothing to count for a visitor, and the API would answer 401.
+  bool get _signedIn =>
+      mounted && context.read<ParentViewModel>().state.data != null;
+
   void _refresh() {
-    // Nothing to count for a visitor, and the API would answer 401.
-    if (!mounted || context.read<ParentViewModel>().state.data == null) return;
-    context.read<ChatUnreadBloc>().add(const LoadChatUnreadIntent());
-    context.read<ComplaintUpdatesBloc>().add(
-      const LoadComplaintUpdatesIntent(),
-    );
+    if (!_signedIn) return;
+    context.loadChatUnread();
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) =>
+      BlocListener<ChildrenViewModel, ChildrenState>(
+        // The badge counts the child every page shows: another one picked,
+        // or the children here at last.
+        listenWhen: (previous, current) =>
+            current.showsOtherChildThan(previous),
+        listener: (context, _) {
+          if (_signedIn) context.loadChatUnread();
+        },
+        child: widget.child,
+      );
 }

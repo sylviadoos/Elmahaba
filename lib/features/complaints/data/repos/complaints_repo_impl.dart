@@ -2,7 +2,6 @@ import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/base/upload_progress.dart';
-import 'package:al_mahhaba_school/features/complaints/data/data_sources/complaints_local_data_source.dart';
 import 'package:al_mahhaba_school/features/complaints/data/data_sources/complaints_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/complaints/data/models/complaint_reply_model.dart';
 import 'package:al_mahhaba_school/features/complaints/data/models/new_complaint_model.dart';
@@ -17,12 +16,9 @@ import 'package:al_mahhaba_school/features/complaints/domain/repos/complaints_re
 
 @LazySingleton(as: ComplaintsRepo)
 class ComplaintsRepoImpl implements ComplaintsRepo {
-  ComplaintsRepoImpl(this._remoteDataSource, this._localDataSource);
+  ComplaintsRepoImpl(this._remoteDataSource);
 
   final ComplaintsRemoteDataSource _remoteDataSource;
-
-  /// How far the parent has read them, for the dot on Complaints.
-  final ComplaintsLocalDataSource _localDataSource;
 
   @override
   Future<Result<List<ComplaintCategoryEntity>>> getCategories() =>
@@ -41,7 +37,6 @@ class ComplaintsRepoImpl implements ComplaintsRepo {
       NewComplaintModel.fromEntity(complaint),
       onProgress: onProgress,
     );
-    await _rememberOwnUpdate(sent);
     return sent;
   });
 
@@ -60,52 +55,8 @@ class ComplaintsRepoImpl implements ComplaintsRepo {
       ComplaintReplyModel.fromEntity(reply),
       onProgress: onProgress,
     );
-    await _rememberOwnUpdate(details.complaint);
     return details;
   });
-
-  /// The parent just changed [complaint] themselves, which is no news to
-  /// them: that change puts no dot on Complaints.
-  Future<void> _rememberOwnUpdate(ComplaintEntity complaint) async {
-    final lastUpdate = complaint.lastUpdate;
-    if (lastUpdate == null) return;
-    await _localDataSource.saveOwnUpdates({
-      ..._localDataSource.getOwnUpdates(),
-      complaint.id: lastUpdate,
-    });
-  }
-
-  @override
-  Future<Result<bool>> hasNewComplaintUpdates() => Result.guard(() async {
-    final page = await _remoteDataSource.getComplaints(page: 1);
-    // Never opened on this phone: whatever is there is unread.
-    final seen = _localDataSource.getSeenUpdate();
-    final own = _localDataSource.getOwnUpdates();
-    return page.complaints.any((complaint) {
-      final lastUpdate = complaint.lastUpdate;
-      if (lastUpdate == null) return false;
-      if (seen != null && !lastUpdate.isAfter(seen)) return false;
-      // The parent's own complaint or reply, unless the school has
-      // changed it again since.
-      final mine = own[complaint.id];
-      return mine == null || lastUpdate.isAfter(mine);
-    });
-  });
-
-  @override
-  Future<void> markComplaintsSeen(DateTime? updatedAt) async {
-    if (updatedAt == null) return;
-    await _localDataSource.saveSeenUpdate(updatedAt);
-    // Read up to there: only the parent's changes after it still matter.
-    final own = _localDataSource.getOwnUpdates();
-    final later = {
-      for (final MapEntry(:key, :value) in own.entries)
-        if (value.isAfter(updatedAt)) key: value,
-    };
-    if (later.length != own.length) {
-      await _localDataSource.saveOwnUpdates(later);
-    }
-  }
 
   @override
   Future<Result<String>> downloadAttachment(

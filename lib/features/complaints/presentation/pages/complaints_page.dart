@@ -20,8 +20,6 @@ import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/complaints/domain/entities/complaint_entity.dart';
 import 'package:al_mahhaba_school/features/complaints/domain/entities/complaints_page_entity.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_bloc.dart';
-import 'package:al_mahhaba_school/features/complaints/presentation/bloc/complaint_updates_intent.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/view_model/my_complaints_event.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/view_model/my_complaints_state.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/view_model/my_complaints_view_model.dart';
@@ -108,147 +106,135 @@ class _ComplaintsViewState extends State<_ComplaintsView> with RouteAware {
       MediaQuery.paddingOf(context).bottom + 12,
     );
 
-    return BlocListener<MyComplaintsViewModel, MyComplaintsState>(
-      // They're on screen, so the dot on the Complaints button goes.
-      listenWhen: (previous, current) =>
-          current.state == StateType.success && current.data != previous.data,
-      listener: (context, state) => context.read<ComplaintUpdatesBloc>().add(
-        ComplaintsSeenIntent(state.data!),
+    return BlocConsumer<MyComplaintsViewModel, MyComplaintsState>(
+      // The next page failed; the ones loaded stay.
+      listenWhen: (_, state) =>
+          state.state == StateType.error && state.data != null,
+      listener: (context, state) => context.showSnackBar(
+        state.exception!.localizedMessage(context),
+        isError: true,
       ),
-      child: BlocConsumer<MyComplaintsViewModel, MyComplaintsState>(
-        // The next page failed; the ones loaded stay.
-        listenWhen: (_, state) =>
-            state.state == StateType.error && state.data != null,
-        listener: (context, state) => context.showSnackBar(
-          state.exception!.localizedMessage(context),
-          isError: true,
-        ),
-        builder: (context, state) {
-          final loaded = state.data;
+      builder: (context, state) {
+        final loaded = state.data;
 
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle.light,
-            child: Scaffold(
-              body: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      RedHeader(
-                        horizontalPadding: 16,
-                        bottomPadding: 40,
-                        watermarkTop: 20,
-                        watermarkSize: const Size(200, 143),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          spacing: 12.h,
-                          children: [
-                            Row(
-                              spacing: 10.w,
-                              children: [
-                                const AppBackButton(
-                                  fallbackRoute: AppRoutes.home,
-                                ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        l10n.complaints,
-                                        style: textTheme.headlineMedium
-                                            ?.copyWith(
-                                              fontSize: 24.sp,
-                                              height: 28 / 24,
-                                              letterSpacing: 0,
-                                              color: AppColors.white,
-                                            ),
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: Scaffold(
+            body: Stack(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    RedHeader(
+                      horizontalPadding: 16,
+                      bottomPadding: 40,
+                      watermarkTop: 20,
+                      watermarkSize: const Size(200, 143),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 12.h,
+                        children: [
+                          Row(
+                            spacing: 10.w,
+                            children: [
+                              const AppBackButton(
+                                fallbackRoute: AppRoutes.home,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.complaints,
+                                      style: textTheme.headlineMedium?.copyWith(
+                                        fontSize: 24.sp,
+                                        height: 28 / 24,
+                                        letterSpacing: 0,
+                                        color: AppColors.white,
                                       ),
-                                      if (loaded != null)
-                                        Text(
-                                          _counts(context, loaded),
-                                          style: textTheme.bodySmall?.copyWith(
-                                            color: AppColors.white.withValues(
-                                              alpha: 0.88,
-                                            ),
+                                    ),
+                                    if (loaded != null)
+                                      Text(
+                                        _counts(context, loaded),
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: AppColors.white.withValues(
+                                            alpha: 0.88,
                                           ),
                                         ),
-                                    ],
-                                  ),
+                                      ),
+                                  ],
                                 ),
-                                const SettingsButton(),
-                              ],
-                            ),
-                            Wrap(
-                              spacing: 8.w,
-                              runSpacing: 8.h,
-                              children: [
-                                for (final (open, label) in [
-                                  (null, l10n.filterAll),
-                                  (true, l10n.filterOpen),
-                                  (false, l10n.filterClosed),
-                                ])
-                                  StatusFilterChip(
-                                    label: label,
-                                    isSelected: _open == open,
-                                    onTap: () => setState(() => _open = open),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: loaded == null
-                            ? _firstPage(context, state)
-                            : _list(context, state, loaded, buttonBottom),
-                      ),
-                    ],
-                  ),
-                  Positioned(
-                    left: 20.w,
-                    right: 20.w,
-                    bottom: buttonBottom,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.mahabbahRed.withValues(
-                              alpha: 0.28,
-                            ),
-                            offset: Offset(0, 14.h),
-                            blurRadius: 30.r,
+                              ),
+                              const SettingsButton(),
+                            ],
+                          ),
+                          Wrap(
+                            spacing: 8.w,
+                            runSpacing: 8.h,
+                            children: [
+                              for (final (open, label) in [
+                                (null, l10n.filterAll),
+                                (true, l10n.filterOpen),
+                                (false, l10n.filterClosed),
+                              ])
+                                StatusFilterChip(
+                                  label: label,
+                                  isSelected: _open == open,
+                                  onTap: () => setState(() => _open = open),
+                                ),
+                            ],
                           ),
                         ],
                       ),
-                      child: ElevatedButton.icon(
-                        onPressed: _newComplaint,
-                        icon: AppSvgIcon(
-                          AppIcons.plus,
-                          size: 18.r,
-                          color: AppColors.white,
+                    ),
+                    Expanded(
+                      child: loaded == null
+                          ? _firstPage(context, state)
+                          : _list(context, state, loaded, buttonBottom),
+                    ),
+                  ],
+                ),
+                Positioned(
+                  left: 20.w,
+                  right: 20.w,
+                  bottom: buttonBottom,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.mahabbahRed.withValues(alpha: 0.28),
+                          offset: Offset(0, 14.h),
+                          blurRadius: 30.r,
                         ),
-                        label: Text(l10n.newComplaint),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size.fromHeight(56.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18.r),
-                          ),
-                          textStyle: textTheme.labelLarge?.copyWith(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      ],
+                    ),
+                    child: ElevatedButton.icon(
+                      onPressed: _newComplaint,
+                      icon: AppSvgIcon(
+                        AppIcons.plus,
+                        size: 18.r,
+                        color: AppColors.white,
+                      ),
+                      label: Text(l10n.newComplaint),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size.fromHeight(56.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.r),
+                        ),
+                        textStyle: textTheme.labelLarge?.copyWith(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 

@@ -3,12 +3,15 @@ sealed class ChatUnreadIntent {
   const ChatUnreadIntent();
 }
 
-/// Asks the server how many chat items are unread.
+/// Asks the school what's new for the child with [studentId] (the one
+/// every page shows), as the School chat card on Home counts it.
 final class LoadChatUnreadIntent extends ChatUnreadIntent {
-  const LoadChatUnreadIntent();
+  const LoadChatUnreadIntent(this.studentId);
+
+  final int studentId;
 }
 
-/// What the chat learned is unread, e.g. after marking items read.
+/// The School chat card's count, as Home just loaded it.
 final class SetChatUnreadIntent extends ChatUnreadIntent {
   const SetChatUnreadIntent(this.count);
 

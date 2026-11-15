@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -303,19 +303,29 @@ void main() {
       await harness.pump(tester);
       await tester.pump(const Duration(milliseconds: 500));
 
-      verify(harness.markRead(['event:41'])).called(1);
+      verify(
+        harness.markRead(['event:41'], studentId: omar.studentId),
+      ).called(1);
     });
 
     testWidgets('a file tapped: downloaded, to open', (tester) async {
       when(
-        harness.downloadAttachment(any, cancel: anyNamed('cancel')),
+        harness.downloadAttachment(
+          any,
+          studentId: anyNamed('studentId'),
+          cancel: anyNamed('cancel'),
+        ),
       ).thenAnswer((_) async => const Failure(exception: NetworkException()));
       await harness.pump(tester);
       await tester.tap(find.text('ex1.pdf'));
       await tester.pump();
 
       verify(
-        harness.downloadAttachment(exerciseFile, cancel: anyNamed('cancel')),
+        harness.downloadAttachment(
+          exerciseFile,
+          studentId: anyNamed('studentId'),
+          cancel: anyNamed('cancel'),
+        ),
       ).called(1);
     });
   });

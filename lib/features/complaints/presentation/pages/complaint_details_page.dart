@@ -16,6 +16,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/extensions/string_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_back_button.dart';
+import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
@@ -41,7 +42,8 @@ import 'package:al_mahhaba_school/features/profile/presentation/widgets/settings
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 
 /// One complaint: its details, what was sent, how its status changed, the
-/// school's updates, and a reply when the school asks for one.
+/// school's updates, and a reply when the school asks for one. Kept up to
+/// date while it shows (see [PageRefresher]); pulling down asks again too.
 class ComplaintDetailsPage extends StatelessWidget {
   const ComplaintDetailsPage({
     super.key,
@@ -97,10 +99,13 @@ class _ComplaintDetailsViewState extends State<_ComplaintDetailsView> {
     super.dispose();
   }
 
-  void _load({bool refresh = false}) =>
+  Future<void> _load({bool refresh = false}) =>
       context.read<ComplaintDetailsViewModel>().doAction(
         LoadComplaintDetailsEvent(widget.complaintId, refresh: refresh),
       );
+
+  /// What the school sent since: the complaint shown stays until it comes.
+  Future<void> _refresh() => _load(refresh: true);
 
   Future<void> _pickAttachments() async {
     final picked = await context.pickComplaintAttachments(
@@ -236,38 +241,50 @@ class _ComplaintDetailsViewState extends State<_ComplaintDetailsView> {
           listener: _listenDownload,
         ),
       ],
-      child: BlocBuilder<ComplaintDetailsViewModel, ComplaintDetailsState>(
-        builder: (context, state) {
-          final details = state.details.data;
+      // The school's updates and replies show without leaving: asked again
+      // as a notification arrives, the app comes back, or the page shows
+      // again; pulling down asks too.
+      child: PageRefresher(
+        path: AppRoutes.complaintDetailsOf(widget.complaintId),
+        onRefresh: _refresh,
+        child: BlocBuilder<ComplaintDetailsViewModel, ComplaintDetailsState>(
+          builder: (context, state) {
+            final details = state.details.data;
 
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle.light,
-            child: Scaffold(
-              body: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _header(context, details?.complaint ?? widget.preview),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.fromLTRB(
-                        20.w,
-                        4.h,
-                        20.w,
-                        math.max(
-                          40.h,
-                          MediaQuery.paddingOf(context).bottom + 16,
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle.light,
+              child: Scaffold(
+                body: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _header(context, details?.complaint ?? widget.preview),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _refresh,
+                        child: SingleChildScrollView(
+                          // Pulls down even when it all fits.
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.fromLTRB(
+                            20.w,
+                            4.h,
+                            20.w,
+                            math.max(
+                              40.h,
+                              MediaQuery.paddingOf(context).bottom + 16,
+                            ),
+                          ),
+                          child: details == null
+                              ? _loadingOrError(context, state)
+                              : _content(context, state, details),
                         ),
                       ),
-                      child: details == null
-                          ? _loadingOrError(context, state)
-                          : _content(context, state, details),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

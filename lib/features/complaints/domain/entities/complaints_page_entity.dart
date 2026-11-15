@@ -21,19 +21,6 @@ class ComplaintsPageEntity extends Equatable {
 
   bool get hasMore => page < lastPage;
 
-  /// The newest change across them, which is how far the parent has read
-  /// once these are on screen (the dot on the Complaints button). Null
-  /// when there are none, or none says when it changed.
-  DateTime? get newestUpdate {
-    DateTime? newest;
-    for (final complaint in complaints) {
-      final lastUpdate = complaint.lastUpdate;
-      if (lastUpdate == null) continue;
-      if (newest == null || lastUpdate.isAfter(newest)) newest = lastUpdate;
-    }
-    return newest;
-  }
-
   /// These, then [next]'s. One sent meanwhile pushes the older ones down a
   /// page, so any already here are skipped.
   ComplaintsPageEntity followedBy(ComplaintsPageEntity next) {

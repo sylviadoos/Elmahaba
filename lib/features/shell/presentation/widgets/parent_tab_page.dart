@@ -19,7 +19,8 @@ import 'package:al_mahhaba_school/features/shell/presentation/widgets/main_nav_b
 /// `ParentShellPage`'s, over it.
 ///
 /// The picker shows the parent's real children; [selectedChild] is the one
-/// every page shows (`watchSelectedChildIndex`).
+/// every page shows (`watchSelectedChildIndex`). With [onRefresh], pulling
+/// the page down asks again; it spins until that ends.
 class ParentTabPage extends StatelessWidget {
   const ParentTabPage({
     super.key,
@@ -27,16 +28,38 @@ class ParentTabPage extends StatelessWidget {
     required this.selectedChild,
     required this.onChildSelected,
     required this.children,
+    this.onRefresh,
   });
 
   final String title;
   final int selectedChild;
   final ValueChanged<int> onChildSelected;
   final List<Widget> children;
+  final RefreshCallback? onRefresh;
 
   @override
   Widget build(BuildContext context) {
     final parentChildren = context.watchChildren();
+    final onRefresh = this.onRefresh;
+    final content = SingleChildScrollView(
+      // Pulls down even when it all fits.
+      physics: onRefresh == null ? null : const AlwaysScrollableScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        6.h,
+        20.w,
+        MainNavBar.contentPadding(context),
+      ),
+      // Painted once: scrolling only moves it, rather than paint every card
+      // again each frame.
+      child: RepaintBoundary(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 18.h,
+          children: children,
+        ),
+      ),
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -83,23 +106,9 @@ class ParentTabPage extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  20.w,
-                  6.h,
-                  20.w,
-                  MainNavBar.contentPadding(context),
-                ),
-                // Painted once: scrolling only moves it, rather than paint
-                // every card again each frame.
-                child: RepaintBoundary(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: 18.h,
-                    children: children,
-                  ),
-                ),
-              ),
+              child: onRefresh == null
+                  ? content
+                  : RefreshIndicator(onRefresh: onRefresh, child: content),
             ),
           ],
         ),

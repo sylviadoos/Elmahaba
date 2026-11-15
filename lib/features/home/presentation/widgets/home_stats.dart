@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,13 +8,12 @@ import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/equal_height_grid.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
-import 'package:al_mahhaba_school/features/home/domain/entities/dashboard_attendance_entity.dart';
-import 'package:al_mahhaba_school/features/home/presentation/extensions/dashboard_chat_counts.dart';
+import 'package:al_mahhaba_school/features/home/domain/extensions/dashboard_chat_counts.dart';
 import 'package:al_mahhaba_school/features/home/presentation/extensions/dashboard_fees_labels.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/home_stat_card.dart';
 
-/// The four Home cards — the latest result, days absent out of those
-/// allowed, the next fees installment and messages — each opening its page.
+/// The four Home cards — the latest result, the days present, the next fees
+/// installment and messages — each opening its page.
 class HomeStats extends StatelessWidget {
   const HomeStats({super.key, required this.dashboard});
 
@@ -55,16 +54,8 @@ class HomeStats extends StatelessWidget {
         HomeStatCard(
           title: l10n.attendance,
           icon: AppIcons.calendarPresent,
-          value: _absences(attendance),
-          subtitle: l10n.daysAbsent,
-          footer: attendance.exceededAbsenceDays > 0
-              ? note(
-                  l10n.absenceDaysOver(attendance.exceededAbsenceDays),
-                  color: AppColors.error,
-                )
-              : attendance.allowedAbsenceDays > 0
-              ? note(l10n.absenceDaysLeft(attendance.remainingAbsenceDays))
-              : null,
+          value: '${attendance.presentDays}',
+          subtitle: l10n.daysPresent,
           onTap: () => context.go(AppRoutes.attendance),
         ),
         HomeStatCard(
@@ -86,10 +77,4 @@ class HomeStats extends StatelessWidget {
       ],
     );
   }
-
-  /// "1/4": days absent out of those allowed; just the days with no limit.
-  static String _absences(DashboardAttendanceEntity attendance) =>
-      attendance.allowedAbsenceDays > 0
-      ? '${attendance.actualAbsenceDays}/${attendance.allowedAbsenceDays}'
-      : '${attendance.actualAbsenceDays}';
 }

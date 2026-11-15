@@ -66,15 +66,27 @@ class _AddChildrenPageState extends State<AddChildrenPage> {
     final link = state.link;
 
     if (link.data case final result?) {
+      final done = switch (result) {
+        ChildLinked() => l10n.childLinked,
+        ChildLinkPending() => l10n.childLinkPending,
+        // The school texted a code to the child's own phone: entered on its
+        // page, which links the child — then this one says so. The ID
+        // stays meanwhile, to try again from.
+        ChildLinkCodeSent() => null,
+      };
+      if (done == null) {
+        context.push(
+          AppRoutes.linkChildCode,
+          extra: (result as ChildLinkCodeSent).verification,
+        );
+        return;
+      }
       // In setState: Continue waits on the field being empty again.
       setState(() {
         _idController.clear();
         _idError = null;
       });
-      context.showSnackBar(switch (result) {
-        ChildLinked() => l10n.childLinked,
-        ChildLinkPending() => l10n.childLinkPending,
-      });
+      context.showSnackBar(done);
       return;
     }
 

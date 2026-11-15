@@ -691,6 +691,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get childLinked => 'Your child has been linked to your account.';
 
   @override
+  String get linkCodeSentTo => 'A verification code will be sent to: ';
+
+  @override
+  String codeAttemptsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tries left',
+      one: '1 try left',
+      zero: 'No tries left',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get childLinkPending =>
       'Request sent to the school. You’ll see your child once the school confirms it.';
 
@@ -757,30 +772,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get daysAbsent => 'Days absent';
-
-  @override
-  String absenceDaysLeft(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count days left',
-      one: '1 day left',
-      zero: 'No absence days left',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String absenceDaysOver(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count days over the limit',
-      one: '1 day over the limit',
-    );
-    return '$_temp0';
-  }
+  String get daysPresent => 'Days present';
 
   @override
   String messagesAndNotices(int messages, int notices) {
@@ -892,6 +884,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get activities => 'Activities';
+
+  @override
+  String get certificate => 'Certificate';
 
   @override
   String get downloadCertificate => 'Download certificate (PDF)';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,8 +14,6 @@ import 'package:al_mahhaba_school/features/announcements/presentation/bloc/annou
 import 'package:al_mahhaba_school/features/announcements/presentation/widgets/announcements_header.dart';
 import 'package:al_mahhaba_school/features/announcements/presentation/widgets/announcements_list.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
-import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
-import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_file_opener.dart';
 import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
@@ -80,9 +78,8 @@ class _AnnouncementsViewState extends State<_AnnouncementsView> {
           isError: true,
         );
         if (exception is UnauthorizedException) context.logOut();
-      // Announcements read here come off the badge on Chat.
-      case AnnouncementsChatUnreadEffect(:final count):
-        context.read<ChatUnreadBloc>().add(SetChatUnreadIntent(count));
+      // Announcements read here come off the badge on Chat by itself
+      // (`ChatUnreadBloc` follows every read the school confirms).
       case AnnouncementsChildPickedEffect(:final studentId):
         context.selectChild(studentId);
     }

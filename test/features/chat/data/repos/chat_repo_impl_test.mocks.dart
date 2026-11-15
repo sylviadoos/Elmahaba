@@ -96,9 +96,9 @@ class MockChatRemoteDataSource extends _i1.Mock
           as _i5.Future<_i2.ChatPageModel>);
 
   @override
-  _i5.Future<int> getUnreadCount() =>
+  _i5.Future<int> getUnreadCount({required int? studentId}) =>
       (super.noSuchMethod(
-            Invocation.method(#getUnreadCount, []),
+            Invocation.method(#getUnreadCount, [], {#studentId: studentId}),
             returnValue: _i5.Future<int>.value(0),
             returnValueForMissingStub: _i5.Future<int>.value(0),
           )
@@ -140,9 +140,9 @@ class MockChatRemoteDataSource extends _i1.Mock
           as _i5.Future<_i3.ChatItemModel>);
 
   @override
-  _i5.Future<int> markRead(List<String>? keys) =>
+  _i5.Future<int> markRead(List<String>? keys, {int? studentId}) =>
       (super.noSuchMethod(
-            Invocation.method(#markRead, [keys]),
+            Invocation.method(#markRead, [keys], {#studentId: studentId}),
             returnValue: _i5.Future<int>.value(0),
             returnValueForMissingStub: _i5.Future<int>.value(0),
           )
@@ -151,13 +151,14 @@ class MockChatRemoteDataSource extends _i1.Mock
   @override
   _i5.Future<String> downloadAttachment(
     _i9.ChatAttachmentEntity? attachment, {
+    int? studentId,
     _i6.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #downloadAttachment,
               [attachment],
-              {#cancel: cancel},
+              {#studentId: studentId, #cancel: cancel},
             ),
             returnValue: _i5.Future<String>.value(
               _i10.dummyValue<String>(
@@ -165,7 +166,7 @@ class MockChatRemoteDataSource extends _i1.Mock
                 Invocation.method(
                   #downloadAttachment,
                   [attachment],
-                  {#cancel: cancel},
+                  {#studentId: studentId, #cancel: cancel},
                 ),
               ),
             ),
@@ -175,7 +176,7 @@ class MockChatRemoteDataSource extends _i1.Mock
                 Invocation.method(
                   #downloadAttachment,
                   [attachment],
-                  {#cancel: cancel},
+                  {#studentId: studentId, #cancel: cancel},
                 ),
               ),
             ),

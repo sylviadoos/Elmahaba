@@ -38,7 +38,9 @@ void main() {
     downloadAttachment = MockDownloadChatAttachmentUseCase();
     previewAttachment = MockPreviewChatAttachmentUseCase();
     effects = [];
-    when(markRead(any)).thenAnswer((_) async => const Success(data: 0));
+    when(
+      markRead(any, studentId: anyNamed('studentId')),
+    ).thenAnswer((_) async => const Success(data: 0));
   });
 
   HomeworkBloc build() {
@@ -264,7 +266,7 @@ void main() {
 
   group('read', () {
     blocTest<HomeworkBloc, HomeworkState>(
-      'homework seen about the same time: one request, then the badge',
+      'homework seen about the same time: one request, for the child',
       build: build,
       seed: shown,
       act: (bloc) => bloc
@@ -273,8 +275,11 @@ void main() {
         ..add(const HomeworkSeenIntent('event:41')),
       wait: const Duration(milliseconds: 500),
       verify: (_) {
-        verify(markRead(['event:41', 'event:42'])).called(1);
-        expect(effects, [isA<ChatUnreadChangedEffect>()]);
+        verify(
+          markRead(['event:41', 'event:42'], studentId: omar.studentId),
+        ).called(1);
+        // The badge follows the read by itself (`ChatUnreadBloc`).
+        expect(effects, isEmpty);
       },
     );
   });
@@ -282,7 +287,11 @@ void main() {
   blocTest<HomeworkBloc, HomeworkState>(
     'a file downloaded: opened',
     setUp: () => when(
-      downloadAttachment(exerciseFile, cancel: anyNamed('cancel')),
+      downloadAttachment(
+        exerciseFile,
+        studentId: omar.studentId,
+        cancel: anyNamed('cancel'),
+      ),
     ).thenAnswer((_) async => const Success(data: '/tmp/ex1.pdf')),
     build: build,
     seed: shown,
@@ -304,7 +313,11 @@ void main() {
     blocTest<HomeworkBloc, HomeworkState>(
       'on screen: saved on the phone to show, a file can still be opened',
       setUp: () => when(
-        downloadAttachment(exercisePhoto, cancel: anyNamed('cancel')),
+        downloadAttachment(
+          exercisePhoto,
+          studentId: omar.studentId,
+          cancel: anyNamed('cancel'),
+        ),
       ).thenAnswer((_) async => const Success(data: '/tmp/ex1-board.jpg')),
       build: build,
       seed: shown,
@@ -329,19 +342,29 @@ void main() {
       ),
       act: (bloc) => bloc.add(const LoadHomeworkImageIntent(exercisePhoto)),
       expect: () => <HomeworkState>[],
-      verify: (_) =>
-          verifyNever(downloadAttachment(any, cancel: anyNamed('cancel'))),
+      verify: (_) => verifyNever(
+        downloadAttachment(
+          any,
+          studentId: anyNamed('studentId'),
+          cancel: anyNamed('cancel'),
+        ),
+      ),
     );
 
     blocTest<HomeworkBloc, HomeworkState>(
       'didn\'t load: why, to try again; signed out: the page logs out',
       setUp: () =>
           when(
-            downloadAttachment(exercisePhoto, cancel: anyNamed('cancel')),
+            downloadAttachment(
+              exercisePhoto,
+              studentId: omar.studentId,
+              cancel: anyNamed('cancel'),
+            ),
           ).thenAnswer(
             (_) async => const Failure(exception: UnauthorizedException()),
           ),
       build: build,
+      seed: shown,
       act: (bloc) => bloc.add(const LoadHomeworkImageIntent(exercisePhoto)),
       verify: (bloc) {
         expect(bloc.state.images[89]?.exception, isA<UnauthorizedException>());

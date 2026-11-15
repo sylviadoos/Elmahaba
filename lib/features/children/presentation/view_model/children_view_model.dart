@@ -43,6 +43,8 @@ class ChildrenViewModel extends BaseCubit<ChildrenState, ChildrenEvent, void> {
         emit(const ChildrenState());
       case LinkChildEvent(:final request):
         await _link(request);
+      case ChildLinkVerifiedEvent(:final child):
+        await _verified(child);
     }
   }
 
@@ -100,6 +102,21 @@ class ChildrenViewModel extends BaseCubit<ChildrenState, ChildrenEvent, void> {
       failure: (exception) =>
           emit(state.copyWith(link: BaseState.error(exception))),
     );
+  }
+
+  /// Linked by the code the school texted: as a link done at once, then
+  /// the list from the API (and Home with it).
+  Future<void> _verified(ChildEntity child) async {
+    final children = state.children.data;
+    emit(
+      state.copyWith(
+        link: BaseState.success(ChildLinked(child)),
+        children: children == null
+            ? null
+            : BaseState.success(_withChild(children, child)),
+      ),
+    );
+    await _refresh();
   }
 
   static List<ChildEntity> _withChild(

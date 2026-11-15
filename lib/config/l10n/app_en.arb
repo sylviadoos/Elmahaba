@@ -244,6 +244,15 @@
   },
   "linked": "Linked",
   "childLinked": "Your child has been linked to your account.",
+  "linkCodeSentTo": "A verification code will be sent to: ",
+  "codeAttemptsLeft": "{count, plural, =0{No tries left} =1{1 try left} other{{count} tries left}}",
+  "@codeAttemptsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "childLinkPending": "Request sent to the school. You’ll see your child once the school confirms it.",
   "noChildrenYet": "No children added yet",
   "goodMorning": "Good morning",
@@ -289,23 +298,7 @@
       }
     }
   },
-  "daysAbsent": "Days absent",
-  "absenceDaysLeft": "{count, plural, =0{No absence days left} =1{1 day left} other{{count} days left}}",
-  "@absenceDaysLeft": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "absenceDaysOver": "{count, plural, =1{1 day over the limit} other{{count} days over the limit}}",
-  "@absenceDaysOver": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "daysPresent": "Days present",
   "messagesAndNotices": "Messages {messages} · Notices {notices}",
   "@messagesAndNotices": {
     "placeholders": {
@@ -364,6 +357,7 @@
   "highLevel": "High level",
   "highLevelNote": "Extra level, not counted in the final result",
   "activities": "Activities",
+  "certificate": "Certificate",
   "downloadCertificate": "Download certificate (PDF)",
   "certificateSaved": "Certificate saved",
   "certificateNotSaved": "Couldn’t save the certificate. Try again.",

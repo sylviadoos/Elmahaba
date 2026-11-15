@@ -18,7 +18,6 @@ import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verificati
 import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.dart';
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_data_source.dart';
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart';
-import 'package:al_mahhaba_school/features/complaints/data/data_sources/complaints_local_data_source.dart';
 
 import '../../../../helpers/result_matchers.dart';
 import '../../auth_fixtures.dart';
@@ -30,7 +29,6 @@ import 'auth_repo_impl_test.mocks.dart';
   MockSpec<PhoneVerificationDataSource>(),
   MockSpec<ChildrenLocalDataSource>(),
   MockSpec<ChatLocalDataSource>(),
-  MockSpec<ComplaintsLocalDataSource>(),
 ])
 void main() {
   late MockAuthRemoteDataSource remoteDataSource;
@@ -38,7 +36,6 @@ void main() {
   late MockPhoneVerificationDataSource phoneVerification;
   late MockChildrenLocalDataSource childrenLocalDataSource;
   late MockChatLocalDataSource chatLocalDataSource;
-  late MockComplaintsLocalDataSource complaintsLocalDataSource;
   late AuthRepoImpl repo;
 
   setUpAll(() {
@@ -54,14 +51,12 @@ void main() {
     phoneVerification = MockPhoneVerificationDataSource();
     childrenLocalDataSource = MockChildrenLocalDataSource();
     chatLocalDataSource = MockChatLocalDataSource();
-    complaintsLocalDataSource = MockComplaintsLocalDataSource();
     repo = AuthRepoImpl(
       remoteDataSource,
       localDataSource,
       phoneVerification,
       childrenLocalDataSource,
       chatLocalDataSource,
-      complaintsLocalDataSource,
     );
     when(localDataSource.clientInfo()).thenAnswer((_) async => client);
   });
@@ -76,7 +71,6 @@ void main() {
     verifyNever(localDataSource.clearToken());
     verifyNever(localDataSource.clearParent());
     verifyNever(childrenLocalDataSource.clearChildren());
-    verifyNever(complaintsLocalDataSource.clearSeenUpdate());
   }
 
   group('checkPhone', () {
@@ -377,10 +371,8 @@ void main() {
       localDataSource.clearParent(),
       childrenLocalDataSource.clearChildren(),
     ]);
-    // The next parent mustn't see this one's chats, nor a dot on
-    // Complaints for how far this one had read.
+    // The next parent mustn't see this one's chats.
     verify(chatLocalDataSource.clear()).called(1);
-    verify(complaintsLocalDataSource.clearSeenUpdate()).called(1);
   });
 
   group('getSavedParent', () {

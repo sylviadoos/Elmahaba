@@ -83,19 +83,19 @@ class MockGetAnnouncementsUseCase extends _i1.Mock
 class MockMarkChatReadUseCase extends _i1.Mock
     implements _i8.MarkChatReadUseCase {
   @override
-  _i3.Future<_i4.Result<int>> call(List<String>? keys) =>
+  _i3.Future<_i4.Result<int>> call(List<String>? keys, {int? studentId}) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [keys]),
+            Invocation.method(#call, [keys], {#studentId: studentId}),
             returnValue: _i3.Future<_i4.Result<int>>.value(
               _i7.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#call, [keys]),
+                Invocation.method(#call, [keys], {#studentId: studentId}),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<int>>.value(
               _i7.dummyValue<_i4.Result<int>>(
                 this,
-                Invocation.method(#call, [keys]),
+                Invocation.method(#call, [keys], {#studentId: studentId}),
               ),
             ),
           )
@@ -110,20 +110,33 @@ class MockDownloadChatAttachmentUseCase extends _i1.Mock
   @override
   _i3.Future<_i4.Result<String>> call(
     _i10.ChatAttachmentEntity? attachment, {
+    int? studentId,
     _i6.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [attachment], {#cancel: cancel}),
+            Invocation.method(
+              #call,
+              [attachment],
+              {#studentId: studentId, #cancel: cancel},
+            ),
             returnValue: _i3.Future<_i4.Result<String>>.value(
               _i7.dummyValue<_i4.Result<String>>(
                 this,
-                Invocation.method(#call, [attachment], {#cancel: cancel}),
+                Invocation.method(
+                  #call,
+                  [attachment],
+                  {#studentId: studentId, #cancel: cancel},
+                ),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<String>>.value(
               _i7.dummyValue<_i4.Result<String>>(
                 this,
-                Invocation.method(#call, [attachment], {#cancel: cancel}),
+                Invocation.method(
+                  #call,
+                  [attachment],
+                  {#studentId: studentId, #cancel: cancel},
+                ),
               ),
             ),
           )
@@ -138,20 +151,33 @@ class MockPreviewChatAttachmentUseCase extends _i1.Mock
   @override
   _i3.Future<_i4.Result<String>> call(
     _i10.ChatAttachmentEntity? attachment, {
+    int? studentId,
     _i6.CancelHandle? cancel,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [attachment], {#cancel: cancel}),
+            Invocation.method(
+              #call,
+              [attachment],
+              {#studentId: studentId, #cancel: cancel},
+            ),
             returnValue: _i3.Future<_i4.Result<String>>.value(
               _i7.dummyValue<_i4.Result<String>>(
                 this,
-                Invocation.method(#call, [attachment], {#cancel: cancel}),
+                Invocation.method(
+                  #call,
+                  [attachment],
+                  {#studentId: studentId, #cancel: cancel},
+                ),
               ),
             ),
             returnValueForMissingStub: _i3.Future<_i4.Result<String>>.value(
               _i7.dummyValue<_i4.Result<String>>(
                 this,
-                Invocation.method(#call, [attachment], {#cancel: cancel}),
+                Invocation.method(
+                  #call,
+                  [attachment],
+                  {#studentId: studentId, #cancel: cancel},
+                ),
               ),
             ),
           )

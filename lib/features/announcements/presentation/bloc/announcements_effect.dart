@@ -23,14 +23,6 @@ final class ShowAnnouncementsErrorEffect extends AnnouncementsEffect {
   final AppException exception;
 }
 
-/// What's still unread in the whole chat (announcements are in it), for
-/// the badge on Chat.
-final class AnnouncementsChatUnreadEffect extends AnnouncementsEffect {
-  const AnnouncementsChatUnreadEffect(this.count);
-
-  final int count;
-}
-
 /// The parent picked the child with [studentId]: every page shows them now.
 final class AnnouncementsChildPickedEffect extends AnnouncementsEffect {
   const AnnouncementsChildPickedEffect(this.studentId);

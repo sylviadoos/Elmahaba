@@ -95,10 +95,19 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
   CancelHandle? _downloading;
   CancelHandle? _refreshing;
 
-  /// The photos shown in the chat.
+  /// The photos shown in the chat, asked for the child shown (none on
+  /// "All").
   late final ChatImageLoads _imageLoads = ChatImageLoads(
-    download: _downloadAttachment.call,
-    preview: _previewAttachment.call,
+    download: (attachment, {cancel}) => _downloadAttachment(
+      attachment,
+      studentId: state.studentId,
+      cancel: cancel,
+    ),
+    preview: (attachment, {cancel}) => _previewAttachment(
+      attachment,
+      studentId: state.studentId,
+      cancel: cancel,
+    ),
   );
 
   /// The items marked read, or being marked, so none is sent twice.
@@ -306,12 +315,11 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     }
 
     show(true);
-    final result = await _markRead(keys.toList());
+    // Read for the child shown, as the school asks of every chat request:
+    // an item about two children stays new for the other. On "All", none.
+    final result = await _markRead(keys.toList(), studentId: state.studentId);
     result.when(
-      success: (unread) {
-        emitEffect(UnreadChangedEffect(unread));
-        show(true, unread: unread);
-      },
+      success: (unread) => show(true, unread: unread),
       failure: (exception) {
         // New again, and tried again when they come on screen again.
         _marked.removeAll(keys);
@@ -502,7 +510,11 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     if (state.downloadingId != null) return;
     final cancel = _downloading = CancelHandle();
     emit(state.copyWith(downloadingId: () => intent.attachment.id));
-    final result = await _downloadAttachment(intent.attachment, cancel: cancel);
+    final result = await _downloadAttachment(
+      intent.attachment,
+      studentId: state.studentId,
+      cancel: cancel,
+    );
     emit(state.copyWith(downloadingId: () => null));
     result.when(
       success: (path) => emitEffect(OpenFileEffect(path, intent.attachment)),

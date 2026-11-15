@@ -152,7 +152,7 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('loads the profile and shows the father, mother and children', (
+  testWidgets('loads the profile and shows the father and mother', (
     tester,
   ) async {
     await pump(tester);
@@ -169,7 +169,8 @@ void main() {
     expect(find.text('0111****333'), findsOneWidget);
     // The mother has no job: no line for it in her section.
     expect(find.text(en.job), findsOneWidget);
-    expect(find.byType(ProfileChildRow), findsNWidgets(2));
+    // The children are on Settings now, a page back.
+    expect(find.byType(ProfileChildRow), findsNothing);
   });
 
   testWidgets('shows what Settings had while the profile loads again', (
@@ -197,7 +198,6 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text(en.father.toUpperCase()), findsNothing);
-    expect(find.byType(ProfileChildRow), findsNWidgets(2));
 
     reply.complete(const Success(data: profile));
     await tester.pump();
@@ -225,9 +225,7 @@ void main() {
     expect(find.textContaining(en.father.toUpperCase()), findsOneWidget);
   });
 
-  testWidgets('still shows the children when the profile fails', (
-    tester,
-  ) async {
+  testWidgets('still shows the parent when the profile fails', (tester) async {
     when(
       getProfile(),
     ).thenAnswer((_) async => Failure(exception: NetworkException()));
@@ -236,7 +234,6 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.text('Hany Adel'), findsOneWidget);
-    expect(find.byType(ProfileChildRow), findsNWidgets(2));
   });
 
   testWidgets('fits a small phone in Arabic', (tester) async {
