@@ -28,7 +28,9 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 # Firebase iOS SDK 11.x+ uses Swift 6-only syntax (sending, access-level-on
 # -import) in FirebaseCoreInternal that this machine's Xcode 15.4 toolchain
 # can't compile. Pin to the last 10.x release until Xcode is upgraded.
-$FirebaseSDKVersion = '10.29.0'
+# GitHub Actions' macos-latest runner has a newer Xcode, so let CI builds
+# use whatever Firebase ships currently.
+$FirebaseSDKVersion = '10.29.0' unless ENV['CI']
 
 flutter_ios_podfile_setup
 
