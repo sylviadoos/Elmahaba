@@ -341,14 +341,6 @@
     }
   },
   "finalResult": "Final result",
-  "attendancePercent": "Attendance {percent}",
-  "@attendancePercent": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      }
-    }
-  },
   "subjects": "Subjects",
   "countedInFinalResult": "Counted in the final result",
   "otherSubjects": "Other subjects",

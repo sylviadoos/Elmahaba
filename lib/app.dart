@@ -19,6 +19,7 @@ import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_v
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/badge_refresher.dart';
+import 'package:al_mahhaba_school/features/shell/presentation/widgets/notification_router.dart';
 
 class AlMahhabaApp extends StatelessWidget {
   const AlMahhabaApp({super.key});
@@ -56,22 +57,25 @@ class AlMahhabaApp extends StatelessWidget {
           },
           // Under the blocs they refresh, over every page that shows them.
           child: BadgeRefresher(
-            child: AppStatusRefresher(
-              child: BlocBuilder<LocaleThemeCubit, LocaleThemeState>(
-                builder: (context, state) => MaterialApp.router(
-                  title: AppConfig.appName,
-                  debugShowCheckedModeBanner: false,
-                  theme: AppTheme.light(state.locale),
-                  darkTheme: AppTheme.dark(state.locale),
-                  themeMode: state.themeMode,
-                  // Not DevicePreview.locale(context): it would override the
-                  // language chosen in the app (LocaleThemeCubit) in debug builds.
-                  locale: state.locale,
-                  localizationsDelegates:
-                      AppLocalizations.localizationsDelegates,
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  routerConfig: appRouter,
-                  builder: DevicePreview.appBuilder,
+            child: NotificationRouter(
+              child: AppStatusRefresher(
+                child: BlocBuilder<LocaleThemeCubit, LocaleThemeState>(
+                  builder: (context, state) => MaterialApp.router(
+                    title: AppConfig.appName,
+                    debugShowCheckedModeBanner: false,
+                    theme: AppTheme.light(state.locale),
+                    darkTheme: AppTheme.dark(state.locale),
+                    themeMode: state.themeMode,
+                    // Not DevicePreview.locale(context): it would override the
+                    // language chosen in the app (LocaleThemeCubit) in debug
+                    // builds.
+                    locale: state.locale,
+                    localizationsDelegates:
+                        AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                    routerConfig: appRouter,
+                    builder: DevicePreview.appBuilder,
+                  ),
                 ),
               ),
             ),

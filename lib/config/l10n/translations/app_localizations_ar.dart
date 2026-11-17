@@ -863,11 +863,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get finalResult => 'النتيجة النهائية';
 
   @override
-  String attendancePercent(String percent) {
-    return 'الحضور $percent';
-  }
-
-  @override
   String get subjects => 'المواد';
 
   @override

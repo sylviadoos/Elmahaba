@@ -258,7 +258,6 @@
   "result": "النتيجة",
   "publishedOn": "نُشرت {date}",
   "finalResult": "النتيجة النهائية",
-  "attendancePercent": "الحضور {percent}",
   "subjects": "المواد",
   "countedInFinalResult": "تُحسب في النتيجة النهائية",
   "otherSubjects": "مواد أخرى",

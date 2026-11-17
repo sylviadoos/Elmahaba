@@ -11,7 +11,11 @@ import 'package:al_mahhaba_school/features/results/domain/entities/result_detail
 
 /// The final result out of the counted subjects' maximum — as a ring and in
 /// numbers — the school's word for it when there's one (a term's, "ناجح"),
-/// the attendance, and the rank in the class when there's one (a month's).
+/// and the rank in the class when there's one (a month's).
+///
+/// Not the attendance: the school asked for it off the result (0068051).
+/// It has its own page, and `attendancePercentage` is still read from the
+/// API for the certificate.
 class FinalResultCard extends StatelessWidget {
   const FinalResultCard({super.key, required this.result});
 
@@ -26,7 +30,6 @@ class FinalResultCard extends StatelessWidget {
     final share = finalResult != null && finalMax > 0
         ? (finalResult / finalMax).clamp(0.0, 1.0)
         : 0.0;
-    final attendance = result.attendancePercentage;
     final rank = result.rank;
 
     return Container(
@@ -93,15 +96,6 @@ class FinalResultCard extends StatelessWidget {
                   children: [
                     if (result.verdict case final verdict?)
                       _Pill(icon: AppIcons.check, label: verdict),
-                    _Pill(
-                      icon: AppIcons.calendarPresent,
-                      label: l10n.attendancePercent(
-                        // A dash, not 0%, as on Attendance.
-                        attendance == null || attendance <= 0
-                            ? '-'
-                            : '${attendance.oneDecimal}%',
-                      ),
-                    ),
                     if (rank != null)
                       _Pill(
                         icon: AppIcons.navResults,

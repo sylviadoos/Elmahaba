@@ -1652,12 +1652,6 @@ abstract class AppLocalizations {
   /// **'Final result'**
   String get finalResult;
 
-  /// No description provided for @attendancePercent.
-  ///
-  /// In en, this message translates to:
-  /// **'Attendance {percent}'**
-  String attendancePercent(String percent);
-
   /// No description provided for @subjects.
   ///
   /// In en, this message translates to:
