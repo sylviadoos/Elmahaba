@@ -10,6 +10,7 @@ import 'package:al_mahhaba_school/features/attendance/presentation/pages/attenda
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/presentation/pages/add_children_page.dart';
 import 'package:al_mahhaba_school/features/children/presentation/pages/child_details_page.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/change_password_page.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/login_page.dart';
@@ -174,11 +175,12 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.newPassword,
       // Needs the number and its proof from the code page; opened any other
       // way, start again.
-      redirect: (context, state) =>
-          state.extra is (String, String) ? null : AppRoutes.forgotPassword,
+      redirect: (context, state) => state.extra is (String, PhoneProofEntity)
+          ? null
+          : AppRoutes.forgotPassword,
       builder: (context, state) {
-        final (phone, firebaseIdToken) = state.extra! as (String, String);
-        return NewPasswordPage(phone: phone, firebaseIdToken: firebaseIdToken);
+        final (phone, proof) = state.extra! as (String, PhoneProofEntity);
+        return NewPasswordPage(phone: phone, proof: proof);
       },
     ),
     GoRoute(

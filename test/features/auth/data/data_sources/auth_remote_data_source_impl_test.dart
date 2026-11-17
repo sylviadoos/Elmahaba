@@ -12,6 +12,8 @@ import 'package:al_mahhaba_school/features/auth/data/models/login_request_model.
 import 'package:al_mahhaba_school/features/auth/data/models/register_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/reset_password_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/complete_register_request_entity.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/reset_password_request_entity.dart';
 
 import '../../auth_fixtures.dart';
 import 'auth_remote_data_source_impl_test.mocks.dart';
@@ -122,7 +124,7 @@ void main() {
           const CompleteRegisterRequestEntity(
             phone: phone,
             password: password,
-            firebaseIdToken: firebaseIdToken,
+            proof: FirebaseProof(firebaseIdToken),
           ),
           client: client,
         ),
@@ -188,6 +190,35 @@ void main() {
         ),
       ).called(1);
     });
+  });
+
+  test("resetPassword with the school's code: posts it as otp", () async {
+    when(
+      api.post(ApiEndpoints.forgotPassword, data: anyNamed('data')),
+    ).thenAnswer((_) async => {'status': 'success', 'data': null});
+
+    await dataSource.resetPassword(
+      ResetPasswordRequestModel.fromEntity(
+        const ResetPasswordRequestEntity(
+          phone: phone,
+          proof: SchoolCodeProof('123456'),
+          password: password,
+          passwordConfirmation: password,
+        ),
+      ),
+    );
+
+    verify(
+      api.post(
+        ApiEndpoints.forgotPassword,
+        data: {
+          'phone_number': phone,
+          'otp': '123456',
+          'password': password,
+          'password_confirmation': password,
+        },
+      ),
+    ).called(1);
   });
 
   group('changePassword', () {

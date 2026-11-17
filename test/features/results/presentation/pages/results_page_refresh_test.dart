@@ -317,12 +317,10 @@ void main() {
       verify(getResults(146)).called(1);
 
       // The list comes back from the API as a new list of the same child.
-      when(childrenViewModel.state).thenReturn(
-        const ChildrenState(children: BaseState.success([omar])),
-      );
-      children.add(
-        const ChildrenState(children: BaseState.success([omar])),
-      );
+      when(
+        childrenViewModel.state,
+      ).thenReturn(const ChildrenState(children: BaseState.success([omar])));
+      children.add(const ChildrenState(children: BaseState.success([omar])));
       await tester.pump();
       await tester.pump();
 
@@ -371,8 +369,9 @@ void main() {
       expect(find.text(en.login), findsNothing);
     });
 
-    testWidgets('the session ended: "Log in", since trying again can\'t help',
-        (tester) async {
+    testWidgets('the session ended: "Log in", since trying again can\'t help', (
+      tester,
+    ) async {
       await pump(tester, const Failure(exception: UnauthorizedException()));
 
       expect(find.text(en.login), findsOneWidget);
@@ -393,8 +392,9 @@ void main() {
       expect(find.text(en.tryAgain), findsOneWidget);
     });
 
-    testWidgets('a notification after it failed: it loads and the error goes',
-        (tester) async {
+    testWidgets('a notification after it failed: it loads and the error goes', (
+      tester,
+    ) async {
       await pump(tester, const Failure(exception: NetworkException()));
       expect(find.text(en.tryAgain), findsOneWidget);
 

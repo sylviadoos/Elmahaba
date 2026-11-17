@@ -88,4 +88,61 @@ void main() {
       );
     });
   });
+
+  group('messages not meant for parents are dropped', () {
+    test('a crash, with its debug details', () {
+      final exception = DioExceptionHandler.handle(
+        _answer(500, {
+          'message':
+              r'Brick\Math\BigNumber::isGreaterThanOrEqualTo(): Argument #1 '
+              'must be of type BigNumber, null given',
+          'exception': 'TypeError',
+          'file': '/home/customer/www/vendor/brick/math/src/BigNumber.php',
+          'trace': <Object>[],
+        }),
+      );
+
+      expect(exception, isA<ServerException>());
+      expect(exception.message, isNull);
+    });
+
+    test('a 500 the API did not name', () {
+      final exception = DioExceptionHandler.handle(
+        _answer(500, {'message': 'Server Error'}),
+      );
+
+      expect(exception.message, isNull);
+    });
+
+    test('an untranslated key', () {
+      final exception = DioExceptionHandler.handle(
+        _answer(503, {
+          'status': 'error',
+          'code': 'mobile_app_disabled',
+          'message': 'parent_app.mobile_app_disabled',
+        }),
+      );
+
+      expect(
+        exception,
+        isA<ServerException>()
+            .having((e) => e.code, 'code', 'mobile_app_disabled')
+            .having((e) => e.message, 'message', isNull),
+      );
+    });
+
+    test('a named error, even a 503: its message is kept', () {
+      final exception = DioExceptionHandler.handle(
+        _answer(503, {
+          'code': 'otp_send_failed',
+          'message': 'We could not send the code. Please try again.',
+        }),
+      );
+
+      expect(
+        exception.message,
+        'We could not send the code. Please try again.',
+      );
+    });
+  });
 }

@@ -12,6 +12,8 @@ import 'package:al_mahhaba_school/features/auth/data/data_sources/auth_remote_da
     as _i5;
 import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source.dart'
     as _i15;
+import 'package:al_mahhaba_school/features/auth/data/data_sources/school_otp_data_source.dart'
+    as _i18;
 import 'package:al_mahhaba_school/features/auth/data/models/auth_session_model.dart'
     as _i3;
 import 'package:al_mahhaba_school/features/auth/data/models/change_password_request_model.dart'
@@ -35,15 +37,15 @@ import 'package:al_mahhaba_school/features/auth/domain/entities/parent_entity.da
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart'
     as _i16;
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_data_source.dart'
-    as _i21;
-import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart'
     as _i22;
+import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity.dart'
+    as _i23;
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart'
-    as _i18;
-import 'package:al_mahhaba_school/features/children/data/models/child_model.dart'
     as _i19;
-import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart'
+import 'package:al_mahhaba_school/features/children/data/models/child_model.dart'
     as _i20;
+import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart'
+    as _i21;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i17;
 
@@ -325,26 +327,51 @@ class MockPhoneVerificationDataSource extends _i1.Mock
           as _i6.Future<void>);
 }
 
+/// A class which mocks [SchoolOtpDataSource].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSchoolOtpDataSource extends _i1.Mock
+    implements _i18.SchoolOtpDataSource {
+  @override
+  _i6.Future<_i16.SchoolCodeSent> sendCode(String? phone) =>
+      (super.noSuchMethod(
+            Invocation.method(#sendCode, [phone]),
+            returnValue: _i6.Future<_i16.SchoolCodeSent>.value(
+              _i17.dummyValue<_i16.SchoolCodeSent>(
+                this,
+                Invocation.method(#sendCode, [phone]),
+              ),
+            ),
+            returnValueForMissingStub: _i6.Future<_i16.SchoolCodeSent>.value(
+              _i17.dummyValue<_i16.SchoolCodeSent>(
+                this,
+                Invocation.method(#sendCode, [phone]),
+              ),
+            ),
+          )
+          as _i6.Future<_i16.SchoolCodeSent>);
+}
+
 /// A class which mocks [ChildrenLocalDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockChildrenLocalDataSource extends _i1.Mock
-    implements _i18.ChildrenLocalDataSource {
+    implements _i19.ChildrenLocalDataSource {
   @override
-  _i6.Future<List<_i19.ChildModel>> getSavedChildren() =>
+  _i6.Future<List<_i20.ChildModel>> getSavedChildren() =>
       (super.noSuchMethod(
             Invocation.method(#getSavedChildren, []),
-            returnValue: _i6.Future<List<_i19.ChildModel>>.value(
-              <_i19.ChildModel>[],
+            returnValue: _i6.Future<List<_i20.ChildModel>>.value(
+              <_i20.ChildModel>[],
             ),
-            returnValueForMissingStub: _i6.Future<List<_i19.ChildModel>>.value(
-              <_i19.ChildModel>[],
+            returnValueForMissingStub: _i6.Future<List<_i20.ChildModel>>.value(
+              <_i20.ChildModel>[],
             ),
           )
-          as _i6.Future<List<_i19.ChildModel>>);
+          as _i6.Future<List<_i20.ChildModel>>);
 
   @override
-  _i6.Future<void> saveChildren(List<_i20.ChildEntity>? children) =>
+  _i6.Future<void> saveChildren(List<_i21.ChildEntity>? children) =>
       (super.noSuchMethod(
             Invocation.method(#saveChildren, [children]),
             returnValue: _i6.Future<void>.value(),
@@ -366,9 +393,9 @@ class MockChildrenLocalDataSource extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockChatLocalDataSource extends _i1.Mock
-    implements _i21.ChatLocalDataSource {
+    implements _i22.ChatLocalDataSource {
   @override
-  void saveNewestPage(int? studentId, _i22.ChatPageEntity? page) =>
+  void saveNewestPage(int? studentId, _i23.ChatPageEntity? page) =>
       super.noSuchMethod(
         Invocation.method(#saveNewestPage, [studentId, page]),
         returnValueForMissingStub: null,

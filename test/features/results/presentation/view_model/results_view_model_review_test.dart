@@ -53,59 +53,70 @@ void main() {
   }
 
   group('opening Results', () {
-    test('the results load on their own, without anything being tapped', ()
-        async {
-      await load();
+    test(
+      'the results load on their own, without anything being tapped',
+      () async {
+        await load();
 
-      expect(viewModel.state.results.state, StateType.success);
-      verify(getResults(146)).called(1);
-    });
+        expect(viewModel.state.results.state, StateType.success);
+        verify(getResults(146)).called(1);
+      },
+    );
 
-    test('the skeleton shows first, then the results — never an empty page',
-        () async {
-      final seen = <StateType>[];
-      final listening = viewModel.stream.listen(
-        (state) => seen.add(state.results.state),
-      );
-      addTearDown(listening.cancel);
+    test(
+      'the skeleton shows first, then the results — never an empty page',
+      () async {
+        final seen = <StateType>[];
+        final listening = viewModel.stream.listen(
+          (state) => seen.add(state.results.state),
+        );
+        addTearDown(listening.cancel);
 
-      await load();
+        await load();
 
-      expect(seen, [StateType.loading, StateType.success]);
-    });
+        expect(seen, [StateType.loading, StateType.success]);
+      },
+    );
 
-    test('one opening costs a results request and a dashboard one: the '
-        'dashboard is fetched again only to see if the newest is unread', ()
-        async {
-      await load();
+    test(
+      'one opening costs a results request and a dashboard one: the '
+      'dashboard is fetched again only to see if the newest is unread',
+      () async {
+        await load();
 
-      verify(getResults(146)).called(1);
-      // `MarkLatestResultReadUseCase` asks Home's dashboard every time,
-      // even when nothing is new.
-      verify(markLatestRead(146)).called(1);
-    });
+        verify(getResults(146)).called(1);
+        // `MarkLatestResultReadUseCase` asks Home's dashboard every time,
+        // even when nothing is new.
+        verify(markLatestRead(146)).called(1);
+      },
+    );
   });
 
   group('the parent leaves while the school is answering', () {
-    test('nothing is emitted after Results closes, and no error is thrown',
-        () async {
-      final pending = Completer<Result<List<ResultDetailsEntity>>>();
-      when(getResults(146)).thenAnswer((_) => pending.future);
-      final seen = <ResultsState>[];
-      final errors = <Object>[];
-      final listening = viewModel.stream.listen(seen.add, onError: errors.add);
+    test(
+      'nothing is emitted after Results closes, and no error is thrown',
+      () async {
+        final pending = Completer<Result<List<ResultDetailsEntity>>>();
+        when(getResults(146)).thenAnswer((_) => pending.future);
+        final seen = <ResultsState>[];
+        final errors = <Object>[];
+        final listening = viewModel.stream.listen(
+          seen.add,
+          onError: errors.add,
+        );
 
-      unawaited(viewModel.doAction(const LoadResultsEvent(146)));
-      await settle();
-      await viewModel.close();
-      // The school answers after the page is gone.
-      pending.complete(Success(data: allResults));
-      await settle();
+        unawaited(viewModel.doAction(const LoadResultsEvent(146)));
+        await settle();
+        await viewModel.close();
+        // The school answers after the page is gone.
+        pending.complete(Success(data: allResults));
+        await settle();
 
-      expect(errors, isEmpty);
-      expect(seen.map((state) => state.results.state), [StateType.loading]);
-      await listening.cancel();
-    });
+        expect(errors, isEmpty);
+        expect(seen.map((state) => state.results.state), [StateType.loading]);
+        await listening.cancel();
+      },
+    );
 
     test('a refresh answering after it closed is dropped quietly', () async {
       await load();
@@ -155,8 +166,7 @@ void main() {
     });
 
     test('a refresh asked while the first load is still out waits for it, '
-        'then goes once — and the result published meanwhile shows', ()
-        async {
+        'then goes once — and the result published meanwhile shows', () async {
       final pending = Completer<Result<List<ResultDetailsEntity>>>();
       var calls = 0;
       when(getResults(146)).thenAnswer((_) {
@@ -174,8 +184,13 @@ void main() {
       // November is published and the notification arrives right now.
       await viewModel.doAction(const RefreshResultsEvent());
       await settle();
-      expect(calls, 1, reason: 'nothing goes out while the load is in '
-          'flight — it is remembered instead');
+      expect(
+        calls,
+        1,
+        reason:
+            'nothing goes out while the load is in '
+            'flight — it is remembered instead',
+      );
 
       // The first load lands with what the school had before November.
       pending.complete(Success(data: [october, firstTerm]));
@@ -214,8 +229,7 @@ void main() {
       expect(viewModel.state.results.data, allResults);
     });
 
-    test('nothing asked while it loaded: no extra request after it', ()
-        async {
+    test('nothing asked while it loaded: no extra request after it', () async {
       await load();
 
       verify(getResults(146)).called(1);
@@ -269,22 +283,24 @@ void main() {
       verify(getResults(147)).called(1);
     });
 
-    test('Results closed while a refresh is held back: nothing is asked', ()
-        async {
-      final pending = Completer<Result<List<ResultDetailsEntity>>>();
-      when(getResults(146)).thenAnswer((_) => pending.future);
+    test(
+      'Results closed while a refresh is held back: nothing is asked',
+      () async {
+        final pending = Completer<Result<List<ResultDetailsEntity>>>();
+        when(getResults(146)).thenAnswer((_) => pending.future);
 
-      unawaited(viewModel.doAction(const LoadResultsEvent(146)));
-      await settle();
-      await viewModel.doAction(const RefreshResultsEvent());
-      await settle();
-      await viewModel.close();
-      pending.complete(Success(data: allResults));
-      await settle();
+        unawaited(viewModel.doAction(const LoadResultsEvent(146)));
+        await settle();
+        await viewModel.doAction(const RefreshResultsEvent());
+        await settle();
+        await viewModel.close();
+        pending.complete(Success(data: allResults));
+        await settle();
 
-      // Only the first load: the page is gone, so nothing follows it.
-      verify(getResults(146)).called(1);
-    });
+        // Only the first load: the page is gone, so nothing follows it.
+        verify(getResults(146)).called(1);
+      },
+    );
   });
 
   group('another child picked meanwhile', () {
@@ -465,17 +481,19 @@ void main() {
       verifyNever(markLatestRead(any));
     });
 
-    test('every result withdrawn: the empty page, and the pick is let go', ()
-        async {
-      await load();
-      when(getResults(146)).thenAnswer((_) async => const Success(data: []));
+    test(
+      'every result withdrawn: the empty page, and the pick is let go',
+      () async {
+        await load();
+        when(getResults(146)).thenAnswer((_) async => const Success(data: []));
 
-      await viewModel.doAction(const RefreshResultsEvent());
-      await settle();
+        await viewModel.doAction(const RefreshResultsEvent());
+        await settle();
 
-      expect(viewModel.state.results.state, StateType.success);
-      expect(viewModel.state.selected, isNull);
-    });
+        expect(viewModel.state.results.state, StateType.success);
+        expect(viewModel.state.selected, isNull);
+      },
+    );
   });
 
   group('errors', () {
@@ -492,8 +510,7 @@ void main() {
       verifyNever(markLatestRead(any));
     });
 
-    test('a timeout reads as no internet, so "Try again" is offered', ()
-        async {
+    test('a timeout reads as no internet, so "Try again" is offered', () async {
       when(
         getResults(146),
       ).thenAnswer((_) async => const Failure(exception: NetworkException()));
@@ -503,19 +520,18 @@ void main() {
       expect(viewModel.state.results.exception, isA<NetworkException>());
     });
 
-    test('the session ended: the error says so, so "Log in" is offered', ()
-        async {
-      when(getResults(146)).thenAnswer(
-        (_) async => const Failure(exception: UnauthorizedException()),
-      );
+    test(
+      'the session ended: the error says so, so "Log in" is offered',
+      () async {
+        when(getResults(146)).thenAnswer(
+          (_) async => const Failure(exception: UnauthorizedException()),
+        );
 
-      await load();
+        await load();
 
-      expect(
-        viewModel.state.results.exception,
-        isA<UnauthorizedException>(),
-      );
-    });
+        expect(viewModel.state.results.exception, isA<UnauthorizedException>());
+      },
+    );
 
     test('a 500: the error keeps its status for the message', () async {
       when(getResults(146)).thenAnswer(
@@ -530,19 +546,23 @@ void main() {
       expect(viewModel.state.results.exception?.message, 'Server Error');
     });
 
-    test('pulled down after it failed: it loads again, as "Try again"', ()
-        async {
-      when(
-        getResults(146),
-      ).thenAnswer((_) async => const Failure(exception: NetworkException()));
-      await load();
-      when(getResults(146)).thenAnswer((_) async => Success(data: allResults));
+    test(
+      'pulled down after it failed: it loads again, as "Try again"',
+      () async {
+        when(
+          getResults(146),
+        ).thenAnswer((_) async => const Failure(exception: NetworkException()));
+        await load();
+        when(
+          getResults(146),
+        ).thenAnswer((_) async => Success(data: allResults));
 
-      await viewModel.doAction(const RefreshResultsEvent());
-      await settle();
+        await viewModel.doAction(const RefreshResultsEvent());
+        await settle();
 
-      expect(viewModel.state.selected, november);
-    });
+        expect(viewModel.state.selected, november);
+      },
+    );
 
     test('"Try again" while it is already trying: not asked twice', () async {
       when(
@@ -565,26 +585,30 @@ void main() {
   });
 
   group('marking the newest seen', () {
-    test('nothing published: nothing is marked, and no dashboard request', ()
-        async {
-      when(getResults(146)).thenAnswer((_) async => const Success(data: []));
+    test(
+      'nothing published: nothing is marked, and no dashboard request',
+      () async {
+        when(getResults(146)).thenAnswer((_) async => const Success(data: []));
 
-      await load();
+        await load();
 
-      verifyNever(markLatestRead(any));
-    });
+        verifyNever(markLatestRead(any));
+      },
+    );
 
-    test('it fails: the results stay on screen, tried again next time', ()
-        async {
-      when(
-        markLatestRead(any),
-      ).thenAnswer((_) async => const Failure(exception: NetworkException()));
+    test(
+      'it fails: the results stay on screen, tried again next time',
+      () async {
+        when(
+          markLatestRead(any),
+        ).thenAnswer((_) async => const Failure(exception: NetworkException()));
 
-      await load();
+        await load();
 
-      expect(viewModel.state.results.state, StateType.success);
-      expect(viewModel.state.selected, november);
-    });
+        expect(viewModel.state.results.state, StateType.success);
+        expect(viewModel.state.selected, november);
+      },
+    );
 
     test('the same child opened again: not loaded or marked twice', () async {
       await load();
@@ -631,23 +655,27 @@ void main() {
       verify(markLatestRead(147)).called(1);
     });
 
-    test('a result published later: the school is told about that one', ()
-        async {
-      when(
-        getResults(146),
-      ).thenAnswer((_) async => Success(data: [october, firstTerm]));
-      await load();
-      clearInteractions(markLatestRead);
+    test(
+      'a result published later: the school is told about that one',
+      () async {
+        when(
+          getResults(146),
+        ).thenAnswer((_) async => Success(data: [october, firstTerm]));
+        await load();
+        clearInteractions(markLatestRead);
 
-      // November is published while Results is open.
-      when(getResults(146)).thenAnswer((_) async => Success(data: allResults));
-      await viewModel.doAction(const RefreshResultsEvent());
-      await settle();
+        // November is published while Results is open.
+        when(
+          getResults(146),
+        ).thenAnswer((_) async => Success(data: allResults));
+        await viewModel.doAction(const RefreshResultsEvent());
+        await settle();
 
-      // A different result than the one remembered, so it is reported.
-      expect(viewModel.state.selected, november);
-      verify(markLatestRead(146)).called(1);
-    });
+        // A different result than the one remembered, so it is reported.
+        expect(viewModel.state.selected, november);
+        verify(markLatestRead(146)).called(1);
+      },
+    );
 
     test('telling the school failed: it is tried again next time, not '
         'remembered as done', () async {

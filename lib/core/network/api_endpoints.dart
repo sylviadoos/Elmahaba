@@ -21,6 +21,9 @@ abstract final class ApiEndpoints {
   static const String registerComplete = 'mobile/register/complete';
   static const String forgotPassword = 'mobile/forgot-password';
 
+  /// POST: the school texts a code (SMS Misr) — when Firebase can't.
+  static const String otpRequest = 'v1/parent/auth/otp/request';
+
   static const String profile = 'v1/parent/profile';
   static const String profileLanguage = 'v1/parent/profile/language';
 

@@ -7,6 +7,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/complete_register_request_entity.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/register_eligibility_entity.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/auth_event.dart';
@@ -59,7 +60,7 @@ void main() {
   const registration = CompleteRegisterRequestEntity(
     phone: phone,
     password: password,
-    firebaseIdToken: firebaseIdToken,
+    proof: FirebaseProof(firebaseIdToken),
   );
 
   void whenCodeSent([PhoneVerificationEntity sent = codeSent]) => when(
@@ -318,6 +319,100 @@ void main() {
     );
   });
 
+  group('the school sent the code (Firebase could not)', () {
+    const schoolSent = SchoolCodeSent(resendAfter: Duration(seconds: 60));
+
+    void whenSchoolSent() => when(
+      sendOtp(
+        any,
+        resendToken: anyNamed('resendToken'),
+        bySchool: anyNamed('bySchool'),
+      ),
+    ).thenAnswer((_) async => const Success(data: schoolSent));
+
+    blocTest<AuthViewModel, AuthState>(
+      "OtpSent, with the school's wait",
+      setUp: whenSchoolSent,
+      build: build,
+      act: (viewModel) =>
+          viewModel.doAction(const SendOtpEvent(registerRequest)),
+      expect: () => [
+        isLoadingState,
+        isSuccessState(
+          isA<OtpSent>().having(
+            (r) => r.resendAfter,
+            'resendAfter',
+            const Duration(seconds: 60),
+          ),
+        ),
+      ],
+    );
+
+    blocTest<AuthViewModel, AuthState>(
+      'again: straight from the school',
+      setUp: whenSchoolSent,
+      build: build,
+      act: (viewModel) async {
+        await viewModel.doAction(const SendOtpEvent(registerRequest));
+        await viewModel.doAction(const SendOtpEvent(registerRequest));
+      },
+      verify: (_) => verifyInOrder([
+        sendOtp(phone, resendToken: null, bySchool: false),
+        sendOtp(phone, resendToken: null, bySchool: true),
+      ]),
+    );
+
+    blocTest<AuthViewModel, AuthState>(
+      'the typed code goes with the new account, unchecked by Firebase',
+      setUp: () {
+        whenSchoolSent();
+        whenRegistered();
+      },
+      build: build,
+      act: (viewModel) async {
+        await viewModel.doAction(const SendOtpEvent(registerRequest));
+        await viewModel.doAction(
+          const VerifyOtpEvent(registerRequest, '123456'),
+        );
+      },
+      skip: 2,
+      expect: () => [isLoadingState, isSuccessState(isA<Registered>())],
+      verify: (_) {
+        verify(
+          completeRegister(
+            const CompleteRegisterRequestEntity(
+              phone: phone,
+              password: password,
+              proof: SchoolCodeProof('123456'),
+            ),
+          ),
+        ).called(1);
+        verifyZeroInteractions(verifyOtp);
+      },
+    );
+
+    blocTest<AuthViewModel, AuthState>(
+      'forgot password: PhoneVerified with the typed code',
+      setUp: whenSchoolSent,
+      build: build,
+      act: (viewModel) async {
+        await viewModel.doAction(const SendResetCodeEvent(phone));
+        await viewModel.doAction(const VerifyResetCodeEvent('123456'));
+      },
+      skip: 2,
+      expect: () => [
+        isLoadingState,
+        isSuccessState(
+          isA<PhoneVerified>().having(
+            (r) => r.proof,
+            'proof',
+            const SchoolCodeProof('123456'),
+          ),
+        ),
+      ],
+    );
+  });
+
   group('SendResetCodeEvent', () {
     blocTest<AuthViewModel, AuthState>(
       'the code was sent: OtpSent',
@@ -338,9 +433,9 @@ void main() {
         isLoadingState,
         isSuccessState(
           isA<PhoneVerified>().having(
-            (r) => r.firebaseIdToken,
-            'firebaseIdToken',
-            firebaseIdToken,
+            (r) => r.proof,
+            'proof',
+            const FirebaseProof(firebaseIdToken),
           ),
         ),
       ],
@@ -367,9 +462,9 @@ void main() {
         isLoadingState,
         isSuccessState(
           isA<PhoneVerified>().having(
-            (r) => r.firebaseIdToken,
-            'firebaseIdToken',
-            firebaseIdToken,
+            (r) => r.proof,
+            'proof',
+            const FirebaseProof(firebaseIdToken),
           ),
         ),
       ],

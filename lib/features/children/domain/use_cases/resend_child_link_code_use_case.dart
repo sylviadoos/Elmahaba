@@ -4,7 +4,8 @@ import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/repos/children_repo.dart';
 
-/// Texts the code for linking a child again:
+/// Has the school text the code for linking a child — again, or instead
+/// of Firebase:
 /// `final result = await resendChildLinkCode(verification.token);`
 @lazySingleton
 class ResendChildLinkCodeUseCase {

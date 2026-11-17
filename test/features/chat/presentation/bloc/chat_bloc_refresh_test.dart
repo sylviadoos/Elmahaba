@@ -114,8 +114,7 @@ void main() {
 
     blocTest<ChatBloc, ChatState>(
       'the session ended: the error says so, so the page can offer "Log in"',
-      setUp: () =>
-          fullPageFails(omar.studentId, const UnauthorizedException()),
+      setUp: () => fullPageFails(omar.studentId, const UnauthorizedException()),
       build: build,
       act: (bloc) =>
           bloc.add(const ChildrenChangedIntent([omar], isLoading: false)),
@@ -163,13 +162,12 @@ void main() {
     test('the request is stopped and nothing is emitted after', () async {
       final cancels = <CancelHandle>[];
       final answer = Completer<Result<ChatPageEntity>>();
-      when(getChat(studentId: omar.studentId, cancel: anyNamed('cancel')))
-          .thenAnswer((invocation) {
-            cancels.add(
-              invocation.namedArguments[#cancel] as CancelHandle,
-            );
-            return answer.future;
-          });
+      when(
+        getChat(studentId: omar.studentId, cancel: anyNamed('cancel')),
+      ).thenAnswer((invocation) {
+        cancels.add(invocation.namedArguments[#cancel] as CancelHandle);
+        return answer.future;
+      });
       final bloc = build();
       final states = <ChatState>[];
       bloc.stream.listen(states.add);
@@ -251,7 +249,7 @@ void main() {
       await bloc.close();
     });
 
-    test('while older items load: nothing asked, and nothing waits', () async {
+    test('while older items load: it waits for them, then asks', () async {
       final older = Completer<Result<ChatPageEntity>>();
       final bloc = build();
       await openOn(
@@ -283,8 +281,100 @@ void main() {
       );
       older.complete(Success(data: chatPage([])));
       await Future<void>.delayed(Duration.zero);
-      // The news never arrives: the refresh was dropped, not queued.
+      await Future<void>.delayed(Duration.zero);
+
+      // Once the older ones are in, the news the parent was told about.
+      verify(
+        getChat(
+          studentId: omar.studentId,
+          limit: 5,
+          cancel: anyNamed('cancel'),
+        ),
+      ).called(1);
+      expect(bloc.state.page?.items, [omarItem, newest]);
+      await bloc.close();
+    });
+
+    test('older items didn\'t load: the news still waits, and comes with '
+        'the next try', () async {
+      final older = Completer<Result<ChatPageEntity>>();
+      final bloc = build();
+      await openOn(
+        bloc,
+        chatPage([omarItem], hasMore: true, nextBefore: 'cursor-1'),
+      );
+      when(
+        getChat(
+          studentId: omar.studentId,
+          before: 'cursor-1',
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) async => older.future);
+      latestFew(omar.studentId, chatPage([newest]));
+
+      bloc.add(const LoadOlderChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const RefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      older.complete(const Failure(exception: NetworkException()));
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      // Nothing was asked over a chat still showing why it didn't load.
+      expect(bloc.state.chat.state, StateType.error);
       expect(bloc.state.page?.items, [omarItem]);
+
+      when(
+        getChat(
+          studentId: omar.studentId,
+          before: 'cursor-1',
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) async => Success(data: chatPage([])));
+      bloc.add(const LoadOlderChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(bloc.state.page?.items, [omarItem, newest]);
+      await bloc.close();
+    });
+
+    test('another child picked while it refreshes: stopped, and the next '
+        'one isn\'t held back', () async {
+      final slow = Completer<Result<ChatPageEntity>>();
+      final bloc = build();
+      await openOn(bloc, chatPage([omarItem]));
+      when(
+        getChat(
+          studentId: omar.studentId,
+          limit: 5,
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) async => slow.future);
+      fullPage(lina.studentId, chatPage([linaItem]));
+      latestFew(lina.studentId, chatPage([linaItem]));
+
+      bloc.add(const RefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(ShowChildChatIntent(lina.studentId));
+      await Future<void>.delayed(Duration.zero);
+      // Omar's refresh comes back late, over Lina's chat.
+      slow.complete(Success(data: chatPage([newest])));
+      await Future<void>.delayed(Duration.zero);
+
+      // It brought nothing to Lina's chat…
+      expect(bloc.state.studentId, lina.studentId);
+      expect(bloc.state.page?.items, [linaItem]);
+      // …and left nothing behind that would drop Lina's own refresh.
+      bloc.add(const RefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      verify(
+        getChat(
+          studentId: lina.studentId,
+          limit: 5,
+          cancel: anyNamed('cancel'),
+        ),
+      ).called(1);
       await bloc.close();
     });
 
@@ -477,12 +567,8 @@ void main() {
       // It is read on screen for Lina too, not left "new" forever.
       expect(bloc.state.page?.items.single.isRead, isTrue);
 
-      verify(
-        markRead([both.key], studentId: omar.studentId),
-      ).called(1);
-      verify(
-        markRead([both.key], studentId: lina.studentId),
-      ).called(1);
+      verify(markRead([both.key], studentId: omar.studentId)).called(1);
+      verify(markRead([both.key], studentId: lina.studentId)).called(1);
       await bloc.close();
     });
   });

@@ -67,16 +67,19 @@ void main() {
     void answer(Object? json) =>
         when(api.get(path)).thenAnswer((_) async => json);
 
-    test('asks for the child\'s dashboard, reads the school\'s answer', () async {
-      answer({'status': 'success', 'data': dashboardJson});
+    test(
+      'asks for the child\'s dashboard, reads the school\'s answer',
+      () async {
+        answer({'status': 'success', 'data': dashboardJson});
 
-      final dashboard = await dataSource.getChildDashboard(childId);
+        final dashboard = await dataSource.getChildDashboard(childId);
 
-      expect(dashboard.child?.studentId, 9);
-      expect(dashboard.attendance.presentDays, 3);
-      expect(dashboard.messages.total, 0);
-      verify(api.get(path)).called(1);
-    });
+        expect(dashboard.child?.studentId, 9);
+        expect(dashboard.attendance.presentDays, 3);
+        expect(dashboard.messages.total, 0);
+        verify(api.get(path)).called(1);
+      },
+    );
 
     test('an empty data object: nothing yet, not an error', () async {
       answer(const {'status': 'success', 'data': <String, dynamic>{}});
@@ -133,9 +136,9 @@ void main() {
     });
 
     test('the server\'s error is passed on as it is', () async {
-      when(api.get(path)).thenThrow(
-        const ServerException(statusCode: StatusCode.forbidden),
-      );
+      when(
+        api.get(path),
+      ).thenThrow(const ServerException(statusCode: StatusCode.forbidden));
 
       expect(
         () => dataSource.getChildDashboard(childId),
@@ -204,18 +207,20 @@ void main() {
       expect((exception as UnauthorizedException).isAccountWithdrawn, isFalse);
     });
 
-    test('403 account_withdrawn: the account is closed, not the session',
-        () async {
-      final exception = await thrownBy(
-        _StubAdapter(
-          statusCode: StatusCode.forbidden,
-          body: const {'code': 'account_withdrawn', 'message': 'Withdrawn'},
-        ),
-      );
+    test(
+      '403 account_withdrawn: the account is closed, not the session',
+      () async {
+        final exception = await thrownBy(
+          _StubAdapter(
+            statusCode: StatusCode.forbidden,
+            body: const {'code': 'account_withdrawn', 'message': 'Withdrawn'},
+          ),
+        );
 
-      expect(exception, isA<UnauthorizedException>());
-      expect((exception as UnauthorizedException).isAccountWithdrawn, isTrue);
-    });
+        expect(exception, isA<UnauthorizedException>());
+        expect((exception as UnauthorizedException).isAccountWithdrawn, isTrue);
+      },
+    );
 
     test('500 with an HTML body: still a ServerException', () async {
       final exception = await thrownBy(
@@ -285,8 +290,10 @@ void main() {
     test('cancelled (the parent left Home): CancelledException', () async {
       final exception = await thrownBy(
         _StubAdapter(
-          error: (options) =>
-              DioException.requestCancelled(requestOptions: options, reason: null),
+          error: (options) => DioException.requestCancelled(
+            requestOptions: options,
+            reason: null,
+          ),
         ),
       );
 

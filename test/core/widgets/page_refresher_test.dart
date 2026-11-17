@@ -49,6 +49,9 @@ void main() {
           ),
         ),
         GoRoute(path: '/other', builder: (_, _) => const Text('other')),
+        // A piece of the page itself, opened over it: a photo from the
+        // chat, a certificate from the results.
+        GoRoute(path: '/page/photo', builder: (_, _) => const Text('photo')),
       ],
     );
     addTearDown(router.dispose);
@@ -74,6 +77,23 @@ void main() {
 
     router.pop();
     await tester.pumpAndSettle();
+    expect(refreshes, 1);
+  });
+
+  testWidgets('a piece of the page over it: nothing to ask on the way '
+      'back, and a notification still reaches it', (tester) async {
+    await pump(tester);
+
+    unawaited(router.push('/page/photo'));
+    await tester.pumpAndSettle();
+    // Still looking at this page, so the push is for it.
+    pushes.received.add({'type': 'chat'});
+    await tester.pump();
+    expect(refreshes, 1);
+
+    router.pop();
+    await tester.pumpAndSettle();
+    // Closing the photo changed nothing at school: nothing asked again.
     expect(refreshes, 1);
   });
 

@@ -386,7 +386,8 @@ void reviewScenarios() {
   );
 
   /// Lets every pending microtask run.
-  Future<void> settle() => Future<void>.delayed(const Duration(milliseconds: 5));
+  Future<void> settle() =>
+      Future<void>.delayed(const Duration(milliseconds: 5));
 
   group('the school doesn\'t answer', () {
     blocTest<HomeBloc, HomeState>(
@@ -407,9 +408,9 @@ void reviewScenarios() {
 
     blocTest<HomeBloc, HomeState>(
       'it timed out: the same as no internet, so "Try again" is offered',
-      setUp: () => when(getDashboard(1)).thenAnswer(
-        (_) async => const Failure(exception: NetworkException()),
-      ),
+      setUp: () => when(
+        getDashboard(1),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException())),
       build: build,
       act: (bloc) => bloc.add(const ShowChildIntent(1)),
       verify: (bloc) =>
@@ -446,8 +447,9 @@ void reviewScenarios() {
 
   blocTest<HomeBloc, HomeState>(
     'a child with nothing yet: an empty dashboard is shown, not an error',
-    setUp: () =>
-        when(getDashboard(1)).thenAnswer((_) async => Success(data: nothingYet)),
+    setUp: () => when(
+      getDashboard(1),
+    ).thenAnswer((_) async => Success(data: nothingYet)),
     build: build,
     act: (bloc) => bloc.add(const ShowChildIntent(1)),
     expect: () => [
@@ -479,7 +481,9 @@ void reviewScenarios() {
     await settle();
 
     expect(errors, isEmpty);
-    expect(states, [const HomeState(childId: 1, dashboard: BaseState.loading())]);
+    expect(states, [
+      const HomeState(childId: 1, dashboard: BaseState.loading()),
+    ]);
     await subscription.cancel();
   });
 
@@ -541,32 +545,34 @@ void reviewScenarios() {
     await bloc.close();
   });
 
-  test('another child picked while the first was still loading: the first '
-      'answer is dropped, and so is the refresh that was waiting on it', ()
-      async {
-    final pending = Completer<Result<ChildDashboardEntity>>();
-    when(getDashboard(1)).thenAnswer((_) => pending.future);
-    when(getDashboard(2)).thenAnswer((_) async => Success(data: other));
-    final bloc = build();
+  test(
+    'another child picked while the first was still loading: the first '
+    'answer is dropped, and so is the refresh that was waiting on it',
+    () async {
+      final pending = Completer<Result<ChildDashboardEntity>>();
+      when(getDashboard(1)).thenAnswer((_) => pending.future);
+      when(getDashboard(2)).thenAnswer((_) async => Success(data: other));
+      final bloc = build();
 
-    bloc.add(const ShowChildIntent(1));
-    await settle();
-    // A notification arrives while child 1 is loading.
-    bloc.add(const RefreshHomeIntent());
-    await settle();
-    // The parent picks child 2 instead.
-    bloc.add(const ShowChildIntent(2));
-    await settle();
-    pending.complete(Success(data: first));
-    await settle();
+      bloc.add(const ShowChildIntent(1));
+      await settle();
+      // A notification arrives while child 1 is loading.
+      bloc.add(const RefreshHomeIntent());
+      await settle();
+      // The parent picks child 2 instead.
+      bloc.add(const ShowChildIntent(2));
+      await settle();
+      pending.complete(Success(data: first));
+      await settle();
 
-    expect(bloc.state.childId, 2);
-    expect(bloc.state.dashboard.data, other);
-    // The refresh asked for child 1 is not spent on child 2: their
-    // dashboard is asked for once, by the load that replaced it.
-    verify(getDashboard(2)).called(1);
-    await bloc.close();
-  });
+      expect(bloc.state.childId, 2);
+      expect(bloc.state.dashboard.data, other);
+      // The refresh asked for child 1 is not spent on child 2: their
+      // dashboard is asked for once, by the load that replaced it.
+      verify(getDashboard(2)).called(1);
+      await bloc.close();
+    },
+  );
 
   test('a read confirmed after Home closed: nothing is asked', () async {
     when(getDashboard(1)).thenAnswer((_) async => Success(data: first));

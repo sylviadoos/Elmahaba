@@ -21,6 +21,11 @@ extension VerificationMessage on AppException {
         code: AuthErrorCodes.tooManyRequests || AuthErrorCodes.quotaExceeded,
       ) =>
         l10n.tooManyAttempts,
+      PhoneVerificationException(code: AuthErrorCodes.invalidPhoneNumber) =>
+        l10n.invalidPhoneNumber,
+      PhoneVerificationException(:final code)
+          when AuthErrorCodes.codeNotSent.contains(code) =>
+        l10n.codeSendFailed,
       _ => localizedMessage(context),
     };
   }

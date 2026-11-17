@@ -75,8 +75,7 @@ class _HomeViewState extends State<_HomeView> {
     // child to ask about, or none asked for yet. Waiting on a state that
     // never comes would leave the indicator spinning for good.
     final state = bloc.state;
-    if (state.childId == null ||
-        state.dashboard.state == StateType.initial) {
+    if (state.childId == null || state.dashboard.state == StateType.initial) {
       return;
     }
     bloc.add(const RefreshHomeIntent());

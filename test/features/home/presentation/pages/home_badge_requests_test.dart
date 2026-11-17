@@ -179,9 +179,7 @@ void main() {
   });
 
   testWidgets('a notification while another page covers Home: still asked '
-      'once, by the badge — the skip must not reach this far', (
-    tester,
-  ) async {
+      'once, by the badge — the skip must not reach this far', (tester) async {
     await pumpApp(tester);
     router.push(AppRoutes.settings);
     await tester.pumpAndSettle();

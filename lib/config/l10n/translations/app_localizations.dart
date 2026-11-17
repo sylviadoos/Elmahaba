@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @noInternet.
   ///
   /// In en, this message translates to:
-  /// **'No internet connection!'**
+  /// **'No internet connection. Check your connection and try again.'**
   String get noInternet;
 
   /// No description provided for @cancelled.
@@ -191,19 +191,19 @@ abstract class AppLocalizations {
   /// No description provided for @unknown.
   ///
   /// In en, this message translates to:
-  /// **'An unexpected error occurred while connecting to the server, please try again later!'**
+  /// **'Something went wrong. Please try again.'**
   String get unknown;
 
   /// No description provided for @serverError.
   ///
   /// In en, this message translates to:
-  /// **'Server error, please try again later!'**
+  /// **'Something went wrong on our side. Please try again in a few minutes.'**
   String get serverError;
 
   /// No description provided for @unexpectedError.
   ///
   /// In en, this message translates to:
-  /// **'An unexpected error occurred'**
+  /// **'Something went wrong. Please try again.'**
   String get unexpectedError;
 
   /// No description provided for @expiredToken.
@@ -1037,7 +1037,7 @@ abstract class AppLocalizations {
   /// No description provided for @otpWrongCode.
   ///
   /// In en, this message translates to:
-  /// **'That code isn’t right. Check the SMS and try again.'**
+  /// **'That code isn’t right. Check the latest SMS and try again.'**
   String get otpWrongCode;
 
   /// No description provided for @otpExpired.
@@ -1049,7 +1049,7 @@ abstract class AppLocalizations {
   /// No description provided for @tooManyAttempts.
   ///
   /// In en, this message translates to:
-  /// **'Too many attempts. Please try again later.'**
+  /// **'Too many tries. Please wait a few minutes, then try again.'**
   String get tooManyAttempts;
 
   /// No description provided for @agreePrefix.
@@ -3283,6 +3283,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done'**
   String get done;
+
+  /// No description provided for @appUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The parents app is paused by the school for now. Please try again later.'**
+  String get appUnavailable;
+
+  /// No description provided for @codeSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn’t send the code right now. Please try again in a moment.'**
+  String get codeSendFailed;
+
+  /// No description provided for @invalidPhoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'This mobile number doesn’t look right. Check it and try again.'**
+  String get invalidPhoneNumber;
 }
 
 class _AppLocalizationsDelegate

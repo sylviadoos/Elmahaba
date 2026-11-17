@@ -80,6 +80,10 @@ import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verifica
     as _i1016;
 import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source_impl.dart'
     as _i988;
+import 'package:al_mahhaba_school/features/auth/data/data_sources/school_otp_data_source.dart'
+    as _i463;
+import 'package:al_mahhaba_school/features/auth/data/data_sources/school_otp_data_source_impl.dart'
+    as _i374;
 import 'package:al_mahhaba_school/features/auth/data/repos/auth_repo_impl.dart'
     as _i1022;
 import 'package:al_mahhaba_school/features/auth/domain/repos/auth_repo.dart'
@@ -162,6 +166,8 @@ import 'package:al_mahhaba_school/features/children/domain/use_cases/link_child_
     as _i528;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/resend_child_link_code_use_case.dart'
     as _i225;
+import 'package:al_mahhaba_school/features/children/domain/use_cases/send_child_link_code_use_case.dart'
+    as _i1049;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/verify_child_link_use_case.dart'
     as _i1004;
 import 'package:al_mahhaba_school/features/children/presentation/view_model/child_details_view_model.dart'
@@ -453,6 +459,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i438.ApiService>(instanceName: 'schoolApi'),
       ),
     );
+    gh.lazySingleton<_i463.SchoolOtpDataSource>(
+      () => _i374.SchoolOtpDataSourceImpl(
+        gh<_i438.ApiService>(instanceName: 'schoolApi'),
+      ),
+    );
     gh.lazySingleton<_i257.AttendanceRemoteDataSource>(
       () => _i110.AttendanceRemoteDataSourceImpl(
         gh<_i438.ApiService>(instanceName: 'schoolApi'),
@@ -504,15 +515,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1051.ComplaintsRepo>(
       () => _i469.ComplaintsRepoImpl(gh<_i663.ComplaintsRemoteDataSource>()),
     );
-    gh.lazySingleton<_i947.AuthRepo>(
-      () => _i1022.AuthRepoImpl(
-        gh<_i55.AuthRemoteDataSource>(),
-        gh<_i682.AuthLocalDataSource>(),
-        gh<_i1016.PhoneVerificationDataSource>(),
-        gh<_i1049.ChildrenLocalDataSource>(),
-        gh<_i694.ChatLocalDataSource>(),
-      ),
-    );
     gh.lazySingleton<_i647.AnnouncementsRemoteDataSource>(
       () => _i316.AnnouncementsRemoteDataSourceImpl(
         gh<_i438.ApiService>(instanceName: 'schoolApi'),
@@ -521,12 +523,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i990.FeesRepo>(
       () => _i793.FeesRepoImpl(gh<_i251.FeesRemoteDataSource>()),
     );
-    gh.lazySingleton<_i668.ChildrenRepo>(
-      () => _i850.ChildrenRepoImpl(
-        gh<_i279.ChildrenRemoteDataSource>(),
-        gh<_i1049.ChildrenLocalDataSource>(),
-      ),
-    );
     gh.lazySingleton<_i503.HomeRemoteDataSource>(
       () => _i510.HomeRemoteDataSourceImpl(
         gh<_i438.ApiService>(instanceName: 'schoolApi'),
@@ -534,6 +530,16 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i218.GetResultsUseCase>(
       () => _i218.GetResultsUseCase(gh<_i828.ResultsRepo>()),
+    );
+    gh.lazySingleton<_i947.AuthRepo>(
+      () => _i1022.AuthRepoImpl(
+        gh<_i55.AuthRemoteDataSource>(),
+        gh<_i682.AuthLocalDataSource>(),
+        gh<_i1016.PhoneVerificationDataSource>(),
+        gh<_i463.SchoolOtpDataSource>(),
+        gh<_i1049.ChildrenLocalDataSource>(),
+        gh<_i694.ChatLocalDataSource>(),
+      ),
     );
     gh.lazySingleton<_i816.NewsRemoteDataSource>(
       () => _i51.NewsRemoteDataSourceImpl(
@@ -601,24 +607,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i113.GetNewsUseCase>(
       () => _i113.GetNewsUseCase(gh<_i1024.NewsRepo>()),
     );
-    gh.lazySingleton<_i378.GetChildDetailsUseCase>(
-      () => _i378.GetChildDetailsUseCase(gh<_i668.ChildrenRepo>()),
-    );
-    gh.lazySingleton<_i760.GetChildrenUseCase>(
-      () => _i760.GetChildrenUseCase(gh<_i668.ChildrenRepo>()),
-    );
-    gh.lazySingleton<_i449.GetSavedChildrenUseCase>(
-      () => _i449.GetSavedChildrenUseCase(gh<_i668.ChildrenRepo>()),
-    );
-    gh.lazySingleton<_i528.LinkChildUseCase>(
-      () => _i528.LinkChildUseCase(gh<_i668.ChildrenRepo>()),
-    );
-    gh.lazySingleton<_i225.ResendChildLinkCodeUseCase>(
-      () => _i225.ResendChildLinkCodeUseCase(gh<_i668.ChildrenRepo>()),
-    );
-    gh.lazySingleton<_i1004.VerifyChildLinkUseCase>(
-      () => _i1004.VerifyChildLinkUseCase(gh<_i668.ChildrenRepo>()),
-    );
     gh.lazySingleton<_i380.ExcusesRemoteDataSource>(
       () => _i859.ExcusesRemoteDataSourceImpl(
         gh<_i438.ApiService>(instanceName: 'schoolApi'),
@@ -668,12 +656,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i520.VerifyOtpUseCase>(
       () => _i520.VerifyOtpUseCase(gh<_i947.AuthRepo>()),
     );
-    gh.factory<_i960.LinkChildCodeViewModel>(
-      () => _i960.LinkChildCodeViewModel(
-        gh<_i1004.VerifyChildLinkUseCase>(),
-        gh<_i225.ResendChildLinkCodeUseCase>(),
-      ),
-    );
     gh.lazySingleton<_i329.GetContactInfoUseCase>(
       () => _i329.GetContactInfoUseCase(gh<_i82.ContactRepo>()),
     );
@@ -683,6 +665,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i796.ContactMessageViewModel>(
       () =>
           _i796.ContactMessageViewModel(gh<_i794.SendContactMessageUseCase>()),
+    );
+    gh.lazySingleton<_i668.ChildrenRepo>(
+      () => _i850.ChildrenRepoImpl(
+        gh<_i279.ChildrenRemoteDataSource>(),
+        gh<_i1049.ChildrenLocalDataSource>(),
+        gh<_i1016.PhoneVerificationDataSource>(),
+      ),
     );
     gh.factory<_i484.NewsViewModel>(
       () => _i484.NewsViewModel(gh<_i113.GetNewsUseCase>()),
@@ -737,9 +726,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i443.AppStatusRepo>(
       () => _i2.AppStatusRepoImpl(gh<_i640.AppStatusRemoteDataSource>()),
     );
-    gh.factory<_i567.ChildDetailsViewModel>(
-      () => _i567.ChildDetailsViewModel(gh<_i378.GetChildDetailsUseCase>()),
-    );
     gh.factory<_i669.MyComplaintsViewModel>(
       () => _i669.MyComplaintsViewModel(gh<_i294.GetComplaintsUseCase>()),
     );
@@ -782,12 +768,26 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i383.SendComplaintUseCase>(),
       ),
     );
-    gh.factory<_i875.ChildrenViewModel>(
-      () => _i875.ChildrenViewModel(
-        gh<_i449.GetSavedChildrenUseCase>(),
-        gh<_i760.GetChildrenUseCase>(),
-        gh<_i528.LinkChildUseCase>(),
-      ),
+    gh.lazySingleton<_i378.GetChildDetailsUseCase>(
+      () => _i378.GetChildDetailsUseCase(gh<_i668.ChildrenRepo>()),
+    );
+    gh.lazySingleton<_i760.GetChildrenUseCase>(
+      () => _i760.GetChildrenUseCase(gh<_i668.ChildrenRepo>()),
+    );
+    gh.lazySingleton<_i449.GetSavedChildrenUseCase>(
+      () => _i449.GetSavedChildrenUseCase(gh<_i668.ChildrenRepo>()),
+    );
+    gh.lazySingleton<_i528.LinkChildUseCase>(
+      () => _i528.LinkChildUseCase(gh<_i668.ChildrenRepo>()),
+    );
+    gh.lazySingleton<_i225.ResendChildLinkCodeUseCase>(
+      () => _i225.ResendChildLinkCodeUseCase(gh<_i668.ChildrenRepo>()),
+    );
+    gh.lazySingleton<_i1049.SendChildLinkCodeUseCase>(
+      () => _i1049.SendChildLinkCodeUseCase(gh<_i668.ChildrenRepo>()),
+    );
+    gh.lazySingleton<_i1004.VerifyChildLinkUseCase>(
+      () => _i1004.VerifyChildLinkUseCase(gh<_i668.ChildrenRepo>()),
     );
     gh.factory<_i210.ContactViewModel>(
       () => _i210.ContactViewModel(gh<_i329.GetContactInfoUseCase>()),
@@ -858,6 +858,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i64.GetExcusableAbsencesUseCase>(),
       ),
     );
+    gh.factory<_i567.ChildDetailsViewModel>(
+      () => _i567.ChildDetailsViewModel(gh<_i378.GetChildDetailsUseCase>()),
+    );
     gh.factory<_i691.ExcuseDetailsViewModel>(
       () => _i691.ExcuseDetailsViewModel(
         gh<_i100.GetExcuseDetailsUseCase>(),
@@ -868,6 +871,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i437.AppStatusBloc>(
       () => _i437.AppStatusBloc(gh<_i23.GetAppStatusUseCase>()),
+    );
+    gh.factory<_i960.LinkChildCodeViewModel>(
+      () => _i960.LinkChildCodeViewModel(
+        gh<_i1004.VerifyChildLinkUseCase>(),
+        gh<_i1049.SendChildLinkCodeUseCase>(),
+        gh<_i225.ResendChildLinkCodeUseCase>(),
+        gh<_i520.VerifyOtpUseCase>(),
+      ),
     );
     gh.factory<_i341.AnnouncementsBloc>(
       () => _i341.AnnouncementsBloc(
@@ -883,6 +894,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i25.MarkChatReadUseCase>(),
         gh<_i778.DownloadChatAttachmentUseCase>(),
         gh<_i165.PreviewChatAttachmentUseCase>(),
+      ),
+    );
+    gh.factory<_i875.ChildrenViewModel>(
+      () => _i875.ChildrenViewModel(
+        gh<_i449.GetSavedChildrenUseCase>(),
+        gh<_i760.GetChildrenUseCase>(),
+        gh<_i528.LinkChildUseCase>(),
       ),
     );
     gh.factory<_i530.ChatUnreadBloc>(

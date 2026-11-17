@@ -10,6 +10,7 @@ import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/complete_register_request_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/otp_page.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 
 import '../../../../helpers/form_helpers.dart';
 import '../../auth_fixtures.dart';
@@ -25,7 +26,7 @@ void main() {
   const registration = CompleteRegisterRequestEntity(
     phone: phone,
     password: password,
-    firebaseIdToken: firebaseIdToken,
+    proof: FirebaseProof(firebaseIdToken),
   );
 
   void whenCodeSent([

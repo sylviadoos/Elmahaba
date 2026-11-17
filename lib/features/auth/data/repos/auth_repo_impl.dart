@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/base/result.dart';
@@ -5,6 +6,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/auth_local_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source.dart';
+import 'package:al_mahhaba_school/features/auth/data/data_sources/school_otp_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/auth_session_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/change_password_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/complete_register_request_model.dart';
@@ -32,6 +34,7 @@ class AuthRepoImpl implements AuthRepo {
     this._remoteDataSource,
     this._localDataSource,
     this._phoneVerification,
+    this._schoolOtp,
     this._childrenLocalDataSource,
     this._chatLocalDataSource,
   );
@@ -39,6 +42,9 @@ class AuthRepoImpl implements AuthRepo {
   final AuthRemoteDataSource _remoteDataSource;
   final AuthLocalDataSource _localDataSource;
   final PhoneVerificationDataSource _phoneVerification;
+
+  /// Sends the code when Firebase can't.
+  final SchoolOtpDataSource _schoolOtp;
 
   /// The session's children are saved and forgotten with it.
   final ChildrenLocalDataSource _childrenLocalDataSource;
@@ -70,9 +76,20 @@ class AuthRepoImpl implements AuthRepo {
   Future<Result<PhoneVerificationEntity>> sendOtp(
     String phone, {
     int? resendToken,
-  }) => Result.guard(
-    () => _phoneVerification.sendCode(phone, resendToken: resendToken),
-  );
+    bool bySchool = false,
+  }) => Result.guard(() async {
+    if (bySchool) return _schoolOtp.sendCode(phone);
+    try {
+      return await _phoneVerification.sendCode(phone, resendToken: resendToken);
+    } on AppException catch (error) {
+      // Firebase couldn't send it (blocked, out of quota, set up wrong…):
+      // the school texts its own code instead. If that fails too, its
+      // error is the one shown — it's the last word, and in the app's
+      // language.
+      debugPrint('Firebase sent no code ($error): the school sends one.');
+      return _schoolOtp.sendCode(phone);
+    }
+  });
 
   @override
   Future<Result<String>> verifyOtp({

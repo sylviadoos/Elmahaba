@@ -1,6 +1,9 @@
 import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/base/result.dart';
+import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart';
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/children/data/models/link_child_request_model.dart';
@@ -13,10 +16,17 @@ import 'package:al_mahhaba_school/features/children/domain/repos/children_repo.d
 
 @LazySingleton(as: ChildrenRepo)
 class ChildrenRepoImpl implements ChildrenRepo {
-  ChildrenRepoImpl(this._remoteDataSource, this._localDataSource);
+  ChildrenRepoImpl(
+    this._remoteDataSource,
+    this._localDataSource,
+    this._phoneVerification,
+  );
 
   final ChildrenRemoteDataSource _remoteDataSource;
   final ChildrenLocalDataSource _localDataSource;
+
+  /// Firebase: sends the linking code to the school's number for the child.
+  final PhoneVerificationDataSource _phoneVerification;
 
   @override
   Future<List<ChildEntity>> getSavedChildren() =>
@@ -47,15 +57,29 @@ class ChildrenRepoImpl implements ChildrenRepo {
   @override
   Future<Result<ChildEntity>> verifyChildLink({
     required String token,
-    required String code,
+    required PhoneProofEntity proof,
   }) => Result.guard(() async {
     final child = await _remoteDataSource.verifyChildLink(
       token: token,
-      code: code,
+      proof: proof,
     );
     await _save(child);
+    if (proof is FirebaseProof) {
+      // Firebase only proved the number (another parent's): the app's own
+      // session is the school's. The child is linked either way, so a
+      // failed sign-out is ignored.
+      await _phoneVerification.signOut().catchError((Object _) {});
+    }
     return child;
   });
+
+  @override
+  Future<Result<PhoneVerificationEntity>> sendChildLinkCode(
+    String phone, {
+    int? resendToken,
+  }) => Result.guard(
+    () => _phoneVerification.sendCode(phone, resendToken: resendToken),
+  );
 
   @override
   Future<Result<LinkVerificationEntity>> resendChildLinkCode(String token) =>

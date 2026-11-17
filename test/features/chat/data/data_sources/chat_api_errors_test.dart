@@ -152,10 +152,10 @@ void main() {
       expect(page.nextBefore, 'cursor-1');
       expect(page.unread, 3);
       expect(page.canSend, isTrue);
-      expect(
-        adapter.requests.single.queryParameters,
-        {'limit': 30, 'student_id': 1208},
-      );
+      expect(adapter.requests.single.queryParameters, {
+        'limit': 30,
+        'student_id': 1208,
+      });
     });
 
     test('nothing yet: an empty chat, not an error', () async {
@@ -210,10 +210,7 @@ void main() {
 
     test('"has_more" without a cursor: no more to ask for', () async {
       final page = await sourceAnswering(
-        chatBody(
-          [itemBody()],
-          meta: {'has_more': true, 'next_before': null},
-        ),
+        chatBody([itemBody()], meta: {'has_more': true, 'next_before': null}),
       ).getChat();
 
       expect(page.hasMore, isFalse);
@@ -242,7 +239,8 @@ void main() {
       );
     });
 
-    test('a message sent back without its item: an error, not null', () async {
+    test('a message sent back without its item: the school is at fault, '
+        'not "unknown"', () async {
       Object? error;
       try {
         await sourceAnswering({
@@ -253,7 +251,10 @@ void main() {
         error = e;
       }
 
-      expect(error, isA<TypeError>());
+      // The parent is told the school had trouble, not that something
+      // unknown happened; the whole answer is kept to report.
+      expect(error, isA<ServerException>());
+      expect((error! as ServerException).body['code'], 'message_sent');
     });
   });
 

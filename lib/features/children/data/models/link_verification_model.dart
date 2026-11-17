@@ -9,11 +9,13 @@ class LinkVerificationModel extends LinkVerificationEntity {
     required super.expiresIn,
     required super.resendAfter,
     required super.resendsLeft,
+    super.phone,
   });
 
   /// { "verification_token": "9b1f4c2e-…", "masked_phone": "••• ••• 4567",
   ///   "relationship": "father", "expires_in": 300, "resend_after": 60,
-  ///   "resends_left": 3 } — times in seconds.
+  ///   "resends_left": 3, "phone": "01012345678" } — times in seconds;
+  ///   `phone` only when the school leaves sending the code to Firebase.
   factory LinkVerificationModel.fromJson(Map<String, dynamic> json) =>
       LinkVerificationModel(
         token: jsonText(json['verification_token']),
@@ -22,6 +24,7 @@ class LinkVerificationModel extends LinkVerificationEntity {
         expiresIn: _seconds(json['expires_in']),
         resendAfter: _seconds(json['resend_after']),
         resendsLeft: jsonDouble(json['resends_left'])?.toInt() ?? 0,
+        phone: jsonTextOrNull(json['phone']),
       );
 
   static Duration _seconds(Object? value) =>

@@ -58,15 +58,15 @@ void main() {
     );
   });
 
-  test('an answer it couldn\'t read: an unknown failure, not a crash',
-      () async {
-    when(
-      remoteDataSource.getChildDashboard(any),
-    ).thenThrow(TypeError());
+  test(
+    'an answer it couldn\'t read: an unknown failure, not a crash',
+    () async {
+      when(remoteDataSource.getChildDashboard(any)).thenThrow(TypeError());
 
-    expect(
-      await repo.getChildDashboard(childId),
-      isFailure<UnknownException>(),
-    );
-  });
+      expect(
+        await repo.getChildDashboard(childId),
+        isFailure<UnknownException>(),
+      );
+    },
+  );
 }

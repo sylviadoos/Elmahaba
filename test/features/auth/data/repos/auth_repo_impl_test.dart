@@ -6,6 +6,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/auth_local_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source.dart';
+import 'package:al_mahhaba_school/features/auth/data/data_sources/school_otp_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/change_password_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/complete_register_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/login_request_model.dart';
@@ -14,6 +15,7 @@ import 'package:al_mahhaba_school/features/auth/data/models/reset_password_reque
 import 'package:al_mahhaba_school/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/complete_register_request_entity.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.dart';
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_data_source.dart';
@@ -27,6 +29,7 @@ import 'auth_repo_impl_test.mocks.dart';
   MockSpec<AuthRemoteDataSource>(),
   MockSpec<AuthLocalDataSource>(),
   MockSpec<PhoneVerificationDataSource>(),
+  MockSpec<SchoolOtpDataSource>(),
   MockSpec<ChildrenLocalDataSource>(),
   MockSpec<ChatLocalDataSource>(),
 ])
@@ -34,6 +37,7 @@ void main() {
   late MockAuthRemoteDataSource remoteDataSource;
   late MockAuthLocalDataSource localDataSource;
   late MockPhoneVerificationDataSource phoneVerification;
+  late MockSchoolOtpDataSource schoolOtp;
   late MockChildrenLocalDataSource childrenLocalDataSource;
   late MockChatLocalDataSource chatLocalDataSource;
   late AuthRepoImpl repo;
@@ -43,18 +47,21 @@ void main() {
     provideDummy<PhoneVerificationEntity>(
       const PhoneAutoVerified(firebaseIdToken: ''),
     );
+    provideDummy(const SchoolCodeSent(resendAfter: Duration.zero));
   });
 
   setUp(() {
     remoteDataSource = MockAuthRemoteDataSource();
     localDataSource = MockAuthLocalDataSource();
     phoneVerification = MockPhoneVerificationDataSource();
+    schoolOtp = MockSchoolOtpDataSource();
     childrenLocalDataSource = MockChildrenLocalDataSource();
     chatLocalDataSource = MockChatLocalDataSource();
     repo = AuthRepoImpl(
       remoteDataSource,
       localDataSource,
       phoneVerification,
+      schoolOtp,
       childrenLocalDataSource,
       chatLocalDataSource,
     );
@@ -142,19 +149,44 @@ void main() {
 
       expect(await repo.sendOtp(phone, resendToken: 7), isSuccess(sent));
       verify(phoneVerification.sendCode(phone, resendToken: 7)).called(1);
+      verifyZeroInteractions(schoolOtp);
     });
 
-    test('Firebase refuses: fails with its error', () async {
+    const schoolSent = SchoolCodeSent(resendAfter: Duration(seconds: 60));
+
+    test('Firebase refuses: the school texts its code instead', () async {
       when(
         phoneVerification.sendCode(any, resendToken: anyNamed('resendToken')),
       ).thenThrow(
         const PhoneVerificationException(code: AuthErrorCodes.tooManyRequests),
       );
+      when(schoolOtp.sendCode(any)).thenAnswer((_) async => schoolSent);
+
+      expect(await repo.sendOtp(phone), isSuccess(schoolSent));
+      verify(schoolOtp.sendCode(phone)).called(1);
+    });
+
+    test("both refuse: fails with the school's error", () async {
+      when(
+        phoneVerification.sendCode(any, resendToken: anyNamed('resendToken')),
+      ).thenThrow(
+        const PhoneVerificationException(code: AuthErrorCodes.quotaExceeded),
+      );
+      when(
+        schoolOtp.sendCode(any),
+      ).thenThrow(const ServerException(code: 'otp_send_failed'));
+
+      expect(await repo.sendOtp(phone), isFailure<ServerException>());
+    });
+
+    test('by the school: Firebase is not tried', () async {
+      when(schoolOtp.sendCode(any)).thenAnswer((_) async => schoolSent);
 
       expect(
-        await repo.sendOtp(phone),
-        isFailure<PhoneVerificationException>(),
+        await repo.sendOtp(phone, resendToken: 7, bySchool: true),
+        isSuccess(schoolSent),
       );
+      verifyZeroInteractions(phoneVerification);
     });
   });
 
@@ -191,7 +223,7 @@ void main() {
     const request = CompleteRegisterRequestEntity(
       phone: phone,
       password: password,
-      firebaseIdToken: firebaseIdToken,
+      proof: FirebaseProof(firebaseIdToken),
     );
 
     test(
@@ -240,6 +272,31 @@ void main() {
         isFailure<ServerException>(),
       );
       verifyNever(phoneVerification.signOut());
+    });
+  });
+
+  test("with the school's code: sent as otp", () async {
+    when(
+      remoteDataSource.completeRegistration(any),
+    ).thenAnswer((_) async => session);
+
+    await repo.completeRegistration(
+      const CompleteRegisterRequestEntity(
+        phone: phone,
+        password: password,
+        proof: SchoolCodeProof('123456'),
+      ),
+    );
+    final sent =
+        verify(
+              remoteDataSource.completeRegistration(captureAny),
+            ).captured.single
+            as CompleteRegisterRequestModel;
+    expect(sent.toJson(), {
+      'phone_number': phone,
+      'password': password,
+      'otp': '123456',
+      ...client.toJson(),
     });
   });
 

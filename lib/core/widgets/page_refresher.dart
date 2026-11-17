@@ -105,8 +105,15 @@ class _PageRefresherState extends State<PageRefresher>
   }
 
   /// Whether this page is the one on top (see [shownRoutePath]).
-  bool _isShown(GoRouterDelegate router) =>
-      shownRoutePath(router) == widget.path;
+  ///
+  /// A page opened over it under its own path — a photo from the chat, a
+  /// certificate from the results — counts as it: the parent is looking at
+  /// a piece of this page, so coming back has nothing new to ask for, and
+  /// a notification arriving meanwhile still reaches it.
+  bool _isShown(GoRouterDelegate router) {
+    final shown = shownRoutePath(router);
+    return shown == widget.path || shown.startsWith('${widget.path}/');
+  }
 
   @override
   Widget build(BuildContext context) => widget.child;

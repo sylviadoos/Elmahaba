@@ -112,7 +112,8 @@ void main() {
   /// The school answers each dashboard asked for in turn, counting them.
   void answers(List<Result<ChildDashboardEntity>> results) {
     when(getDashboard(any)).thenAnswer((_) async {
-      final result = results[calls < results.length ? calls : results.length - 1];
+      final result =
+          results[calls < results.length ? calls : results.length - 1];
       calls++;
       return result;
     });
@@ -180,8 +181,9 @@ void main() {
       verify(getDashboard(omar.studentId)).called(1);
     });
 
-    testWidgets('a child with nothing yet: the empty cards, not an error',
-        (tester) async {
+    testWidgets('a child with nothing yet: the empty cards, not an error', (
+      tester,
+    ) async {
       answers([const Success(data: nothingYet)]);
       await pump(tester);
       await tester.pump();
@@ -194,8 +196,9 @@ void main() {
   });
 
   group('when it couldn\'t load', () {
-    testWidgets('no internet: the message and "Try again", which loads it',
-        (tester) async {
+    testWidgets('no internet: the message and "Try again", which loads it', (
+      tester,
+    ) async {
       answers([
         const Failure(exception: NetworkException()),
         Success(data: dashboard),
@@ -217,8 +220,9 @@ void main() {
       expect(find.text('${dashboard.attendance.presentDays}'), findsOneWidget);
     });
 
-    testWidgets('the server broke: its own message, with "Try again"',
-        (tester) async {
+    testWidgets('the server broke: its own message, with "Try again"', (
+      tester,
+    ) async {
       answers([
         const Failure(
           exception: ServerException(statusCode: 500, message: 'Server error'),
@@ -231,8 +235,9 @@ void main() {
       expect(find.text(en.tryAgain), findsOneWidget);
     });
 
-    testWidgets('the session ended: "Log in" instead of "Try again"',
-        (tester) async {
+    testWidgets('the session ended: "Log in" instead of "Try again"', (
+      tester,
+    ) async {
       answers([const Failure(exception: UnauthorizedException())]);
       await pump(tester);
       await tester.pump();
@@ -262,8 +267,9 @@ void main() {
       expect(find.byType(RefreshProgressIndicator), findsNothing);
     });
 
-    testWidgets('back on Home from a page opened over it: asked again',
-        (tester) async {
+    testWidgets('back on Home from a page opened over it: asked again', (
+      tester,
+    ) async {
       answers([Success(data: dashboard), Success(data: changed)]);
       await pump(tester);
       await tester.pump();
@@ -281,8 +287,9 @@ void main() {
       expect(find.text('${changed.attendance.presentDays}'), findsOneWidget);
     });
 
-    testWidgets('a notification while Home is shown: asked again',
-        (tester) async {
+    testWidgets('a notification while Home is shown: asked again', (
+      tester,
+    ) async {
       answers([Success(data: dashboard), Success(data: changed)]);
       await pump(tester);
       await tester.pump();

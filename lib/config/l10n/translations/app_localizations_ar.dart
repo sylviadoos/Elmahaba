@@ -50,20 +50,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneNumberIsRequired => 'رقم الهاتف مطلوب!';
 
   @override
-  String get noInternet => 'لا يوجد اتصال بالإنترنت!';
+  String get noInternet =>
+      'لا يوجد اتصال بالإنترنت. تحقّق من اتصالك وحاول مرة أخرى.';
 
   @override
   String get cancelled => 'تم إلغاء الطلب إلى الخادم';
 
   @override
-  String get unknown =>
-      'حدث خطأ غير متوقع في الاتصال بالخادم ، يرجى المحاولة لاحقًا!';
+  String get unknown => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
 
   @override
-  String get serverError => 'خطأ في الخادم، يرجى المحاولة لاحقًا!';
+  String get serverError =>
+      'حدثت مشكلة من جهتنا. يرجى المحاولة مرة أخرى بعد دقائق.';
 
   @override
-  String get unexpectedError => 'حدث خطأ غير متوقع';
+  String get unexpectedError => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
 
   @override
   String get expiredToken => 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى';
@@ -497,13 +498,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneVerificationFailed => 'تعذّر التحقق من رقمك. حاول مرة أخرى.';
 
   @override
-  String get otpWrongCode => 'الرمز غير صحيح. راجع الرسالة وحاول مرة أخرى.';
+  String get otpWrongCode =>
+      'الرمز غير صحيح. راجع آخر رسالة وصلتك وحاول مرة أخرى.';
 
   @override
   String get otpExpired => 'انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا.';
 
   @override
-  String get tooManyAttempts => 'محاولات كثيرة. حاول مرة أخرى لاحقًا.';
+  String get tooManyAttempts =>
+      'محاولات كثيرة. انتظر بضع دقائق ثم حاول مرة أخرى.';
 
   @override
   String get agreePrefix => 'أوافق على ';
@@ -1823,4 +1826,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get done => 'تم';
+
+  @override
+  String get appUnavailable =>
+      'تطبيق أولياء الأمور متوقف مؤقتًا من المدرسة. يرجى المحاولة لاحقًا.';
+
+  @override
+  String get codeSendFailed =>
+      'تعذّر إرسال الرمز الآن. يرجى المحاولة بعد قليل.';
+
+  @override
+  String get invalidPhoneNumber =>
+      'رقم الموبايل غير صحيح. راجعه وحاول مرة أخرى.';
 }

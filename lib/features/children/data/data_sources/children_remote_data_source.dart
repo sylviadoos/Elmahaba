@@ -1,3 +1,4 @@
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/children/data/models/child_details_model.dart';
 import 'package:al_mahhaba_school/features/children/data/models/child_model.dart';
 import 'package:al_mahhaba_school/features/children/data/models/link_child_request_model.dart';
@@ -22,16 +23,18 @@ abstract interface class ChildrenRemoteDataSource {
   /// `child_already_linked`; invalid fields (422) are in `fieldErrors`.
   Future<LinkChildResultEntity> linkChild(LinkChildRequestModel request);
 
-  /// Links the child the code of the check [token] was texted for. Fails
-  /// with a `ServerException`: `otp_incorrect` (`attempts_left`),
-  /// `otp_expired`, `link_verification_invalid`, `link_attempts_exceeded`
-  /// or `child_already_linked`.
+  /// Links the child of the check [token], with its [proof]: the code the
+  /// school texted, or Firebase's sign-in to the school's number for the
+  /// child. Fails with a `ServerException`: `otp_incorrect`
+  /// (`attempts_left`), `otp_expired`, `link_verification_invalid`,
+  /// `link_attempts_exceeded` or `child_already_linked`.
   Future<ChildModel> verifyChildLink({
     required String token,
-    required String code,
+    required PhoneProofEntity proof,
   });
 
-  /// Texts that code again. Fails with a `ServerException`:
+  /// Texts that code — again, or instead of Firebase when it couldn't
+  /// send one. Fails with a `ServerException`:
   /// `otp_resend_too_soon` (`retry_after`), `otp_resend_limit` or
   /// `link_verification_invalid`.
   Future<LinkVerificationModel> resendChildLinkCode(String token);

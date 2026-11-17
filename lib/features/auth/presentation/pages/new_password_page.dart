@@ -20,6 +20,7 @@ import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header_title.dart';
 import 'package:al_mahhaba_school/core/widgets/scrollable_fill.dart';
 import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/reset_password_request_entity.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/auth_field_errors.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/auth_event.dart';
@@ -31,32 +32,28 @@ import 'package:al_mahhaba_school/features/auth/presentation/widgets/password_ru
 /// Forgot password, step 3: the new password, typed twice and checked
 /// against the rules as it's typed; then "Password changed".
 class NewPasswordPage extends StatelessWidget {
-  const NewPasswordPage({
-    super.key,
-    required this.phone,
-    required this.firebaseIdToken,
-  });
+  const NewPasswordPage({super.key, required this.phone, required this.proof});
 
   /// The number verified on the code page.
   final String phone;
 
-  /// Firebase's proof of [phone], sent with the new password.
-  final String firebaseIdToken;
+  /// That the parent owns [phone], sent with the new password.
+  final PhoneProofEntity proof;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<AuthViewModel>(),
-      child: _NewPasswordView(phone: phone, firebaseIdToken: firebaseIdToken),
+      child: _NewPasswordView(phone: phone, proof: proof),
     );
   }
 }
 
 class _NewPasswordView extends StatefulWidget {
-  const _NewPasswordView({required this.phone, required this.firebaseIdToken});
+  const _NewPasswordView({required this.phone, required this.proof});
 
   final String phone;
-  final String firebaseIdToken;
+  final PhoneProofEntity proof;
 
   @override
   State<_NewPasswordView> createState() => _NewPasswordViewState();
@@ -83,7 +80,7 @@ class _NewPasswordViewState extends State<_NewPasswordView> {
       ResetPasswordEvent(
         ResetPasswordRequestEntity(
           phone: widget.phone,
-          firebaseIdToken: widget.firebaseIdToken,
+          proof: widget.proof,
           password: _password.text,
           passwordConfirmation: _confirmation.text,
         ),
@@ -108,9 +105,16 @@ class _NewPasswordViewState extends State<_NewPasswordView> {
       case ServerException(
         code: AuthErrorCodes.resetVerificationExpired ||
             AuthErrorCodes.firebaseTokenInvalid ||
-            AuthErrorCodes.firebasePhoneMismatch,
+            AuthErrorCodes.firebasePhoneMismatch ||
+            AuthErrorCodes.otpExpired ||
+            AuthErrorCodes.otpLocked,
       ):
         context.go(AppRoutes.forgotPassword);
+      // The school's code, checked only now, was mistyped: back to type it
+      // again.
+      case ServerException(code: AuthErrorCodes.otpIncorrect)
+          when context.canPop():
+        context.pop();
       case ServerException(code: AuthErrorCodes.accountNotFound):
         context.go(AppRoutes.register);
       default:

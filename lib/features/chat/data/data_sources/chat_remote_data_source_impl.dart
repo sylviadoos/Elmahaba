@@ -5,10 +5,12 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:al_mahhaba_school/core/base/cancel_handle.dart';
 import 'package:al_mahhaba_school/core/base/upload_progress.dart';
+import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/network/api_endpoints.dart';
 import 'package:al_mahhaba_school/core/network/api_keys.dart';
 import 'package:al_mahhaba_school/core/network/api_names.dart';
 import 'package:al_mahhaba_school/core/network/api_service.dart';
+import 'package:al_mahhaba_school/core/network/status_code.dart';
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/chat/data/models/chat_item_model.dart';
 import 'package:al_mahhaba_school/features/chat/data/models/chat_page_model.dart';
@@ -79,7 +81,14 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
               cancelToken: cancel?.token,
             )
             as Map<String, dynamic>;
-    return ChatItemModel.fromJson(json[ApiKeys.data] as Map<String, dynamic>);
+    final data = json[ApiKeys.data];
+    // Taken, by the look of it, but there's no message to put in the chat:
+    // "something went wrong at school" beats "unknown error" — and sending
+    // it again can't post it twice, it carries the same id.
+    if (data is! Map<String, dynamic>) {
+      throw ServerException(statusCode: StatusCode.ok, body: json);
+    }
+    return ChatItemModel.fromJson(data);
   }
 
   @override

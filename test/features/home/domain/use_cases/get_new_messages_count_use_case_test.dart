@@ -66,21 +66,23 @@ void sharedWithHome() {
     getChildDashboard = GetChildDashboardUseCase(repo);
   });
 
-  test('the badge and Home ask for the same child\'s dashboard: the school '
-      'is asked twice for one answer, with nothing shared between them',
-      () async {
-    final dashboard = dashboardWith();
-    var calls = 0;
-    when(repo.getChildDashboard(9)).thenAnswer((_) async {
-      calls++;
-      return Success(data: dashboard);
-    });
+  test(
+    'the badge and Home ask for the same child\'s dashboard: the school '
+    'is asked twice for one answer, with nothing shared between them',
+    () async {
+      final dashboard = dashboardWith();
+      var calls = 0;
+      when(repo.getChildDashboard(9)).thenAnswer((_) async {
+        calls++;
+        return Success(data: dashboard);
+      });
 
-    // `BadgeRefresher` and `HomePage` both react to the children arriving.
-    await Future.wait([getNewMessagesCount(9), getChildDashboard(9)]);
+      // `BadgeRefresher` and `HomePage` both react to the children arriving.
+      await Future.wait([getNewMessagesCount(9), getChildDashboard(9)]);
 
-    // Recorded as it behaves today: no cache and no in-flight sharing, so
-    // the same endpoint is hit twice at the same moment.
-    expect(calls, 2);
-  });
+      // Recorded as it behaves today: no cache and no in-flight sharing, so
+      // the same endpoint is hit twice at the same moment.
+      expect(calls, 2);
+    },
+  );
 }

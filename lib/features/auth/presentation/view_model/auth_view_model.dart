@@ -6,6 +6,7 @@ import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/complete_register_request_entity.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/register_request_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/use_cases/change_password_use_case.dart';
@@ -41,9 +42,14 @@ class AuthViewModel extends BaseCubit<AuthState, AuthEvent, void> {
   final ResetPasswordUseCase _resetPassword;
   final ChangePasswordUseCase _changePassword;
 
-  /// From the last sent code: checks the typed code, and sends it again.
+  /// From the last code Firebase sent: checks the typed code, and sends it
+  /// again.
   String? _verificationId;
   int? _resendToken;
+
+  /// Whether the school sent the last code (Firebase couldn't): its code
+  /// isn't checked here, and the next one comes from the school too.
+  bool _bySchool = false;
 
   @override
   Future<void> doAction(AuthEvent event) async {
@@ -103,26 +109,36 @@ class AuthViewModel extends BaseCubit<AuthState, AuthEvent, void> {
   /// itself, goes straight on with [then] and Firebase's proof.
   Future<Result<AuthResult>> _sendCode(
     String phone, {
-    required Future<Result<AuthResult>> Function(String firebaseIdToken) then,
+    required Future<Result<AuthResult>> Function(PhoneProofEntity proof) then,
   }) async {
-    final sent = await _sendOtp(phone, resendToken: _resendToken);
+    final sent = await _sendOtp(
+      phone,
+      resendToken: _resendToken,
+      bySchool: _bySchool,
+    );
     return sent.andThen((verification) async {
       switch (verification) {
         case SmsCodeSent(:final verificationId, :final resendToken):
           _verificationId = verificationId;
           _resendToken = resendToken;
           return const Success(data: OtpSent());
+        case SchoolCodeSent(:final resendAfter):
+          _bySchool = true;
+          return Success(data: OtpSent(resendAfter: resendAfter));
         case PhoneAutoVerified(:final firebaseIdToken):
-          return then(firebaseIdToken);
+          return then(FirebaseProof(firebaseIdToken));
       }
     });
   }
 
-  /// Checks the typed [code], then goes on with [then] and Firebase's proof.
+  /// Checks the typed [code], then goes on with [then] and its proof. The
+  /// school's code goes on unchecked: the school checks it with [then]'s
+  /// request.
   Future<Result<AuthResult>> _checkCode(
     String code, {
-    required Future<Result<AuthResult>> Function(String firebaseIdToken) then,
+    required Future<Result<AuthResult>> Function(PhoneProofEntity proof) then,
   }) async {
+    if (_bySchool) return then(SchoolCodeProof(code));
     final verificationId = _verificationId;
     if (verificationId == null) {
       return const Failure(
@@ -133,22 +149,22 @@ class AuthViewModel extends BaseCubit<AuthState, AuthEvent, void> {
       verificationId: verificationId,
       smsCode: code,
     );
-    return verified.andThen(then);
+    return verified.andThen((token) => then(FirebaseProof(token)));
   }
 
   /// Forgot password: the number is verified; the new password comes next.
-  static Future<Result<AuthResult>> _verified(String firebaseIdToken) async =>
-      Success(data: PhoneVerified(firebaseIdToken));
+  static Future<Result<AuthResult>> _verified(PhoneProofEntity proof) async =>
+      Success(data: PhoneVerified(proof));
 
   Future<Result<AuthResult>> _register(
     RegisterRequestEntity request,
-    String firebaseIdToken,
+    PhoneProofEntity proof,
   ) async {
     final registered = await _completeRegister(
       CompleteRegisterRequestEntity(
         phone: request.phone,
         password: request.password,
-        firebaseIdToken: firebaseIdToken,
+        proof: proof,
       ),
     );
     return registered.map(Registered.new);

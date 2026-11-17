@@ -6,9 +6,17 @@
 
 import 'dart:async' as _i6;
 
-import 'package:al_mahhaba_school/core/base/result.dart' as _i14;
-import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart'
+import 'package:al_mahhaba_school/core/base/result.dart' as _i15;
+import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source.dart'
+    as _i24;
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart'
     as _i10;
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart'
+    as _i22;
+import 'package:al_mahhaba_school/features/auth/domain/use_cases/verify_otp_use_case.dart'
+    as _i23;
+import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart'
+    as _i11;
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_remote_data_source.dart'
     as _i5;
 import 'package:al_mahhaba_school/features/children/data/models/child_details_model.dart'
@@ -20,23 +28,25 @@ import 'package:al_mahhaba_school/features/children/data/models/link_child_reque
 import 'package:al_mahhaba_school/features/children/data/models/link_verification_model.dart'
     as _i4;
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart'
-    as _i11;
+    as _i12;
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_request_entity.dart'
-    as _i16;
+    as _i17;
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_result_entity.dart'
     as _i7;
 import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart'
-    as _i19;
+    as _i20;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/get_children_use_case.dart'
-    as _i13;
+    as _i14;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/get_saved_children_use_case.dart'
-    as _i12;
+    as _i13;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/link_child_use_case.dart'
-    as _i15;
+    as _i16;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/resend_child_link_code_use_case.dart'
-    as _i18;
+    as _i19;
+import 'package:al_mahhaba_school/features/children/domain/use_cases/send_child_link_code_use_case.dart'
+    as _i21;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/verify_child_link_use_case.dart'
-    as _i17;
+    as _i18;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i9;
 
@@ -134,19 +144,19 @@ class MockChildrenRemoteDataSource extends _i1.Mock
   @override
   _i6.Future<_i3.ChildModel> verifyChildLink({
     required String? token,
-    required String? code,
+    required _i10.PhoneProofEntity? proof,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#verifyChildLink, [], {
               #token: token,
-              #code: code,
+              #proof: proof,
             }),
             returnValue: _i6.Future<_i3.ChildModel>.value(
               _FakeChildModel_1(
                 this,
                 Invocation.method(#verifyChildLink, [], {
                   #token: token,
-                  #code: code,
+                  #proof: proof,
                 }),
               ),
             ),
@@ -155,7 +165,7 @@ class MockChildrenRemoteDataSource extends _i1.Mock
                 this,
                 Invocation.method(#verifyChildLink, [], {
                   #token: token,
-                  #code: code,
+                  #proof: proof,
                 }),
               ),
             ),
@@ -187,7 +197,7 @@ class MockChildrenRemoteDataSource extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockChildrenLocalDataSource extends _i1.Mock
-    implements _i10.ChildrenLocalDataSource {
+    implements _i11.ChildrenLocalDataSource {
   @override
   _i6.Future<List<_i3.ChildModel>> getSavedChildren() =>
       (super.noSuchMethod(
@@ -202,7 +212,7 @@ class MockChildrenLocalDataSource extends _i1.Mock
           as _i6.Future<List<_i3.ChildModel>>);
 
   @override
-  _i6.Future<void> saveChildren(List<_i11.ChildEntity>? children) =>
+  _i6.Future<void> saveChildren(List<_i12.ChildEntity>? children) =>
       (super.noSuchMethod(
             Invocation.method(#saveChildren, [children]),
             returnValue: _i6.Future<void>.value(),
@@ -224,127 +234,281 @@ class MockChildrenLocalDataSource extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetSavedChildrenUseCase extends _i1.Mock
-    implements _i12.GetSavedChildrenUseCase {
+    implements _i13.GetSavedChildrenUseCase {
   @override
-  _i6.Future<List<_i11.ChildEntity>> call() =>
+  _i6.Future<List<_i12.ChildEntity>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i6.Future<List<_i11.ChildEntity>>.value(
-              <_i11.ChildEntity>[],
+            returnValue: _i6.Future<List<_i12.ChildEntity>>.value(
+              <_i12.ChildEntity>[],
             ),
-            returnValueForMissingStub: _i6.Future<List<_i11.ChildEntity>>.value(
-              <_i11.ChildEntity>[],
+            returnValueForMissingStub: _i6.Future<List<_i12.ChildEntity>>.value(
+              <_i12.ChildEntity>[],
             ),
           )
-          as _i6.Future<List<_i11.ChildEntity>>);
+          as _i6.Future<List<_i12.ChildEntity>>);
 }
 
 /// A class which mocks [GetChildrenUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetChildrenUseCase extends _i1.Mock
-    implements _i13.GetChildrenUseCase {
+    implements _i14.GetChildrenUseCase {
   @override
-  _i6.Future<_i14.Result<List<_i11.ChildEntity>>> call() =>
+  _i6.Future<_i15.Result<List<_i12.ChildEntity>>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i6.Future<_i14.Result<List<_i11.ChildEntity>>>.value(
-              _i9.dummyValue<_i14.Result<List<_i11.ChildEntity>>>(
+            returnValue: _i6.Future<_i15.Result<List<_i12.ChildEntity>>>.value(
+              _i9.dummyValue<_i15.Result<List<_i12.ChildEntity>>>(
                 this,
                 Invocation.method(#call, []),
               ),
             ),
             returnValueForMissingStub:
-                _i6.Future<_i14.Result<List<_i11.ChildEntity>>>.value(
-                  _i9.dummyValue<_i14.Result<List<_i11.ChildEntity>>>(
+                _i6.Future<_i15.Result<List<_i12.ChildEntity>>>.value(
+                  _i9.dummyValue<_i15.Result<List<_i12.ChildEntity>>>(
                     this,
                     Invocation.method(#call, []),
                   ),
                 ),
           )
-          as _i6.Future<_i14.Result<List<_i11.ChildEntity>>>);
+          as _i6.Future<_i15.Result<List<_i12.ChildEntity>>>);
 }
 
 /// A class which mocks [LinkChildUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockLinkChildUseCase extends _i1.Mock implements _i15.LinkChildUseCase {
+class MockLinkChildUseCase extends _i1.Mock implements _i16.LinkChildUseCase {
   @override
-  _i6.Future<_i14.Result<_i7.LinkChildResultEntity>> call(
-    _i16.LinkChildRequestEntity? request,
+  _i6.Future<_i15.Result<_i7.LinkChildResultEntity>> call(
+    _i17.LinkChildRequestEntity? request,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#call, [request]),
             returnValue:
-                _i6.Future<_i14.Result<_i7.LinkChildResultEntity>>.value(
-                  _i9.dummyValue<_i14.Result<_i7.LinkChildResultEntity>>(
+                _i6.Future<_i15.Result<_i7.LinkChildResultEntity>>.value(
+                  _i9.dummyValue<_i15.Result<_i7.LinkChildResultEntity>>(
                     this,
                     Invocation.method(#call, [request]),
                   ),
                 ),
             returnValueForMissingStub:
-                _i6.Future<_i14.Result<_i7.LinkChildResultEntity>>.value(
-                  _i9.dummyValue<_i14.Result<_i7.LinkChildResultEntity>>(
+                _i6.Future<_i15.Result<_i7.LinkChildResultEntity>>.value(
+                  _i9.dummyValue<_i15.Result<_i7.LinkChildResultEntity>>(
                     this,
                     Invocation.method(#call, [request]),
                   ),
                 ),
           )
-          as _i6.Future<_i14.Result<_i7.LinkChildResultEntity>>);
+          as _i6.Future<_i15.Result<_i7.LinkChildResultEntity>>);
 }
 
 /// A class which mocks [VerifyChildLinkUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockVerifyChildLinkUseCase extends _i1.Mock
-    implements _i17.VerifyChildLinkUseCase {
+    implements _i18.VerifyChildLinkUseCase {
   @override
-  _i6.Future<_i14.Result<_i11.ChildEntity>> call({
+  _i6.Future<_i15.Result<_i12.ChildEntity>> call({
     required String? token,
-    required String? code,
+    required _i10.PhoneProofEntity? proof,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [], {#token: token, #code: code}),
-            returnValue: _i6.Future<_i14.Result<_i11.ChildEntity>>.value(
-              _i9.dummyValue<_i14.Result<_i11.ChildEntity>>(
+            Invocation.method(#call, [], {#token: token, #proof: proof}),
+            returnValue: _i6.Future<_i15.Result<_i12.ChildEntity>>.value(
+              _i9.dummyValue<_i15.Result<_i12.ChildEntity>>(
                 this,
-                Invocation.method(#call, [], {#token: token, #code: code}),
+                Invocation.method(#call, [], {#token: token, #proof: proof}),
               ),
             ),
             returnValueForMissingStub:
-                _i6.Future<_i14.Result<_i11.ChildEntity>>.value(
-                  _i9.dummyValue<_i14.Result<_i11.ChildEntity>>(
+                _i6.Future<_i15.Result<_i12.ChildEntity>>.value(
+                  _i9.dummyValue<_i15.Result<_i12.ChildEntity>>(
                     this,
-                    Invocation.method(#call, [], {#token: token, #code: code}),
+                    Invocation.method(#call, [], {
+                      #token: token,
+                      #proof: proof,
+                    }),
                   ),
                 ),
           )
-          as _i6.Future<_i14.Result<_i11.ChildEntity>>);
+          as _i6.Future<_i15.Result<_i12.ChildEntity>>);
 }
 
 /// A class which mocks [ResendChildLinkCodeUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockResendChildLinkCodeUseCase extends _i1.Mock
-    implements _i18.ResendChildLinkCodeUseCase {
+    implements _i19.ResendChildLinkCodeUseCase {
   @override
-  _i6.Future<_i14.Result<_i19.LinkVerificationEntity>> call(String? token) =>
+  _i6.Future<_i15.Result<_i20.LinkVerificationEntity>> call(String? token) =>
       (super.noSuchMethod(
             Invocation.method(#call, [token]),
             returnValue:
-                _i6.Future<_i14.Result<_i19.LinkVerificationEntity>>.value(
-                  _i9.dummyValue<_i14.Result<_i19.LinkVerificationEntity>>(
+                _i6.Future<_i15.Result<_i20.LinkVerificationEntity>>.value(
+                  _i9.dummyValue<_i15.Result<_i20.LinkVerificationEntity>>(
                     this,
                     Invocation.method(#call, [token]),
                   ),
                 ),
             returnValueForMissingStub:
-                _i6.Future<_i14.Result<_i19.LinkVerificationEntity>>.value(
-                  _i9.dummyValue<_i14.Result<_i19.LinkVerificationEntity>>(
+                _i6.Future<_i15.Result<_i20.LinkVerificationEntity>>.value(
+                  _i9.dummyValue<_i15.Result<_i20.LinkVerificationEntity>>(
                     this,
                     Invocation.method(#call, [token]),
                   ),
                 ),
           )
-          as _i6.Future<_i14.Result<_i19.LinkVerificationEntity>>);
+          as _i6.Future<_i15.Result<_i20.LinkVerificationEntity>>);
+}
+
+/// A class which mocks [SendChildLinkCodeUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockSendChildLinkCodeUseCase extends _i1.Mock
+    implements _i21.SendChildLinkCodeUseCase {
+  @override
+  _i6.Future<_i15.Result<_i22.PhoneVerificationEntity>> call(
+    String? phone, {
+    int? resendToken,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [phone], {#resendToken: resendToken}),
+            returnValue:
+                _i6.Future<_i15.Result<_i22.PhoneVerificationEntity>>.value(
+                  _i9.dummyValue<_i15.Result<_i22.PhoneVerificationEntity>>(
+                    this,
+                    Invocation.method(
+                      #call,
+                      [phone],
+                      {#resendToken: resendToken},
+                    ),
+                  ),
+                ),
+            returnValueForMissingStub:
+                _i6.Future<_i15.Result<_i22.PhoneVerificationEntity>>.value(
+                  _i9.dummyValue<_i15.Result<_i22.PhoneVerificationEntity>>(
+                    this,
+                    Invocation.method(
+                      #call,
+                      [phone],
+                      {#resendToken: resendToken},
+                    ),
+                  ),
+                ),
+          )
+          as _i6.Future<_i15.Result<_i22.PhoneVerificationEntity>>);
+}
+
+/// A class which mocks [VerifyOtpUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockVerifyOtpUseCase extends _i1.Mock implements _i23.VerifyOtpUseCase {
+  @override
+  _i6.Future<_i15.Result<String>> call({
+    required String? verificationId,
+    required String? smsCode,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [], {
+              #verificationId: verificationId,
+              #smsCode: smsCode,
+            }),
+            returnValue: _i6.Future<_i15.Result<String>>.value(
+              _i9.dummyValue<_i15.Result<String>>(
+                this,
+                Invocation.method(#call, [], {
+                  #verificationId: verificationId,
+                  #smsCode: smsCode,
+                }),
+              ),
+            ),
+            returnValueForMissingStub: _i6.Future<_i15.Result<String>>.value(
+              _i9.dummyValue<_i15.Result<String>>(
+                this,
+                Invocation.method(#call, [], {
+                  #verificationId: verificationId,
+                  #smsCode: smsCode,
+                }),
+              ),
+            ),
+          )
+          as _i6.Future<_i15.Result<String>>);
+}
+
+/// A class which mocks [PhoneVerificationDataSource].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockPhoneVerificationDataSource extends _i1.Mock
+    implements _i24.PhoneVerificationDataSource {
+  @override
+  _i6.Future<_i22.PhoneVerificationEntity> sendCode(
+    String? phone, {
+    int? resendToken,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#sendCode, [phone], {#resendToken: resendToken}),
+            returnValue: _i6.Future<_i22.PhoneVerificationEntity>.value(
+              _i9.dummyValue<_i22.PhoneVerificationEntity>(
+                this,
+                Invocation.method(
+                  #sendCode,
+                  [phone],
+                  {#resendToken: resendToken},
+                ),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i6.Future<_i22.PhoneVerificationEntity>.value(
+                  _i9.dummyValue<_i22.PhoneVerificationEntity>(
+                    this,
+                    Invocation.method(
+                      #sendCode,
+                      [phone],
+                      {#resendToken: resendToken},
+                    ),
+                  ),
+                ),
+          )
+          as _i6.Future<_i22.PhoneVerificationEntity>);
+
+  @override
+  _i6.Future<String> verifyCode({
+    required String? verificationId,
+    required String? smsCode,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#verifyCode, [], {
+              #verificationId: verificationId,
+              #smsCode: smsCode,
+            }),
+            returnValue: _i6.Future<String>.value(
+              _i9.dummyValue<String>(
+                this,
+                Invocation.method(#verifyCode, [], {
+                  #verificationId: verificationId,
+                  #smsCode: smsCode,
+                }),
+              ),
+            ),
+            returnValueForMissingStub: _i6.Future<String>.value(
+              _i9.dummyValue<String>(
+                this,
+                Invocation.method(#verifyCode, [], {
+                  #verificationId: verificationId,
+                  #smsCode: smsCode,
+                }),
+              ),
+            ),
+          )
+          as _i6.Future<String>);
+
+  @override
+  _i6.Future<void> signOut() =>
+      (super.noSuchMethod(
+            Invocation.method(#signOut, []),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
 }

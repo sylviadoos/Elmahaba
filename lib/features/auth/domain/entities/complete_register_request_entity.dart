@@ -1,20 +1,22 @@
 import 'package:equatable/equatable.dart';
 
-/// Creates the parent's account once Firebase verified their mobile.
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
+
+/// Creates the parent's account once their mobile is verified.
 class CompleteRegisterRequestEntity extends Equatable {
   const CompleteRegisterRequestEntity({
     required this.phone,
     required this.password,
-    required this.firebaseIdToken,
+    required this.proof,
   });
 
   /// Local Egyptian mobile, e.g. "01201234154" — the one that was verified.
   final String phone;
   final String password;
 
-  /// Proof from Firebase that the parent owns [phone].
-  final String firebaseIdToken;
+  /// That the parent owns [phone].
+  final PhoneProofEntity proof;
 
   @override
-  List<Object?> get props => [phone, password, firebaseIdToken];
+  List<Object?> get props => [phone, password, proof];
 }

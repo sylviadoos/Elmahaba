@@ -50,20 +50,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneNumberIsRequired => 'Phone number is required!';
 
   @override
-  String get noInternet => 'No internet connection!';
+  String get noInternet =>
+      'No internet connection. Check your connection and try again.';
 
   @override
   String get cancelled => 'The request to the server was cancelled';
 
   @override
-  String get unknown =>
-      'An unexpected error occurred while connecting to the server, please try again later!';
+  String get unknown => 'Something went wrong. Please try again.';
 
   @override
-  String get serverError => 'Server error, please try again later!';
+  String get serverError =>
+      'Something went wrong on our side. Please try again in a few minutes.';
 
   @override
-  String get unexpectedError => 'An unexpected error occurred';
+  String get unexpectedError => 'Something went wrong. Please try again.';
 
   @override
   String get expiredToken => 'Session expired, please log in again';
@@ -500,13 +501,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get otpWrongCode =>
-      'That code isn’t right. Check the SMS and try again.';
+      'That code isn’t right. Check the latest SMS and try again.';
 
   @override
   String get otpExpired => 'This code has expired. Please request a new one.';
 
   @override
-  String get tooManyAttempts => 'Too many attempts. Please try again later.';
+  String get tooManyAttempts =>
+      'Too many tries. Please wait a few minutes, then try again.';
 
   @override
   String get agreePrefix => 'I agree to the ';
@@ -1821,4 +1823,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get done => 'Done';
+
+  @override
+  String get appUnavailable =>
+      'The parents app is paused by the school for now. Please try again later.';
+
+  @override
+  String get codeSendFailed =>
+      'We couldn’t send the code right now. Please try again in a moment.';
+
+  @override
+  String get invalidPhoneNumber =>
+      'This mobile number doesn’t look right. Check it and try again.';
 }

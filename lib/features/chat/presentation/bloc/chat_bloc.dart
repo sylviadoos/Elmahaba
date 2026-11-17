@@ -95,6 +95,10 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
   CancelHandle? _downloading;
   CancelHandle? _refreshing;
 
+  /// A refresh asked for while older items were on their way: joining both
+  /// answers would lose one, so it waits for them instead of being lost.
+  bool _refreshPending = false;
+
   /// The photos shown in the chat, asked for the child shown (none on
   /// "All").
   late final ChatImageLoads _imageLoads = ChatImageLoads(
@@ -170,6 +174,11 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     final load = ++_loads;
     _newest?.cancel();
     _older?.cancel();
+    // This asks for the newest itself: a refresh of the chat left behind
+    // has nothing to add, and would hold the next one back.
+    _refreshing?.cancel();
+    _refreshing = null;
+    _refreshPending = false;
     final cancel = _newest = CancelHandle();
     final cached = _getCachedChat(studentId);
     emit(
@@ -208,12 +217,14 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     RefreshChatIntent intent,
     Emitter<ChatState> emit,
   ) async {
-    if (!state.isRequested ||
-        state.chat.state != StateType.success ||
-        state.chat.data == null ||
-        _refreshing != null) {
+    if (!state.isRequested || state.chat.data == null) return;
+    // Older items are on their way: asking now would join an answer to a
+    // chat that is about to change under it. Once they're here instead.
+    if (state.chat.state == StateType.moreLoading) {
+      _refreshPending = true;
       return;
     }
+    if (state.chat.state != StateType.success || _refreshing != null) return;
     final load = _loads;
     final cancel = _refreshing = CancelHandle();
     final studentId = state.studentId;
@@ -231,7 +242,8 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     ) when load == _loads && _leavesGap(latest, before)) {
       result = await _getChat(studentId: studentId, cancel: cancel);
     }
-    _refreshing = null;
+    // Not a later one, started once another child was picked meanwhile.
+    if (identical(_refreshing, cancel)) _refreshing = null;
     if (load != _loads) return;
     final shown = state.chat.data;
     if (shown == null) return;
@@ -281,8 +293,15 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     // With any message sent meanwhile.
     final shown = state.chat.data ?? loaded;
     result.when(
-      success: (older) =>
-          emit(state.showing(BaseState.success(shown.after(older)))),
+      success: (older) {
+        emit(state.showing(BaseState.success(shown.after(older))));
+        // What the school sent meanwhile, asked for now that these are in.
+        if (_refreshPending) {
+          _refreshPending = false;
+          add(const RefreshChatIntent());
+        }
+      },
+      // It keeps waiting: these come again when the parent tries again.
       failure: (exception) => emit(
         state.copyWith(
           chat: BaseState.all(

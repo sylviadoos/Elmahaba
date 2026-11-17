@@ -31,16 +31,18 @@ void main() {
 
   tearDown(() => debugPrint = originalDebugPrint);
 
-  void answerWith(List<Object?> results) => when(
-    api.get(any, queryParameters: anyNamed('queryParameters')),
-  ).thenAnswer(
-    (_) async => {'status': 'success', 'data': results, 'meta': const {}},
-  );
+  void answerWith(List<Object?> results) =>
+      when(
+        api.get(any, queryParameters: anyNamed('queryParameters')),
+      ).thenAnswer(
+        (_) async => {'status': 'success', 'data': results, 'meta': const {}},
+      );
 
   Future<List<int>> idsOf(ResultKind kind) async =>
-      (await dataSource.getResults(146, kind: kind))
-          .map((result) => result.id)
-          .toList();
+      (await dataSource.getResults(
+        146,
+        kind: kind,
+      )).map((result) => result.id).toList();
 
   group('a result without a usable id', () {
     test('is left out, and the good ones beside it still come', () async {
@@ -53,15 +55,17 @@ void main() {
       expect(await idsOf(ResultKind.monthly), [820, 905]);
     });
 
-    test('an id sent as text is left out too — it couldn\'t be opened', ()
-        async {
-      answerWith([
-        {...octoberJson, 'result_id': '820'},
-        novemberJson,
-      ]);
+    test(
+      'an id sent as text is left out too — it couldn\'t be opened',
+      () async {
+        answerWith([
+          {...octoberJson, 'result_id': '820'},
+          novemberJson,
+        ]);
 
-      expect(await idsOf(ResultKind.monthly), [905]);
-    });
+        expect(await idsOf(ResultKind.monthly), [905]);
+      },
+    );
 
     test('the log says one was left out and why', () async {
       answerWith([
@@ -130,14 +134,16 @@ void main() {
       expect(logged, isEmpty);
     });
 
-    test('nulls and non-objects in the list are skipped without a word', ()
-        async {
-      answerWith([null, 'nonsense', 42, octoberJson]);
+    test(
+      'nulls and non-objects in the list are skipped without a word',
+      () async {
+        answerWith([null, 'nonsense', 42, octoberJson]);
 
-      expect(await idsOf(ResultKind.monthly), [820]);
-      // They never looked like results, so there is nothing to report.
-      expect(logged, isEmpty);
-    });
+        expect(await idsOf(ResultKind.monthly), [820]);
+        // They never looked like results, so there is nothing to report.
+        expect(logged, isEmpty);
+      },
+    );
   });
 
   test('the whole page survives: the repo still succeeds with the results '
