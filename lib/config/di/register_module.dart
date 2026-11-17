@@ -32,6 +32,10 @@ abstract class CoreInjectableModule {
   @lazySingleton
   FirebaseAuth firebaseAuth() => FirebaseAuth.instance;
 
+  /// Whether the school (SMS Misr) sends the SMS codes first, not Firebase.
+  @Named(AppConfig.smsMisrFirstName)
+  bool smsMisrFirst() => AppConfig.smsMisrFirst;
+
   /// Push notifications: this phone's token, and the pushes themselves.
   @lazySingleton
   FirebaseMessaging firebaseMessaging() => FirebaseMessaging.instance;

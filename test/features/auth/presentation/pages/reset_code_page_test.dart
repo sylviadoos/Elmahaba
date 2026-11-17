@@ -103,14 +103,14 @@ void main() {
     ));
   });
 
-  testWidgets('resends after 45 seconds', (tester) async {
+  testWidgets('resends after 45 seconds, by the school', (tester) async {
     whenCodeSent();
     await harness.pump(tester, AppRoutes.resetCode, page);
     await tester.pump(const Duration(seconds: 45));
     await tester.tapShown(buttonLabeled(l10n.resendCode));
     await tester.pump();
 
-    verify(harness.sendOtp(phone, resendToken: 7)).called(1);
+    verify(harness.sendOtp(phone, resendToken: 7, bySchool: true)).called(1);
   });
 
   testWidgets('Change it goes back to Forgot password', (tester) async {

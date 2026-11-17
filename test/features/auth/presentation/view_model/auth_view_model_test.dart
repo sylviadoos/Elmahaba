@@ -166,7 +166,7 @@ void main() {
     );
 
     blocTest<AuthViewModel, AuthState>(
-      'again: with the last resend token',
+      "again after Firebase's: by the school (Firebase's may never come)",
       setUp: whenCodeSent,
       build: build,
       act: (viewModel) async {
@@ -174,9 +174,46 @@ void main() {
         await viewModel.doAction(const SendOtpEvent(registerRequest));
       },
       verify: (_) => verifyInOrder([
-        sendOtp(phone, resendToken: null),
-        sendOtp(phone, resendToken: 7),
+        sendOtp(phone, resendToken: null, bySchool: false),
+        sendOtp(phone, resendToken: 7, bySchool: true),
       ]),
+    );
+
+    blocTest<AuthViewModel, AuthState>(
+      "the school's resent code: goes with the account, unchecked by Firebase",
+      setUp: () {
+        whenCodeSent();
+        when(
+          sendOtp(any, resendToken: anyNamed('resendToken'), bySchool: true),
+        ).thenAnswer(
+          (_) async => const Success(
+            data: SchoolCodeSent(resendAfter: Duration(seconds: 60)),
+          ),
+        );
+        whenRegistered();
+      },
+      build: build,
+      act: (viewModel) async {
+        await viewModel.doAction(const SendOtpEvent(registerRequest));
+        await viewModel.doAction(const SendOtpEvent(registerRequest));
+        await viewModel.doAction(
+          const VerifyOtpEvent(registerRequest, '123456'),
+        );
+      },
+      skip: 4,
+      expect: () => [isLoadingState, isSuccessState(isA<Registered>())],
+      verify: (_) {
+        verify(
+          completeRegister(
+            const CompleteRegisterRequestEntity(
+              phone: phone,
+              password: password,
+              proof: SchoolCodeProof('123456'),
+            ),
+          ),
+        ).called(1);
+        verifyZeroInteractions(verifyOtp);
+      },
     );
 
     blocTest<AuthViewModel, AuthState>(

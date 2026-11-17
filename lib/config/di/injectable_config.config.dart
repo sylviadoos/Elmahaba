@@ -385,6 +385,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i833.DeviceInfoPlugin>(
       () => coreInjectableModule.deviceInfo(),
     );
+    gh.factory<bool>(
+      () => coreInjectableModule.smsMisrFirst(),
+      instanceName: 'smsMisrFirst',
+    );
     gh.lazySingleton<_i833.SharedPrefHelper>(
       () => _i833.SharedPrefHelper(gh<_i460.SharedPreferences>()),
     );
@@ -539,6 +543,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i463.SchoolOtpDataSource>(),
         gh<_i1049.ChildrenLocalDataSource>(),
         gh<_i694.ChatLocalDataSource>(),
+        gh<bool>(instanceName: 'smsMisrFirst'),
       ),
     );
     gh.lazySingleton<_i816.NewsRemoteDataSource>(
@@ -869,16 +874,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i435.PreviewExcuseDocumentUseCase>(),
       ),
     );
-    gh.factory<_i437.AppStatusBloc>(
-      () => _i437.AppStatusBloc(gh<_i23.GetAppStatusUseCase>()),
-    );
     gh.factory<_i960.LinkChildCodeViewModel>(
       () => _i960.LinkChildCodeViewModel(
         gh<_i1004.VerifyChildLinkUseCase>(),
         gh<_i1049.SendChildLinkCodeUseCase>(),
         gh<_i225.ResendChildLinkCodeUseCase>(),
         gh<_i520.VerifyOtpUseCase>(),
+        gh<bool>(instanceName: 'smsMisrFirst'),
       ),
+    );
+    gh.factory<_i437.AppStatusBloc>(
+      () => _i437.AppStatusBloc(gh<_i23.GetAppStatusUseCase>()),
     );
     gh.factory<_i341.AnnouncementsBloc>(
       () => _i341.AnnouncementsBloc(

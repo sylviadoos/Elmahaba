@@ -57,6 +57,7 @@ void main() {
         sendCode,
         resendCode,
         checkFirebaseCode,
+        false,
       ),
     );
   });
@@ -326,6 +327,7 @@ void main() {
         sendCode,
         resendCode,
         checkFirebaseCode,
+        false,
       ).state.checking,
       const BaseState<ChildEntity>.initial(),
     );

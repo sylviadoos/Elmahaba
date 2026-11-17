@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:al_mahhaba_school/config/app_config.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/auth_local_data_source.dart';
@@ -25,6 +26,7 @@ import 'package:al_mahhaba_school/features/auth/domain/entities/register_request
 import 'package:al_mahhaba_school/features/auth/domain/entities/reset_password_request_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.dart';
 import 'package:al_mahhaba_school/features/auth/domain/repos/auth_repo.dart';
+import 'package:al_mahhaba_school/features/auth/domain/school_sms_down.dart';
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_data_source.dart';
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart';
 
@@ -37,14 +39,19 @@ class AuthRepoImpl implements AuthRepo {
     this._schoolOtp,
     this._childrenLocalDataSource,
     this._chatLocalDataSource,
+    @Named(AppConfig.smsMisrFirstName) this._smsMisrFirst,
   );
 
   final AuthRemoteDataSource _remoteDataSource;
   final AuthLocalDataSource _localDataSource;
   final PhoneVerificationDataSource _phoneVerification;
 
-  /// Sends the code when Firebase can't.
+  /// The school's own SMS (SMS Misr): first, or when Firebase can't send.
   final SchoolOtpDataSource _schoolOtp;
+
+  /// Whether the school sends the codes first (`AppConfig.smsMisrFirst`),
+  /// Firebase only when it fails; else the other way round.
+  final bool _smsMisrFirst;
 
   /// The session's children are saved and forgotten with it.
   final ChildrenLocalDataSource _childrenLocalDataSource;
@@ -78,7 +85,17 @@ class AuthRepoImpl implements AuthRepo {
     int? resendToken,
     bool bySchool = false,
   }) => Result.guard(() async {
-    if (bySchool) return _schoolOtp.sendCode(phone);
+    if (_smsMisrFirst || bySchool) {
+      try {
+        return await _schoolOtp.sendCode(phone);
+      } on AppException catch (error) {
+        // SMS Misr failed: Firebase sends it instead — when the school
+        // sends first; asked for the school's on purpose, its error stands.
+        if (!_smsMisrFirst || !error.isSchoolSmsDown) rethrow;
+        debugPrint('The school sent no code ($error): Firebase sends one.');
+        return _phoneVerification.sendCode(phone, resendToken: resendToken);
+      }
+    }
     try {
       return await _phoneVerification.sendCode(phone, resendToken: resendToken);
     } on AppException catch (error) {

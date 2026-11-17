@@ -64,6 +64,8 @@ void main() {
       schoolOtp,
       childrenLocalDataSource,
       chatLocalDataSource,
+      // Firebase first; the school first is tested on its own.
+      false,
     );
     when(localDataSource.clientInfo()).thenAnswer((_) async => client);
   });
@@ -137,6 +139,62 @@ void main() {
 
       expect(await repo.login(loginRequest), isFailure<ServerException>());
       verifyNothingKept();
+    });
+  });
+
+  group('sendOtp, the school (SMS Misr) first', () {
+    late AuthRepoImpl schoolFirst;
+    const schoolSent = SchoolCodeSent(resendAfter: Duration(seconds: 60));
+    const firebaseSent = SmsCodeSent(verificationId: 'vid', resendToken: 8);
+
+    setUp(
+      () => schoolFirst = AuthRepoImpl(
+        remoteDataSource,
+        localDataSource,
+        phoneVerification,
+        schoolOtp,
+        childrenLocalDataSource,
+        chatLocalDataSource,
+        true,
+      ),
+    );
+
+    test('the school texts it; Firebase is not tried', () async {
+      when(schoolOtp.sendCode(any)).thenAnswer((_) async => schoolSent);
+
+      expect(await schoolFirst.sendOtp(phone), isSuccess(schoolSent));
+      verify(schoolOtp.sendCode(phone)).called(1);
+      verifyZeroInteractions(phoneVerification);
+    });
+
+    test('SMS Misr fails (otp_send_failed): Firebase sends it', () async {
+      when(schoolOtp.sendCode(any)).thenThrow(
+        const ServerException(statusCode: 503, code: 'otp_send_failed'),
+      );
+      when(
+        phoneVerification.sendCode(any, resendToken: anyNamed('resendToken')),
+      ).thenAnswer((_) async => firebaseSent);
+
+      expect(await schoolFirst.sendOtp(phone), isSuccess(firebaseSent));
+    });
+
+    test(
+      'the school refuses on purpose (too soon): its error, no Firebase',
+      () async {
+        when(schoolOtp.sendCode(any)).thenThrow(
+          const ServerException(statusCode: 429, code: 'otp_resend_too_soon'),
+        );
+
+        expect(await schoolFirst.sendOtp(phone), isFailure<ServerException>());
+        verifyZeroInteractions(phoneVerification);
+      },
+    );
+
+    test('offline: the error, no Firebase', () async {
+      when(schoolOtp.sendCode(any)).thenThrow(const NetworkException());
+
+      expect(await schoolFirst.sendOtp(phone), isFailure<NetworkException>());
+      verifyZeroInteractions(phoneVerification);
     });
   });
 

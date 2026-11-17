@@ -26,6 +26,10 @@ extension VerificationMessage on AppException {
       PhoneVerificationException(:final code)
           when AuthErrorCodes.codeNotSent.contains(code) =>
         l10n.codeSendFailed,
+      // The school's SMS (SMS Misr) failed too; its own words when it
+      // sent some meant for parents.
+      ServerException(code: AuthErrorCodes.otpSendFailed, message: null) =>
+        l10n.codeSendFailed,
       _ => localizedMessage(context),
     };
   }

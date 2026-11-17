@@ -47,8 +47,12 @@ class AuthViewModel extends BaseCubit<AuthState, AuthEvent, void> {
   String? _verificationId;
   int? _resendToken;
 
-  /// Whether the school sent the last code (Firebase couldn't): its code
-  /// isn't checked here, and the next one comes from the school too.
+  /// Whether the school sent the last code: its code isn't checked here,
+  /// and the next one comes from the school too. The school sends first
+  /// (`AppConfig.smsMisrFirst`), or when Firebase fails, and every code
+  /// after Firebase's first — Firebase can say it sent one that never
+  /// arrives (no billing, a carrier dropping it), so asking again goes
+  /// another way.
   bool _bySchool = false;
 
   @override
@@ -111,16 +115,19 @@ class AuthViewModel extends BaseCubit<AuthState, AuthEvent, void> {
     String phone, {
     required Future<Result<AuthResult>> Function(PhoneProofEntity proof) then,
   }) async {
+    // Firebase sent one already and the parent asks again: it didn't come.
     final sent = await _sendOtp(
       phone,
       resendToken: _resendToken,
-      bySchool: _bySchool,
+      bySchool: _bySchool || _verificationId != null,
     );
     return sent.andThen((verification) async {
       switch (verification) {
         case SmsCodeSent(:final verificationId, :final resendToken):
           _verificationId = verificationId;
           _resendToken = resendToken;
+          // Firebase's (the school's failed): Firebase checks it.
+          _bySchool = false;
           return const Success(data: OtpSent());
         case SchoolCodeSent(:final resendAfter):
           _bySchool = true;

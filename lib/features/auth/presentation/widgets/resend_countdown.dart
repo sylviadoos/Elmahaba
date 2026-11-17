@@ -11,7 +11,9 @@ class ResendCountdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final time = '0:${seconds.toString().padLeft(2, '0')}';
+    // m:ss — 60 seconds is "1:00", not "0:60".
+    final time =
+        '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
     final text = context.l10n.resendCodeIn(time);
     final timeAt = text.indexOf(time);
 

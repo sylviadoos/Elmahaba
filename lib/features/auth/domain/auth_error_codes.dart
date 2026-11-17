@@ -43,6 +43,10 @@ abstract final class AuthErrorCodes {
   /// with `locked_until`).
   static const String otpLocked = 'otp_locked';
 
+  /// The school couldn't send its SMS (SMS Misr down, or set up wrong:
+  /// 503).
+  static const String otpSendFailed = 'otp_send_failed';
+
   // Firebase phone auth (`PhoneVerificationException.code`).
 
   static const String wrongCode = 'invalid-verification-code';

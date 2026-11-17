@@ -48,6 +48,8 @@ void main() {
       sendCode,
       resendCode,
       checkFirebaseCode,
+      // Firebase first; the school first is tested on its own.
+      false,
     );
   });
 
@@ -126,16 +128,58 @@ void main() {
       expect(viewModel.state.resending.data, withPhone);
     });
 
-    test('again: with the last resend token', () async {
+    test("again after Firebase's: the school texts it", () async {
       whenFirebaseSends();
+      when(
+        resendCode(any),
+      ).thenAnswer((_) async => Success(data: verification));
+      when(
+        verifyChildLink(token: anyNamed('token'), proof: anyNamed('proof')),
+      ).thenAnswer((_) async => const Success(data: ereny));
 
       await viewModel.doAction(SendLinkCodeEvent(withPhone));
       await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      await viewModel.doAction(
+        CheckLinkCodeEvent(token: withPhone.token, code: '123456'),
+      );
 
-      verifyInOrder([
-        sendCode('01012344567', resendToken: null),
-        sendCode('01012344567', resendToken: 7),
-      ]);
+      verify(sendCode(any, resendToken: anyNamed('resendToken'))).called(1);
+      verify(resendCode(withPhone.token)).called(1);
+      // The school's code: checked by the school.
+      verify(
+        verifyChildLink(
+          token: withPhone.token,
+          proof: const SchoolCodeProof('123456'),
+        ),
+      ).called(1);
+      verifyZeroInteractions(checkFirebaseCode);
+    });
+
+    test("the school's resend fails: Firebase's code still counts", () async {
+      whenFirebaseSends();
+      when(resendCode(any)).thenAnswer(
+        (_) async =>
+            const Failure(exception: ServerException(code: 'otp_resend_limit')),
+      );
+      when(
+        checkFirebaseCode(verificationId: 'vid', smsCode: '123456'),
+      ).thenAnswer((_) async => const Success(data: 'firebase-id-token'));
+      when(
+        verifyChildLink(token: anyNamed('token'), proof: anyNamed('proof')),
+      ).thenAnswer((_) async => const Success(data: ereny));
+
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      await viewModel.doAction(
+        CheckLinkCodeEvent(token: withPhone.token, code: '123456'),
+      );
+
+      verify(
+        verifyChildLink(
+          token: withPhone.token,
+          proof: const FirebaseProof('firebase-id-token'),
+        ),
+      ).called(1);
     });
 
     test("the right code: Firebase's proof links the child", () async {
@@ -264,6 +308,76 @@ void main() {
           'otp_resend_limit',
         );
       });
+    });
+  });
+
+  group('the school (SMS Misr) first', () {
+    late LinkChildCodeViewModel schoolFirst;
+
+    setUp(
+      () => schoolFirst = LinkChildCodeViewModel(
+        verifyChildLink,
+        sendCode,
+        resendCode,
+        checkFirebaseCode,
+        true,
+      ),
+    );
+    tearDown(() => schoolFirst.close());
+
+    test('the school texts it, even with a number for Firebase', () async {
+      when(
+        resendCode(any),
+      ).thenAnswer((_) async => Success(data: verification));
+
+      await schoolFirst.doAction(SendLinkCodeEvent(withPhone));
+
+      verify(resendCode(withPhone.token)).called(1);
+      verifyZeroInteractions(sendCode);
+      expect(schoolFirst.state.resending.data, verification);
+    });
+
+    test('SMS Misr fails: Firebase sends it, and checks the code', () async {
+      when(resendCode(any)).thenAnswer(
+        (_) async => const Failure(
+          exception: ServerException(statusCode: 503, code: 'otp_send_failed'),
+        ),
+      );
+      whenFirebaseSends();
+      when(
+        checkFirebaseCode(verificationId: 'vid', smsCode: '123456'),
+      ).thenAnswer((_) async => const Success(data: 'firebase-id-token'));
+      when(
+        verifyChildLink(token: anyNamed('token'), proof: anyNamed('proof')),
+      ).thenAnswer((_) async => const Success(data: ereny));
+
+      await schoolFirst.doAction(SendLinkCodeEvent(withPhone));
+      await schoolFirst.doAction(
+        CheckLinkCodeEvent(token: withPhone.token, code: '123456'),
+      );
+
+      verify(sendCode('01012344567', resendToken: null)).called(1);
+      verify(
+        verifyChildLink(
+          token: withPhone.token,
+          proof: const FirebaseProof('firebase-id-token'),
+        ),
+      ).called(1);
+    });
+
+    test('the school refuses on purpose: its error, no Firebase', () async {
+      when(resendCode(any)).thenAnswer(
+        (_) async =>
+            const Failure(exception: ServerException(code: 'otp_resend_limit')),
+      );
+
+      await schoolFirst.doAction(SendLinkCodeEvent(withPhone));
+
+      expect(
+        (schoolFirst.state.resending.exception! as ServerException).code,
+        'otp_resend_limit',
+      );
+      verifyZeroInteractions(sendCode);
     });
   });
 
