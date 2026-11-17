@@ -22,10 +22,13 @@ abstract interface class AuthRepo {
   Future<Result<AuthSessionEntity>> login(LoginRequestEntity request);
 
   /// Sends the SMS code to [phone] — again, when given the last
-  /// [resendToken].
+  /// [resendToken]. Firebase sends it; when it can't, the school does
+  /// (`SchoolCodeSent`). [bySchool] goes to the school straight away: to
+  /// send again after the school sent the last one.
   Future<Result<PhoneVerificationEntity>> sendOtp(
     String phone, {
     int? resendToken,
+    bool bySchool = false,
   });
 
   /// Checks the typed code; returns the Firebase ID token that proves the

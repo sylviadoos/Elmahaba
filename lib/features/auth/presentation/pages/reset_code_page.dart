@@ -80,9 +80,11 @@ class _ResetCodeViewState extends State<_ResetCodeView> {
     super.dispose();
   }
 
-  void _startCountdown() {
+  /// From [wait] when the sender gave one (the school does), else the
+  /// page's own.
+  void _startCountdown([Duration? wait]) {
     _timer?.cancel();
-    _secondsLeft = _resendSeconds;
+    _secondsLeft = wait?.inSeconds ?? _resendSeconds;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsLeft <= 1) timer.cancel();
       setState(() => _secondsLeft--);
@@ -115,15 +117,12 @@ class _ResetCodeViewState extends State<_ResetCodeView> {
 
   void _onState(BuildContext context, AuthState state) {
     switch (state.data) {
-      case OtpSent():
+      case OtpSent(:final resendAfter):
         // The countdown runs from when the code really left.
-        setState(_startCountdown);
+        setState(() => _startCountdown(resendAfter));
         return;
-      case PhoneVerified(:final firebaseIdToken):
-        context.push(
-          AppRoutes.newPassword,
-          extra: (widget.phone, firebaseIdToken),
-        );
+      case PhoneVerified(:final proof):
+        context.push(AppRoutes.newPassword, extra: (widget.phone, proof));
         return;
       default:
     }

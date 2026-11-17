@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -59,9 +61,12 @@ class _StatementPdfButtonsState extends State<StatementPdfButtons> {
     }
   }
 
-  void _preview() => _withPdf(
-    (file) => context.push(AppRoutes.feeStatementPreview, extra: file),
-  );
+  // Opened, not waited on: the push's future ends only when the page is
+  // popped, and never when something else takes it away (a notification
+  // opened, Home) — the buttons would stay off until the app restarts.
+  void _preview() => _withPdf((file) async {
+    unawaited(context.push(AppRoutes.feeStatementPreview, extra: file));
+  });
 
   void _download() => _withPdf(context.saveStatementPdf);
 

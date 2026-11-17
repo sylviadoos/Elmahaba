@@ -10,6 +10,7 @@ import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/complete_register_request_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/otp_page.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 
 import '../../../../helpers/form_helpers.dart';
 import '../../auth_fixtures.dart';
@@ -25,7 +26,7 @@ void main() {
   const registration = CompleteRegisterRequestEntity(
     phone: phone,
     password: password,
-    firebaseIdToken: firebaseIdToken,
+    proof: FirebaseProof(firebaseIdToken),
   );
 
   void whenCodeSent([
@@ -144,10 +145,21 @@ void main() {
   });
 
   group('resend', () {
-    testWidgets('after 45 seconds: sends again with the resend token', (
+    testWidgets("after 45 seconds: sends again, by the school, with its wait", (
       tester,
     ) async {
       whenCodeSent();
+      when(
+        harness.sendOtp(
+          any,
+          resendToken: anyNamed('resendToken'),
+          bySchool: true,
+        ),
+      ).thenAnswer(
+        (_) async => const Success(
+          data: SchoolCodeSent(resendAfter: Duration(seconds: 60)),
+        ),
+      );
       await harness.pump(tester, AppRoutes.otp, page);
       expect(find.text(l10n.resendCode), findsNothing);
 
@@ -156,10 +168,10 @@ void main() {
       await tester.pump();
 
       verifyInOrder([
-        harness.sendOtp(phone, resendToken: null),
-        harness.sendOtp(phone, resendToken: 7),
+        harness.sendOtp(phone, resendToken: null, bySchool: false),
+        harness.sendOtp(phone, resendToken: 7, bySchool: true),
       ]);
-      expect(find.textContaining('0:45', findRichText: true), findsOneWidget);
+      expect(find.textContaining('1:00', findRichText: true), findsOneWidget);
     });
 
     testWidgets('sending failed: says why, can resend right away', (

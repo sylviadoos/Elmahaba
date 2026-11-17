@@ -56,6 +56,10 @@ class HomeBloc extends Bloc<HomeIntent, HomeState> {
     if (childId == state.childId && state.dashboard.state != StateType.error) {
       return;
     }
+    // Anything asked for while the child before was loading was about
+    // them, not this one: it would spend a whole request on the wrong
+    // answer. The load below is newer than any of it.
+    _askAgain = false;
     // Another child (or theirs failed): the skeleton until it comes.
     emit(HomeState(childId: childId, dashboard: const BaseState.loading()));
     await Future.wait([_load(childId, emit), _loadCalendar(childId, emit)]);

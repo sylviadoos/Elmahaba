@@ -6,6 +6,24 @@ import 'package:go_router/go_router.dart';
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/core/notifications/notification_service.dart';
 
+/// The path of the page the parent is actually looking at.
+///
+/// Not the same as the router's own location: a page opened with `push`
+/// (the chat, an excuse…) leaves [RouteMatchList.uri] at the page under
+/// it, with its own location in its match. Reading that uri alone would
+/// call Home "shown" while the chat covers it — so anything asking "is
+/// this page the one on screen?" must go through here, never through
+/// `currentConfiguration.uri` directly.
+///
+/// A branch of the tabs that is alive but off screen is not shown either:
+/// switching tabs changes the location.
+String shownRoutePath(GoRouterDelegate router) {
+  final configuration = router.currentConfiguration;
+  final top = configuration.lastOrNull;
+  final shown = top is ImperativeRouteMatch ? top.matches : configuration;
+  return shown.uri.path;
+}
+
 /// Calls [onRefresh] whenever the page at [path] may show something that
 /// changed at school, so it's never stale and never asked on a timer:
 /// - a notification arrives while it's shown (the school posted, accepted
@@ -86,14 +104,15 @@ class _PageRefresherState extends State<PageRefresher>
     if (_shown && mounted) widget.onRefresh();
   }
 
-  /// The page on top. A page opened with `push` (the chat, an excuse…)
-  /// leaves the configuration's own [RouteMatchList.uri] at the page under
-  /// it: its own location is in its match.
+  /// Whether this page is the one on top (see [shownRoutePath]).
+  ///
+  /// A page opened over it under its own path — a photo from the chat, a
+  /// certificate from the results — counts as it: the parent is looking at
+  /// a piece of this page, so coming back has nothing new to ask for, and
+  /// a notification arriving meanwhile still reaches it.
   bool _isShown(GoRouterDelegate router) {
-    final configuration = router.currentConfiguration;
-    final top = configuration.lastOrNull;
-    final shown = top is ImperativeRouteMatch ? top.matches : configuration;
-    return shown.uri.path == widget.path;
+    final shown = shownRoutePath(router);
+    return shown == widget.path || shown.startsWith('${widget.path}/');
   }
 
   @override

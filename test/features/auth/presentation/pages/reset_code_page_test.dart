@@ -9,6 +9,7 @@ import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/reset_code_page.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 
 import '../../../../helpers/form_helpers.dart';
 import '../../auth_fixtures.dart';
@@ -63,7 +64,10 @@ void main() {
     await verifyCode(tester, '123456');
 
     expect(find.text(AppRoutes.newPassword), findsOneWidget);
-    expect(harness.extras[AppRoutes.newPassword], (phone, firebaseIdToken));
+    expect(harness.extras[AppRoutes.newPassword], (
+      phone,
+      const FirebaseProof(firebaseIdToken),
+    ));
     verifyZeroInteractions(harness.completeRegister);
   });
 
@@ -93,17 +97,20 @@ void main() {
     await harness.pump(tester, AppRoutes.resetCode, page);
     await tester.settle();
 
-    expect(harness.extras[AppRoutes.newPassword], (phone, firebaseIdToken));
+    expect(harness.extras[AppRoutes.newPassword], (
+      phone,
+      const FirebaseProof(firebaseIdToken),
+    ));
   });
 
-  testWidgets('resends after 45 seconds', (tester) async {
+  testWidgets('resends after 45 seconds, by the school', (tester) async {
     whenCodeSent();
     await harness.pump(tester, AppRoutes.resetCode, page);
     await tester.pump(const Duration(seconds: 45));
     await tester.tapShown(buttonLabeled(l10n.resendCode));
     await tester.pump();
 
-    verify(harness.sendOtp(phone, resendToken: 7)).called(1);
+    verify(harness.sendOtp(phone, resendToken: 7, bySchool: true)).called(1);
   });
 
   testWidgets('Change it goes back to Forgot password', (tester) async {

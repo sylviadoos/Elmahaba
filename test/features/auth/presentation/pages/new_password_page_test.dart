@@ -7,6 +7,7 @@ import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/domain/auth_error_codes.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/pages/new_password_page.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 
 import '../../../../helpers/form_helpers.dart';
 import '../../auth_fixtures.dart';
@@ -18,7 +19,10 @@ void main() {
   setUp(() => (harness = AuthPageHarness()).register());
   tearDown(getIt.reset);
 
-  const page = NewPasswordPage(phone: phone, firebaseIdToken: firebaseIdToken);
+  const page = NewPasswordPage(
+    phone: phone,
+    proof: FirebaseProof(firebaseIdToken),
+  );
 
   Future<void> type(
     WidgetTester tester, {

@@ -23,6 +23,7 @@ import 'package:al_mahhaba_school/core/widgets/red_header.dart';
 import 'package:al_mahhaba_school/core/widgets/red_header_title.dart';
 import 'package:al_mahhaba_school/core/widgets/scrollable_fill.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/extensions/log_out.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/extensions/verification_message.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/otp_code_input.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/prompt_link.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/resend_countdown.dart';
@@ -35,9 +36,10 @@ import 'package:al_mahhaba_school/features/children/presentation/view_model/link
 import 'package:al_mahhaba_school/features/children/presentation/view_model/link_child_code_view_model.dart';
 
 /// Adding a child, step 2 when the school has another phone for them: the
-/// 6-digit code it texted there (by its own SMS, not Firebase), with a
-/// resend countdown. Once it's right the child is linked, and Add children
-/// shows it.
+/// 6-digit code sent there, with a resend countdown. Firebase sends it when
+/// the school gave the number (as the page opens); otherwise — or when
+/// Firebase can't — the school texts it. Once it's right the child is
+/// linked, and Add children shows it.
 class LinkChildCodePage extends StatelessWidget {
   const LinkChildCodePage({super.key, required this.verification});
 
@@ -47,7 +49,14 @@ class LinkChildCodePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<LinkChildCodeViewModel>(),
+      create: (_) {
+        final viewModel = getIt<LinkChildCodeViewModel>();
+        // No number: the school texted the code already.
+        if (verification.phone != null) {
+          viewModel.doAction(SendLinkCodeEvent(verification));
+        }
+        return viewModel;
+      },
       child: _LinkChildCodeView(verification: verification),
     );
   }
@@ -112,7 +121,7 @@ class _LinkChildCodeViewState extends State<_LinkChildCodeView> {
   }
 
   void _resend() => context.read<LinkChildCodeViewModel>().doAction(
-    ResendLinkCodeEvent(_verification.token),
+    SendLinkCodeEvent(_verification),
   );
 
   /// Back to Add children: to start again, or done.
@@ -136,6 +145,11 @@ class _LinkChildCodeViewState extends State<_LinkChildCodeView> {
       return;
     }
     switch (exception) {
+      // Firebase's code: wrong, or too old. Its own message is technical
+      // English, so the app's is shown.
+      case PhoneVerificationException():
+        _codeController.clear();
+        setState(() => _codeError = exception.verificationMessage(context));
       case ServerException(code: ChildrenErrorCodes.codeIncorrect, :final body):
         final attemptsLeft = _bodyInt(body, 'attempts_left');
         _codeController.clear();

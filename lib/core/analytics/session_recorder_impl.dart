@@ -1,4 +1,4 @@
-import 'package:clarity_flutter/clarity_flutter.dart';
+import 'package:al_mahhaba_school/core/analytics/clarity.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/config/app_config.dart';

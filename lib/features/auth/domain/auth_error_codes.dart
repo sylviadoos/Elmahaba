@@ -31,6 +31,22 @@ abstract final class AuthErrorCodes {
   /// Changing the password: the current one typed is wrong.
   static const String currentPasswordIncorrect = 'current_password_incorrect';
 
+  /// The school's SMS code (sent when Firebase couldn't) is wrong (422,
+  /// with `attempts_left`).
+  static const String otpIncorrect = 'otp_incorrect';
+
+  /// The school's SMS code is too old, or was used already: ask for
+  /// another.
+  static const String otpExpired = 'otp_expired';
+
+  /// Too many wrong school codes: the number is locked for a while (429,
+  /// with `locked_until`).
+  static const String otpLocked = 'otp_locked';
+
+  /// The school couldn't send its SMS (SMS Misr down, or set up wrong:
+  /// 503).
+  static const String otpSendFailed = 'otp_send_failed';
+
   // Firebase phone auth (`PhoneVerificationException.code`).
 
   static const String wrongCode = 'invalid-verification-code';
@@ -40,4 +56,19 @@ abstract final class AuthErrorCodes {
 
   /// Verifying before a code was sent.
   static const String noCodeSent = 'missing-verification-id';
+
+  /// Firebase won't take the number as a mobile.
+  static const String invalidPhoneNumber = 'invalid-phone-number';
+
+  /// Firebase couldn't send the SMS for reasons of its own setup — none
+  /// the parent can fix but by trying again later.
+  static const Set<String> codeNotSent = {
+    'billing-not-enabled',
+    'app-not-authorized',
+    'captcha-check-failed',
+    'missing-client-identifier',
+    'operation-not-allowed',
+    'internal-error',
+    'web-context-cancelled',
+  };
 }

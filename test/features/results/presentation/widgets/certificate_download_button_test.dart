@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -96,6 +97,19 @@ void main() {
 
   testWidgets('only the button tapped turns: Preview', (tester) async {
     useFakeFilePicker();
+    // The page and font slow to load, so the making is there to see.
+    // Left in place after, at full speed: taking it away would take the
+    // test's own assets with it.
+    var slow = true;
+    addTearDown(() => slow = false);
+    tester.binding.defaultBinaryMessenger.setMockMessageHandler(
+      'flutter/assets',
+      (message) async {
+        if (slow) await Future<void>.delayed(const Duration(milliseconds: 200));
+        final key = Uri.decodeFull(utf8.decode(message!.buffer.asUint8List()));
+        return ByteData.sublistView(File(key).readAsBytesSync());
+      },
+    );
     final router = GoRouter(
       routes: [
         GoRoute(
@@ -122,6 +136,44 @@ void main() {
     expect(spinnerOn(en.downloadCertificate), findsNothing);
 
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('the preview taken away, not closed (a notification opened): the '
+      'buttons work again', (tester) async {
+    useFakeFilePicker();
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => Scaffold(
+            body: Center(
+              child: CertificateDownloadButton(certificate: certificate),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutes.certificatePreview,
+          builder: (_, _) => const Scaffold(body: Text('preview')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(TestApp(router: router));
+    await tester.tap(find.text(en.preview));
+    await tester.pumpAndSettle();
+
+    router.go('/');
+    await tester.pumpAndSettle();
+
+    expect(spinnerOn(en.preview), findsNothing);
+    expect(
+      tester
+          .widget<OutlinedButton>(
+            find.widgetWithText(OutlinedButton, en.preview),
+          )
+          .onPressed,
+      isNotNull,
+    );
   });
 
   testWidgets('only the button tapped turns: Download', (tester) async {

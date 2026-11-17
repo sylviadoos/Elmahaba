@@ -61,11 +61,13 @@ class _CertificateDownloadButtonState extends State<CertificateDownloadButton> {
     }
   }
 
+  // Opened, not waited on: the push's future ends only when the page is
+  // popped, and never when something else takes it away (a notification
+  // opened, Home) — the button would turn until the app restarts.
   void _preview() => unawaited(
-    _withPdf(
-      _Making.preview,
-      (file) => context.push(AppRoutes.certificatePreview, extra: file),
-    ),
+    _withPdf(_Making.preview, (file) async {
+      unawaited(context.push(AppRoutes.certificatePreview, extra: file));
+    }),
   );
 
   void _download() =>

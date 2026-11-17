@@ -38,12 +38,18 @@ class ResultDetailsModel extends ResultDetailsEntity {
   ///     "high_level": [ … ], "activities": [ … ],
   ///     "final_result": "ناجح", "final_result_2": null } }
   factory ResultDetailsModel.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] as Map<String, dynamic>? ?? const {};
+    // Anything but an object — `[]`, which is how an empty map is written,
+    // or nothing at all — is a result with nothing recorded on it yet.
+    final data = switch (json['data']) {
+      final Map<String, dynamic> data => data,
+      _ => const <String, dynamic>{},
+    };
     final counted = <ResultSubjectModel>[];
     final notCounted = <ResultSubjectModel>[];
     for (final subject in jsonObjects(data['subjects'])) {
-      // Counted unless the school says not.
-      (subject['included_in_total'] as bool? ?? true)
+      // Counted unless the school says not. Sent as true/false, as 1/0, or
+      // as text — anything it doesn't say counts.
+      (jsonBool(subject['included_in_total']) ?? true)
           ? counted.add(ResultSubjectModel.fromJson(subject))
           : notCounted.add(ResultSubjectModel.fromJson(subject));
     }
@@ -58,7 +64,8 @@ class ResultDetailsModel extends ResultDetailsEntity {
 
     return ResultDetailsModel(
       id: json['result_id'] as int,
-      kind: ResultKind.of(json['result_type'] as String?),
+      // Anything that isn't one of the kinds it knows reads as `other`.
+      kind: ResultKind.of(jsonText(json['result_type'])),
       title: jsonText(json['title']),
       academicYear: jsonText(json['academic_year']),
       resultType: jsonText(json['display']),

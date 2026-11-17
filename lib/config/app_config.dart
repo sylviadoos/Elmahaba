@@ -27,9 +27,9 @@ abstract final class AppConfig {
   static String get websiteBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-     // 'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
-    // Live:
-     _liveWebsite,
+      //'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
+      // Live:
+      _liveWebsite,
     Environment.staging || Environment.prod => _liveWebsite,
   };
 
@@ -38,9 +38,8 @@ abstract final class AppConfig {
     Environment.dev =>
       // Office:
       //'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
-    // Live:
-    _liveSchool,
-    // Jenkins' server (petrasoftware; the phone can't look the name up):
+      // Live:
+      _liveSchool,
     //'http://192.168.0.106:8080/mariam_hany/almahaba316/Almahhaba-School-back-API/public/api/',
     Environment.staging || Environment.prod => _liveSchool,
   };
@@ -91,6 +90,19 @@ abstract final class AppConfig {
   static const bool sentryEnabled =
       sentryDsn != '' &&
       bool.fromEnvironment('SENTRY', defaultValue: !kDebugMode);
+
+  /// Who sends the SMS codes first (sign-up, forgot password, linking a
+  /// child): the school (SMS Misr) when true, Firebase when false — the
+  /// other only when the first fails. On: Firebase sends no SMS without
+  /// its billing (Blaze), yet says it did. Turn off once billing is on,
+  /// or try with `--dart-define=SMS_MISR_FIRST=false`.
+  static const bool smsMisrFirst = bool.fromEnvironment(
+    'SMS_MISR_FIRST',
+    defaultValue: true,
+  );
+
+  /// [smsMisrFirst]'s name in dependency injection.
+  static const String smsMisrFirstName = 'smsMisrFirst';
 
   static bool get isProduction => environment == Environment.prod;
 

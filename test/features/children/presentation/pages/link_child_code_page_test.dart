@@ -10,6 +10,9 @@ import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
+import 'package:al_mahhaba_school/features/children/data/models/link_verification_model.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart';
 import 'package:al_mahhaba_school/features/children/presentation/pages/link_child_code_page.dart';
@@ -29,27 +32,42 @@ final en = lookupAppLocalizations(const Locale('en'));
 void main() {
   late MockVerifyChildLinkUseCase verifyChildLink;
   late MockResendChildLinkCodeUseCase resendCode;
+  late MockSendChildLinkCodeUseCase sendCode;
+  late MockVerifyOtpUseCase checkFirebaseCode;
   late MockChildrenViewModel childrenViewModel;
 
   setUpAll(() {
     provideResultDummy<ChildEntity>();
     provideResultDummy<LinkVerificationEntity>();
+    provideResultDummy<PhoneVerificationEntity>();
+    provideResultDummy<String>();
   });
 
   setUp(() {
     verifyChildLink = MockVerifyChildLinkUseCase();
     resendCode = MockResendChildLinkCodeUseCase();
+    sendCode = MockSendChildLinkCodeUseCase();
+    checkFirebaseCode = MockVerifyOtpUseCase();
     childrenViewModel = MockChildrenViewModel();
     when(childrenViewModel.state).thenReturn(const ChildrenState());
     when(childrenViewModel.stream).thenAnswer((_) => const Stream.empty());
     getIt.registerFactory<LinkChildCodeViewModel>(
-      () => LinkChildCodeViewModel(verifyChildLink, resendCode),
+      () => LinkChildCodeViewModel(
+        verifyChildLink,
+        sendCode,
+        resendCode,
+        checkFirebaseCode,
+        false,
+      ),
     );
   });
   tearDown(getIt.reset);
 
   /// Add children, with the code page opened over it.
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(
+    WidgetTester tester, {
+    LinkVerificationEntity? opened,
+  }) async {
     tester.usePhoneScreen();
     final router = GoRouter(
       routes: [
@@ -74,12 +92,12 @@ void main() {
         ],
       ),
     );
-    router.push(AppRoutes.linkChildCode, extra: verification);
+    router.push(AppRoutes.linkChildCode, extra: opened ?? verification);
     await tester.pumpAndSettle();
   }
 
   void answerCheck(Result<ChildEntity> result) => when(
-    verifyChildLink(token: anyNamed('token'), code: anyNamed('code')),
+    verifyChildLink(token: anyNamed('token'), proof: anyNamed('proof')),
   ).thenAnswer((_) async => result);
 
   Future<void> enterCode(WidgetTester tester, String code) async {
@@ -107,7 +125,10 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(
-      verifyChildLink(token: verification.token, code: '123456'),
+      verifyChildLink(
+        token: verification.token,
+        proof: const SchoolCodeProof('123456'),
+      ),
     ).called(1);
     final event =
         verify(childrenViewModel.doAction(captureAny)).captured.single
@@ -209,9 +230,105 @@ void main() {
     expect(find.text(en.resendCode), findsNothing);
   });
 
+  group('the school gave its number: Firebase sends the code', () {
+    final withPhone = LinkVerificationModel.fromJson({
+      ...verificationJson,
+      'phone': '01012344567',
+    });
+
+    testWidgets('sent by Firebase as the page opens', (tester) async {
+      when(sendCode(any, resendToken: anyNamed('resendToken'))).thenAnswer(
+        (_) async => const Success(
+          data: SmsCodeSent(verificationId: 'vid', resendToken: 1),
+        ),
+      );
+      when(
+        checkFirebaseCode(verificationId: 'vid', smsCode: '123456'),
+      ).thenAnswer((_) async => const Success(data: 'firebase-id-token'));
+      answerCheck(const Success(data: ereny));
+      await pump(tester, opened: withPhone);
+
+      verify(sendCode('01012344567', resendToken: null)).called(1);
+      verifyNever(resendCode(any));
+
+      await enterCode(tester, '123456');
+      await tester.pumpAndSettle();
+
+      verify(
+        verifyChildLink(
+          token: withPhone.token,
+          proof: const FirebaseProof('firebase-id-token'),
+        ),
+      ).called(1);
+      expect(find.text('Add children'), findsOneWidget);
+    });
+
+    testWidgets('Firebase fails: the school texts it instead', (tester) async {
+      when(sendCode(any, resendToken: anyNamed('resendToken'))).thenAnswer(
+        (_) async => const Failure(
+          exception: PhoneVerificationException(code: 'quota-exceeded'),
+        ),
+      );
+      when(
+        resendCode(any),
+      ).thenAnswer((_) async => Success(data: verification));
+      answerCheck(const Success(data: ereny));
+      await pump(tester, opened: withPhone);
+
+      verify(resendCode(withPhone.token)).called(1);
+
+      await enterCode(tester, '123456');
+      await tester.pumpAndSettle();
+
+      verify(
+        verifyChildLink(
+          token: withPhone.token,
+          proof: const SchoolCodeProof('123456'),
+        ),
+      ).called(1);
+      verifyZeroInteractions(checkFirebaseCode);
+    });
+
+    testWidgets('a wrong Firebase code: the app\'s message, under the boxes', (
+      tester,
+    ) async {
+      when(sendCode(any, resendToken: anyNamed('resendToken'))).thenAnswer(
+        (_) async => const Success(
+          data: SmsCodeSent(verificationId: 'vid', resendToken: 1),
+        ),
+      );
+      when(
+        checkFirebaseCode(
+          verificationId: anyNamed('verificationId'),
+          smsCode: anyNamed('smsCode'),
+        ),
+      ).thenAnswer(
+        (_) async => const Failure(
+          exception: PhoneVerificationException(
+            code: 'invalid-verification-code',
+          ),
+        ),
+      );
+      await pump(tester, opened: withPhone);
+
+      await enterCode(tester, '000000');
+
+      expect(find.text(en.otpWrongCode), findsOneWidget);
+      verifyNever(
+        verifyChildLink(token: anyNamed('token'), proof: anyNamed('proof')),
+      );
+    });
+  });
+
   test('the state starts with nothing checked', () {
     expect(
-      LinkChildCodeViewModel(verifyChildLink, resendCode).state.checking,
+      LinkChildCodeViewModel(
+        verifyChildLink,
+        sendCode,
+        resendCode,
+        checkFirebaseCode,
+        false,
+      ).state.checking,
       const BaseState<ChildEntity>.initial(),
     );
   });

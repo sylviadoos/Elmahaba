@@ -151,9 +151,14 @@ class MockSendOtpUseCase extends _i1.Mock implements _i13.SendOtpUseCase {
   _i5.Future<_i6.Result<_i14.PhoneVerificationEntity>> call(
     String? phone, {
     int? resendToken,
+    bool? bySchool = false,
   }) =>
       (super.noSuchMethod(
-            Invocation.method(#call, [phone], {#resendToken: resendToken}),
+            Invocation.method(
+              #call,
+              [phone],
+              {#resendToken: resendToken, #bySchool: bySchool},
+            ),
             returnValue:
                 _i5.Future<_i6.Result<_i14.PhoneVerificationEntity>>.value(
                   _i9.dummyValue<_i6.Result<_i14.PhoneVerificationEntity>>(
@@ -161,7 +166,7 @@ class MockSendOtpUseCase extends _i1.Mock implements _i13.SendOtpUseCase {
                     Invocation.method(
                       #call,
                       [phone],
-                      {#resendToken: resendToken},
+                      {#resendToken: resendToken, #bySchool: bySchool},
                     ),
                   ),
                 ),
@@ -172,7 +177,7 @@ class MockSendOtpUseCase extends _i1.Mock implements _i13.SendOtpUseCase {
                     Invocation.method(
                       #call,
                       [phone],
-                      {#resendToken: resendToken},
+                      {#resendToken: resendToken, #bySchool: bySchool},
                     ),
                   ),
                 ),

@@ -4,8 +4,8 @@ import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart';
 
-/// Linking a child by the code the school texted: checking the code, and
-/// asking for another.
+/// Linking a child by a texted code: checking the code, and sending it
+/// (the first time when Firebase sends it, and again).
 class LinkChildCodeState extends Equatable {
   const LinkChildCodeState({
     this.checking = const BaseState.initial(),
@@ -15,8 +15,9 @@ class LinkChildCodeState extends Equatable {
   /// The code checked: success with the child once it's linked.
   final BaseState<ChildEntity> checking;
 
-  /// Another code asked for: success with the check as the school sent it
-  /// again (a new count of resends).
+  /// A code sent: success with the check — as the school sent it back when
+  /// it texted the code (a new count of resends), or as it was when
+  /// Firebase sent it.
   final BaseState<LinkVerificationEntity> resending;
 
   bool get isBusy =>

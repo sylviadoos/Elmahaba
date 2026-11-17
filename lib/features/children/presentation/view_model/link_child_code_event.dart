@@ -1,3 +1,5 @@
+import 'package:al_mahhaba_school/features/children/domain/entities/link_verification_entity.dart';
+
 sealed class LinkChildCodeEvent {
   const LinkChildCodeEvent();
 }
@@ -10,9 +12,11 @@ final class CheckLinkCodeEvent extends LinkChildCodeEvent {
   final String code;
 }
 
-/// Asks the school to text the code of the check [token] again.
-final class ResendLinkCodeEvent extends LinkChildCodeEvent {
-  const ResendLinkCodeEvent(this.token);
+/// Sends the code of [verification] — by Firebase when the school gave its
+/// number for the child, else (or when Firebase can't) by the school. The
+/// first time, and again.
+final class SendLinkCodeEvent extends LinkChildCodeEvent {
+  const SendLinkCodeEvent(this.verification);
 
-  final String token;
+  final LinkVerificationEntity verification;
 }

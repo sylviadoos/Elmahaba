@@ -13,11 +13,15 @@ sealed class AppException implements Exception {
   final String? message;
   final int? statusCode;
 
-  /// The server's message if it sent one, otherwise a translated default.
+  /// The server's message if it sent one meant for parents, otherwise a
+  /// translated default (crashes and untranslated keys are dropped by
+  /// `DioExceptionHandler`).
   String localizedMessage(BuildContext context) {
     final l10n = context.l10n;
     return message ??
         switch (this) {
+          // The school turned the parents app off for now (503).
+          ServerException(code: 'mobile_app_disabled') => l10n.appUnavailable,
           ServerException() => l10n.serverError,
           UnauthorizedException(:final isAccountWithdrawn) =>
             isAccountWithdrawn ? l10n.accountWithdrawn : l10n.expiredToken,

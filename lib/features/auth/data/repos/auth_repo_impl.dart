@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:al_mahhaba_school/config/app_config.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/auth_local_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/auth_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/data_sources/phone_verification_data_source.dart';
+import 'package:al_mahhaba_school/features/auth/data/data_sources/school_otp_data_source.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/auth_session_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/change_password_request_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/complete_register_request_model.dart';
@@ -23,6 +26,7 @@ import 'package:al_mahhaba_school/features/auth/domain/entities/register_request
 import 'package:al_mahhaba_school/features/auth/domain/entities/reset_password_request_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.dart';
 import 'package:al_mahhaba_school/features/auth/domain/repos/auth_repo.dart';
+import 'package:al_mahhaba_school/features/auth/domain/school_sms_down.dart';
 import 'package:al_mahhaba_school/features/chat/data/data_sources/chat_local_data_source.dart';
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_local_data_source.dart';
 
@@ -32,13 +36,22 @@ class AuthRepoImpl implements AuthRepo {
     this._remoteDataSource,
     this._localDataSource,
     this._phoneVerification,
+    this._schoolOtp,
     this._childrenLocalDataSource,
     this._chatLocalDataSource,
+    @Named(AppConfig.smsMisrFirstName) this._smsMisrFirst,
   );
 
   final AuthRemoteDataSource _remoteDataSource;
   final AuthLocalDataSource _localDataSource;
   final PhoneVerificationDataSource _phoneVerification;
+
+  /// The school's own SMS (SMS Misr): first, or when Firebase can't send.
+  final SchoolOtpDataSource _schoolOtp;
+
+  /// Whether the school sends the codes first (`AppConfig.smsMisrFirst`),
+  /// Firebase only when it fails; else the other way round.
+  final bool _smsMisrFirst;
 
   /// The session's children are saved and forgotten with it.
   final ChildrenLocalDataSource _childrenLocalDataSource;
@@ -70,9 +83,30 @@ class AuthRepoImpl implements AuthRepo {
   Future<Result<PhoneVerificationEntity>> sendOtp(
     String phone, {
     int? resendToken,
-  }) => Result.guard(
-    () => _phoneVerification.sendCode(phone, resendToken: resendToken),
-  );
+    bool bySchool = false,
+  }) => Result.guard(() async {
+    if (_smsMisrFirst || bySchool) {
+      try {
+        return await _schoolOtp.sendCode(phone);
+      } on AppException catch (error) {
+        // SMS Misr failed: Firebase sends it instead — when the school
+        // sends first; asked for the school's on purpose, its error stands.
+        if (!_smsMisrFirst || !error.isSchoolSmsDown) rethrow;
+        debugPrint('The school sent no code ($error): Firebase sends one.');
+        return _phoneVerification.sendCode(phone, resendToken: resendToken);
+      }
+    }
+    try {
+      return await _phoneVerification.sendCode(phone, resendToken: resendToken);
+    } on AppException catch (error) {
+      // Firebase couldn't send it (blocked, out of quota, set up wrong…):
+      // the school texts its own code instead. If that fails too, its
+      // error is the one shown — it's the last word, and in the app's
+      // language.
+      debugPrint('Firebase sent no code ($error): the school sends one.');
+      return _schoolOtp.sendCode(phone);
+    }
+  });
 
   @override
   Future<Result<String>> verifyOtp({

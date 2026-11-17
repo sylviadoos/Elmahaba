@@ -12,6 +12,8 @@ import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance
 import 'package:al_mahhaba_school/features/attendance/domain/entities/holiday_entity.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
+import 'package:al_mahhaba_school/features/home/domain/entities/dashboard_attendance_entity.dart';
+import 'package:al_mahhaba_school/features/home/domain/entities/message_counts_entity.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_bloc.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_intent.dart';
 import 'package:al_mahhaba_school/features/home/presentation/bloc/home_state.dart';
@@ -333,5 +335,256 @@ void main() {
         expect(bloc.state.calendar, calendar);
       },
     );
+  });
+
+  group('review scenarios', reviewScenarios);
+}
+
+/// Scenarios added by the Home review: what the parent can do to Home
+/// while the school is still answering, and what comes back when it
+/// doesn't answer at all.
+void reviewScenarios() {
+  late MockGetChildDashboardUseCase getDashboard;
+  late MockGetMonthAttendanceUseCase getMonth;
+  late StreamController<ChatReadEntity> reads;
+
+  final first = dashboardWith();
+  final other = dashboardWith(homework: const []);
+
+  /// Nothing happened at school yet: every part empty.
+  const nothingYet = ChildDashboardEntity(
+    attendance: DashboardAttendanceEntity(),
+    messages: MessageCountsEntity(messages: 0, notices: 0, total: 0),
+  );
+
+  setUpAll(() {
+    provideResultDummy<ChildDashboardEntity>();
+    provideResultDummy<MonthAttendanceEntity>();
+  });
+
+  setUp(() {
+    getDashboard = MockGetChildDashboardUseCase();
+    getMonth = MockGetMonthAttendanceUseCase();
+    reads = StreamController.broadcast();
+    addTearDown(reads.close);
+  });
+
+  HomeBloc build() {
+    final watchReads = MockWatchChatReadsUseCase();
+    when(watchReads()).thenAnswer((_) => reads.stream);
+    return HomeBloc(getDashboard, getMonth, watchReads);
+  }
+
+  HomeState shown(
+    int childId,
+    ChildDashboardEntity dashboard, {
+    bool isRefreshing = false,
+  }) => HomeState(
+    childId: childId,
+    dashboard: BaseState.success(dashboard),
+    isRefreshing: isRefreshing,
+  );
+
+  /// Lets every pending microtask run.
+  Future<void> settle() =>
+      Future<void>.delayed(const Duration(milliseconds: 5));
+
+  group('the school doesn\'t answer', () {
+    blocTest<HomeBloc, HomeState>(
+      'no internet on the first load: the error, and nothing shown',
+      setUp: () => when(
+        getDashboard(1),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException())),
+      build: build,
+      act: (bloc) => bloc.add(const ShowChildIntent(1)),
+      expect: () => [
+        const HomeState(childId: 1, dashboard: BaseState.loading()),
+        const HomeState(
+          childId: 1,
+          dashboard: BaseState.error(NetworkException()),
+        ),
+      ],
+    );
+
+    blocTest<HomeBloc, HomeState>(
+      'it timed out: the same as no internet, so "Try again" is offered',
+      setUp: () => when(
+        getDashboard(1),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException())),
+      build: build,
+      act: (bloc) => bloc.add(const ShowChildIntent(1)),
+      verify: (bloc) =>
+          expect(bloc.state.dashboard.exception, isA<NetworkException>()),
+    );
+
+    blocTest<HomeBloc, HomeState>(
+      'the session ended: the error says so, so "Log in" is offered',
+      setUp: () => when(getDashboard(1)).thenAnswer(
+        (_) async => const Failure(exception: UnauthorizedException()),
+      ),
+      build: build,
+      act: (bloc) => bloc.add(const ShowChildIntent(1)),
+      verify: (bloc) =>
+          expect(bloc.state.dashboard.exception, isA<UnauthorizedException>()),
+    );
+
+    blocTest<HomeBloc, HomeState>(
+      'the server broke: the error, with its status kept for the message',
+      setUp: () => when(getDashboard(1)).thenAnswer(
+        (_) async => const Failure(
+          exception: ServerException(statusCode: 500, message: 'Server error'),
+        ),
+      ),
+      build: build,
+      act: (bloc) => bloc.add(const ShowChildIntent(1)),
+      verify: (bloc) {
+        final exception = bloc.state.dashboard.exception;
+        expect(exception, isA<ServerException>());
+        expect(exception?.statusCode, 500);
+      },
+    );
+  });
+
+  blocTest<HomeBloc, HomeState>(
+    'a child with nothing yet: an empty dashboard is shown, not an error',
+    setUp: () => when(
+      getDashboard(1),
+    ).thenAnswer((_) async => Success(data: nothingYet)),
+    build: build,
+    act: (bloc) => bloc.add(const ShowChildIntent(1)),
+    expect: () => [
+      const HomeState(childId: 1, dashboard: BaseState.loading()),
+      shown(1, nothingYet),
+    ],
+    verify: (bloc) {
+      expect(bloc.state.dashboard.state, StateType.success);
+      expect(bloc.state.dashboard.data?.announcements.items, isEmpty);
+      expect(bloc.state.dashboard.data?.attendance.presentDays, 0);
+    },
+  );
+
+  test('the parent left Home while it was asking: no error, nothing emitted '
+      'after it closed', () async {
+    final pending = Completer<Result<ChildDashboardEntity>>();
+    when(getDashboard(1)).thenAnswer((_) => pending.future);
+    final bloc = build();
+    final states = <HomeState>[];
+    final errors = <Object>[];
+    final subscription = bloc.stream.listen(states.add, onError: errors.add);
+
+    bloc.add(const ShowChildIntent(1));
+    await settle();
+    // Home is gone: `BlocProvider` closes its bloc.
+    await bloc.close();
+    // The school answers afterwards.
+    pending.complete(Success(data: first));
+    await settle();
+
+    expect(errors, isEmpty);
+    expect(states, [
+      const HomeState(childId: 1, dashboard: BaseState.loading()),
+    ]);
+    await subscription.cancel();
+  });
+
+  test('refreshed over and over while the school is still answering: they '
+      'fold into one more request, not one per pull', () async {
+    var calls = 0;
+    final pending = Completer<Result<ChildDashboardEntity>>();
+    when(getDashboard(1)).thenAnswer((_) {
+      calls++;
+      // The first load answers at once; the refresh after it hangs.
+      return calls == 1
+          ? Future.value(Success(data: first))
+          : (calls == 2 ? pending.future : Future.value(Success(data: other)));
+    });
+    final bloc = build();
+
+    bloc.add(const ShowChildIntent(1));
+    await settle();
+    expect(calls, 1, reason: 'the first load');
+
+    // Five pulls while that second request is still out.
+    for (var i = 0; i < 5; i++) {
+      bloc.add(const RefreshHomeIntent());
+    }
+    await settle();
+    expect(calls, 2, reason: 'the four after the first are folded into one');
+
+    pending.complete(Success(data: first));
+    await settle();
+
+    // The one in flight, then one more for everything asked during it.
+    expect(calls, 3);
+    expect(bloc.state.isRefreshing, isFalse);
+    await bloc.close();
+  });
+
+  test('refreshed over and over when the school answers instantly: nothing '
+      'holds them back, so each one is its own request', () async {
+    var calls = 0;
+    when(getDashboard(1)).thenAnswer((_) async {
+      calls++;
+      return Success(data: first);
+    });
+    final bloc = build();
+
+    bloc.add(const ShowChildIntent(1));
+    await settle();
+    expect(calls, 1);
+
+    for (var i = 0; i < 5; i++) {
+      bloc.add(const RefreshHomeIntent());
+    }
+    await settle();
+
+    // Recorded as it behaves today: there is no debounce, only the
+    // "one in flight" guard, and nothing is in flight between two fast
+    // answers.
+    expect(calls, 6);
+    await bloc.close();
+  });
+
+  test(
+    'another child picked while the first was still loading: the first '
+    'answer is dropped, and so is the refresh that was waiting on it',
+    () async {
+      final pending = Completer<Result<ChildDashboardEntity>>();
+      when(getDashboard(1)).thenAnswer((_) => pending.future);
+      when(getDashboard(2)).thenAnswer((_) async => Success(data: other));
+      final bloc = build();
+
+      bloc.add(const ShowChildIntent(1));
+      await settle();
+      // A notification arrives while child 1 is loading.
+      bloc.add(const RefreshHomeIntent());
+      await settle();
+      // The parent picks child 2 instead.
+      bloc.add(const ShowChildIntent(2));
+      await settle();
+      pending.complete(Success(data: first));
+      await settle();
+
+      expect(bloc.state.childId, 2);
+      expect(bloc.state.dashboard.data, other);
+      // The refresh asked for child 1 is not spent on child 2: their
+      // dashboard is asked for once, by the load that replaced it.
+      verify(getDashboard(2)).called(1);
+      await bloc.close();
+    },
+  );
+
+  test('a read confirmed after Home closed: nothing is asked', () async {
+    when(getDashboard(1)).thenAnswer((_) async => Success(data: first));
+    final bloc = build();
+    bloc.add(const ShowChildIntent(1));
+    await settle();
+    await bloc.close();
+
+    reads.add(const ChatReadEntity(unread: 0));
+    await settle();
+
+    // Only the first load: the stream is let go when Home closes.
+    verify(getDashboard(1)).called(1);
   });
 }

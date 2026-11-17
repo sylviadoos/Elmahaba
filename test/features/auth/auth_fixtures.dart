@@ -4,6 +4,7 @@ import 'package:al_mahhaba_school/features/auth/data/models/parent_model.dart';
 import 'package:al_mahhaba_school/features/auth/data/models/register_eligibility_model.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/change_password_request_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/login_request_entity.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/register_request_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/reset_password_request_entity.dart';
 
@@ -70,7 +71,7 @@ const loginRequest = LoginRequestEntity(phone: phone, password: password);
 
 const resetRequest = ResetPasswordRequestEntity(
   phone: phone,
-  firebaseIdToken: firebaseIdToken,
+  proof: FirebaseProof(firebaseIdToken),
   password: password,
   passwordConfirmation: password,
 );

@@ -1,8 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-/// A code the school texted to the phone it has for the child, to prove the
-/// parent may link them (the parent's own number is another one). Sent by
-/// the school's SMS, not Firebase.
+/// A code sent to the phone the school has for the child, to prove the
+/// parent may link them (the parent's own number is another one). By
+/// Firebase when the school gives the whole [phone], and by the school's
+/// own SMS (SMS Misr) when it doesn't, or when Firebase can't send it.
 class LinkVerificationEntity extends Equatable {
   const LinkVerificationEntity({
     required this.token,
@@ -11,13 +12,14 @@ class LinkVerificationEntity extends Equatable {
     required this.expiresIn,
     required this.resendAfter,
     required this.resendsLeft,
+    this.phone,
   });
 
   /// Names this check: sent back with the code, or to resend it.
   final String token;
 
   /// The school's number for the child, hidden but its end, e.g.
-  /// "••• ••• 4567": shown as it is; the whole number never comes.
+  /// "••• ••• 4567": shown as it is.
   final String maskedPhone;
 
   /// e.g. "father".
@@ -29,8 +31,13 @@ class LinkVerificationEntity extends Equatable {
   /// How long until another code can be asked for.
   final Duration resendAfter;
 
-  /// How many more codes can be asked for.
+  /// How many more codes the school can text.
   final int resendsLeft;
+
+  /// The school's number for the child, whole and local ("01012345678"),
+  /// for Firebase to send the code to: the school hasn't texted one yet.
+  /// Null when it has (by its own SMS). Never shown.
+  final String? phone;
 
   @override
   List<Object?> get props => [
@@ -40,5 +47,6 @@ class LinkVerificationEntity extends Equatable {
     expiresIn,
     resendAfter,
     resendsLeft,
+    phone,
   ];
 }

@@ -4,6 +4,7 @@ import 'package:al_mahhaba_school/core/network/api_endpoints.dart';
 import 'package:al_mahhaba_school/core/network/api_keys.dart';
 import 'package:al_mahhaba_school/core/network/api_names.dart';
 import 'package:al_mahhaba_school/core/network/api_service.dart';
+import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/children/data/models/child_details_model.dart';
 import 'package:al_mahhaba_school/features/children/data/models/child_model.dart';
@@ -56,14 +57,22 @@ class ChildrenRemoteDataSourceImpl implements ChildrenRemoteDataSource {
   @override
   Future<ChildModel> verifyChildLink({
     required String token,
-    required String code,
+    required PhoneProofEntity proof,
   }) async {
     // As linking: { "status": "success", "code": "child_linked",
     //   "data": { "result": "linked", "child": {...} } }
     final json =
         await _api.post(
               ApiEndpoints.linkChildVerify,
-              data: {'verification_token': token, 'code': code},
+              data: {
+                'verification_token': token,
+                ...switch (proof) {
+                  SchoolCodeProof(:final code) => {'code': code},
+                  FirebaseProof(:final idToken) => {
+                    'firebase_id_token': idToken,
+                  },
+                },
+              },
             )
             as Map<String, dynamic>;
     final data = json[ApiKeys.data] as Map<String, dynamic>;

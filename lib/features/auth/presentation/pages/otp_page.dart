@@ -85,9 +85,11 @@ class _OtpViewState extends State<_OtpView> {
     super.dispose();
   }
 
-  void _startCountdown() {
+  /// From [wait] when the sender gave one (the school does), else the
+  /// page's own.
+  void _startCountdown([Duration? wait]) {
     _timer?.cancel();
-    _secondsLeft = _resendSeconds;
+    _secondsLeft = wait?.inSeconds ?? _resendSeconds;
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsLeft <= 1) timer.cancel();
       setState(() => _secondsLeft--);
@@ -123,9 +125,9 @@ class _OtpViewState extends State<_OtpView> {
   void _toLogin() => context.go(AppRoutes.login, extra: widget.request.phone);
 
   void _onState(BuildContext context, AuthState state) {
-    if (state.data is OtpSent) {
+    if (state.data case OtpSent(:final resendAfter)) {
       // The countdown runs from when the code really left.
-      setState(_startCountdown);
+      setState(() => _startCountdown(resendAfter));
       return;
     }
     if (state.data is Registered) {
