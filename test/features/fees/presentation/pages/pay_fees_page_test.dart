@@ -112,6 +112,41 @@ void main() {
     expect(ticked(tester, bus), isFalse);
   });
 
+  group('Preview and Download PDF', () {
+    bool enabled(WidgetTester tester, String label) =>
+        tester
+            .widget<OutlinedButton>(
+              find.ancestor(
+                of: find.text(label),
+                matching: find.byType(OutlinedButton),
+              ),
+            )
+            .onPressed !=
+        null;
+
+    testWidgets('in full, with an installment that can\'t be paid yet before '
+        'another: the whole statement still opens', (tester) async {
+      await pumpPage(tester, statement(educationPayable: false));
+
+      expect(enabled(tester, l10n.preview), isTrue);
+      expect(enabled(tester, l10n.downloadPdf), isTrue);
+    });
+
+    testWidgets('in installments, ticked out of order: off until in order', (
+      tester,
+    ) async {
+      await pumpPage(tester, statement());
+      await payInInstallments(tester);
+      // Nothing ticked: nothing to show.
+      expect(enabled(tester, l10n.preview), isFalse);
+
+      await tap(tester, education);
+
+      expect(enabled(tester, l10n.preview), isTrue);
+      expect(enabled(tester, l10n.downloadPdf), isTrue);
+    });
+  });
+
   testWidgets('nothing out of order: no sentence at all', (tester) async {
     await pumpPage(tester, statement());
 

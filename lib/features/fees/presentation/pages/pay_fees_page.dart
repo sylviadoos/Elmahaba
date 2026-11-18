@@ -286,7 +286,11 @@ class _PayFeesViewState extends State<_PayFeesView> {
                           statement: statement,
                           // In full: every fee; else what's ticked.
                           installments: _inFull ? null : toPay,
-                          enabled: inOrder,
+                          // In full it's the whole statement, which needs no
+                          // order: always there to see, even with an
+                          // installment that can't be paid yet (under
+                          // settlement) before another.
+                          enabled: _inFull || inOrder,
                         ),
                         if (!inOrder)
                           for (final reason

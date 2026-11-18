@@ -411,8 +411,10 @@ final GoRouter appRouter = GoRouter(
         },
       ),
     ),
+    // An excuse is part of Attendance: back from one is Attendance.
     _parentPage(
       path: AppRoutes.newExcuse,
+      backGoesHome: false,
       // Needs the absence Attendance picked; opened any other way, go there.
       redirect: (context, state) =>
           state.extra is NewExcuseArgs ? null : AppRoutes.attendance,
@@ -421,6 +423,7 @@ final GoRouter appRouter = GoRouter(
     ),
     _parentPage(
       path: AppRoutes.excuseDetails,
+      backGoesHome: false,
       builder: (context, state) {
         // Passed from Attendance; missing when opened from a link.
         final args = switch (state.extra) {
@@ -440,13 +443,17 @@ final GoRouter appRouter = GoRouter(
 );
 
 /// A page the parent opens over the tabs. Back from it goes Home, not
-/// through every page they opened on the way there ([HomeOnBack]).
+/// through every page they opened on the way there ([HomeOnBack]) — unless
+/// not [backGoesHome]: then back is the page under it.
 GoRoute _parentPage({
   required String path,
   required Widget Function(BuildContext context, GoRouterState state) builder,
   GoRouterRedirect? redirect,
+  bool backGoesHome = true,
 }) => GoRoute(
   path: path,
   redirect: redirect,
-  builder: (context, state) => HomeOnBack(child: builder(context, state)),
+  builder: (context, state) => backGoesHome
+      ? HomeOnBack(child: builder(context, state))
+      : builder(context, state),
 );

@@ -12,7 +12,8 @@ import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 /// - Home itself — back there leaves the app, as always;
 /// - the tabs — they share one route, so `ParentShellPage` has its own;
 /// - the chat's photo and file viewers — back there closes what's open and
-///   leaves the chat underneath, where the parent was reading.
+///   leaves the chat underneath, where the parent was reading;
+/// - an excuse (new, or its details) — back is Attendance, which opened it.
 ///
 /// Log in and sign up aren't parent pages: there's no Home to go to yet.
 class HomeOnBack extends StatelessWidget {

@@ -60,11 +60,14 @@ const busAdded = FeeEntity(
 );
 
 /// A child's statement: the [fees] lines, and an education installment
-/// that comes before a bus one — locked, with [reason] for why.
+/// that comes before a bus one — locked, with [reason] for why. Without
+/// [educationPayable], the education one can't be paid yet (under
+/// settlement), so the bus can't be paid before it either.
 FeeStatementEntity statement({
   String reason = busReason,
   List<FeeEntity> fees = const [tuition],
   bool canChangeOptionalFees = true,
+  bool educationPayable = true,
 }) => FeeStatementEntity(
   student: student,
   payOnlineEnabled: true,
@@ -73,14 +76,16 @@ FeeStatementEntity statement({
   paidAmount: 0,
   remainingBalance: 8000,
   installments: [
-    const FeeInstallmentEntity(
+    FeeInstallmentEntity(
       feeName: 'مصاريف التعليم والنشاط',
       label: 'قسط اول',
       bankAccount: '••••••••/446',
       amount: 5000,
-      status: InstallmentStatus.overdue,
-      statusLabel: 'متأخر',
-      canPay: true,
+      status: educationPayable
+          ? InstallmentStatus.overdue
+          : InstallmentStatus.underSettlement,
+      statusLabel: educationPayable ? 'متأخر' : 'تحت التسوية',
+      canPay: educationPayable,
       payKey: firstEducation,
     ),
     FeeInstallmentEntity(

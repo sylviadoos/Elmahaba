@@ -7,14 +7,13 @@ import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/features/fees/domain/entities/fee_installment_entity.dart';
 import 'package:al_mahhaba_school/features/fees/domain/entities/fee_statement_entity.dart';
-import 'package:al_mahhaba_school/features/fees/domain/entities/installment_status.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/pdf/fee_statement_pdf_file.dart';
 
 /// The school's official fee statement, laid out like the one its system
 /// prints: the student, then every fee (no [installments]) or the
-/// installments being paid, the totals, and the settlement notice (always
-/// with installments; on every fee, when some are being settled). Its labels are in English like the school's; names stay
-/// as the school wrote them.
+/// installments being paid, the totals, and the settlement notice (on
+/// every statement, like the school's). Its labels are in English like the
+/// school's; names stay as the school wrote them.
 abstract final class FeeStatementPdf {
   static Future<FeeStatementPdfFile> build(
     FeeStatementEntity statement, {
@@ -65,15 +64,6 @@ abstract final class FeeStatementPdf {
       paid = 0;
       remaining = total;
     }
-    // Always on the installments being paid, like the school's; on the
-    // whole statement only while some are being settled.
-    final underSettlement =
-        installments != null ||
-        statement.installments.any(
-          (installment) =>
-              installment.status == InstallmentStatus.underSettlement,
-        );
-
     document.addPage(
       pw.MultiPage(
         pageTheme: pw.PageTheme(
@@ -150,24 +140,20 @@ abstract final class FeeStatementPdf {
             ('Paid Amount', paid),
             ('Remaining Balance', remaining),
           ]),
-          if (underSettlement) ...[
-            pw.SizedBox(height: 18),
-            _section('SETTLEMENT NOTICE', brand),
-            pw.Container(
-              width: double.infinity,
-              padding: const pw.EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 8,
-              ),
-              decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: _border, width: 0.7),
-              ),
-              child: pw.Text(
-                'These fees are under settlement.',
-                style: const pw.TextStyle(fontSize: 9.5, color: _slate),
-              ),
+          // On every statement, like the school's.
+          pw.SizedBox(height: 18),
+          _section('SETTLEMENT NOTICE', brand),
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: _border, width: 0.7),
             ),
-          ],
+            child: pw.Text(
+              'These fees are under settlement.',
+              style: const pw.TextStyle(fontSize: 9.5, color: _slate),
+            ),
+          ),
           pw.SizedBox(height: 22),
           pw.Divider(color: _line, thickness: 0.7, height: 0.7),
           pw.SizedBox(height: 14),
