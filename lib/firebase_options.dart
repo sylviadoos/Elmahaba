@@ -66,10 +66,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDb2w6QwRh2N_FYRBJ_q-Fpnz-R2gufmBc',
-    appId: '1:757278004720:ios:b4c39d419e88b97faef935',
+    appId: '1:757278004720:ios:6864219a30655f86aef935',
     messagingSenderId: '757278004720',
     projectId: 'el-mahaba-schools',
     storageBucket: 'el-mahaba-schools.firebasestorage.app',
-    iosBundleId: 'com.almahabbahschools.parents',
+    iosBundleId: 'com.petra.almahabbahschools-parents',
   );
 }
