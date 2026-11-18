@@ -91,6 +91,16 @@ jobs:
             | base64 --decode \
             > "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision"
 
+          PROFILE_NAME=$(security cms -D -i "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision" \
+            | plutil -extract Name xml1 -o - - \
+            | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+          TEAM_ID=$(security cms -D -i "$HOME/Library/MobileDevice/Provisioning Profiles/profile.mobileprovision" \
+            | plutil -extract TeamIdentifier.0 xml1 -o - - \
+            | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+
+          echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          echo "TEAM_ID=$TEAM_ID" >> "$GITHUB_ENV"
+
       # 8. Verify signing identities
       - name: Verify Apple signing identity
         run: |
@@ -98,19 +108,65 @@ jobs:
             -v \
             -p codesigning
 
-      # 9. Build signed IPA
+      # The Runner target has CODE_SIGN_STYLE=Automatic, which needs a
+      # logged-in Apple ID to resolve in Xcode but can't do that on a CI
+      # runner. Patch just the Runner target to manual signing with the
+      # installed cert/profile.
+      - name: Configure manual code signing
+        run: |
+          gem list -i xcodeproj > /dev/null || gem install xcodeproj --no-document
+
+          ruby -e '
+            require "xcodeproj"
+            project = Xcodeproj::Project.open("ios/Runner.xcodeproj")
+            target = project.targets.find { |t| t.name == "Runner" }
+            target.build_configurations.each do |config|
+              config.build_settings["CODE_SIGN_STYLE"] = "Manual"
+              config.build_settings["CODE_SIGN_IDENTITY"] = "Apple Distribution"
+              config.build_settings["DEVELOPMENT_TEAM"] = ENV["TEAM_ID"]
+              config.build_settings["PROVISIONING_PROFILE_SPECIFIER"] = ENV["PROFILE_NAME"]
+            end
+            project.save
+          '
+
+      # 9. Generate ExportOptions.plist matching the installed profile
+      - name: Generate ExportOptions.plist
+        run: |
+          cat > ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>teamID</key>
+            <string>${TEAM_ID}</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.petra.almahabbahschools-parents</key>
+              <string>${PROFILE_NAME}</string>
+            </dict>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+      # 10. Build signed IPA
       - name: Build iOS IPA
         run: |
           flutter build ipa \
             --release \
             --export-options-plist=ios/ExportOptions.plist
 
-      # 10. Show generated IPA
+      # 11. Show generated IPA
       - name: Check IPA
         run: |
           ls -lah build/ios/ipa/
 
-      # 11. Upload IPA to App Store Connect / TestFlight
+      # 12. Upload IPA to App Store Connect / TestFlight
       - name: Upload to App Store Connect
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
@@ -129,7 +185,7 @@ jobs:
             --apiKey "$APP_STORE_CONNECT_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
 
-      # 12. Success message
+      # 13. Success message
       - name: Upload completed
         run: |
           echo "========================================="
