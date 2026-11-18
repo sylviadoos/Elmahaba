@@ -16,7 +16,6 @@ import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_effect.da
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_file_opener.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_bottom_bar.dart';
-import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_header.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_page_header.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_timeline.dart';
 import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
@@ -149,27 +148,8 @@ class _ChatViewState extends State<_ChatView> {
               body: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    // The header lies over the list's top and slides away as
-                    // it scrolls: the list keeps its size.
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          top: ChatHeader.collapsedHeight(context),
-                          child: ChatTimeline(
-                            scroll: _scroll,
-                            overlap: ChatHeader.collapseExtent,
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          child: ChatPageHeader(scroll: _scroll),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const ChatPageHeader(),
+                  Expanded(child: ChatTimeline(scroll: _scroll)),
                   ChatBottomBar(controller: _message, focusNode: _messageFocus),
                 ],
               ),

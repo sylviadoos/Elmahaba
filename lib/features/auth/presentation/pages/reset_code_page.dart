@@ -58,7 +58,9 @@ class _ResetCodeView extends StatefulWidget {
 
 class _ResetCodeViewState extends State<_ResetCodeView> {
   static const int _codeLength = 6;
-  static const int _resendSeconds = 45;
+
+  /// 5 minutes: as long as the code lasts.
+  static const int _resendSeconds = 300;
 
   final TextEditingController _codeController = TextEditingController();
   Timer? _timer;
@@ -80,11 +82,11 @@ class _ResetCodeViewState extends State<_ResetCodeView> {
     super.dispose();
   }
 
-  /// From [wait] when the sender gave one (the school does), else the
-  /// page's own.
+  /// The page's own 5 minutes, or the sender's [wait] when longer (the
+  /// school gives one).
   void _startCountdown([Duration? wait]) {
     _timer?.cancel();
-    _secondsLeft = wait?.inSeconds ?? _resendSeconds;
+    _secondsLeft = math.max(wait?.inSeconds ?? 0, _resendSeconds);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_secondsLeft <= 1) timer.cancel();
       setState(() => _secondsLeft--);

@@ -86,6 +86,14 @@ class PayInstallmentsSection extends StatelessWidget {
             installment: installment,
             isPicked: picked.contains(installment.payKey),
             onPickedChanged: (_) => onTogglePicked(installment.payKey),
+            // Locked until the earlier ones it's paid with are ticked: the
+            // school's sentence naming them, or the app's.
+            waitingReason:
+                installment.canPay && !installment.isInOrderWith(picked)
+                ? installment.lockedReason.isNotEmpty
+                      ? installment.lockedReason
+                      : l10n.tickEarlierInstallmentsFirst
+                : null,
           ),
       ],
     );

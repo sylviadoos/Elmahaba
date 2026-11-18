@@ -60,8 +60,8 @@ void main() {
       find.textContaining('0101****678', findRichText: true),
       findsOneWidget,
     );
-    // "Resend code in 0:45", the time in bold.
-    expect(find.textContaining('0:45', findRichText: true), findsOneWidget);
+    // "Resend code in 5:00", the time in bold.
+    expect(find.textContaining('5:00', findRichText: true), findsOneWidget);
   });
 
   testWidgets('Verify waits for all six digits', (tester) async {
@@ -145,9 +145,8 @@ void main() {
   });
 
   group('resend', () {
-    testWidgets("after 45 seconds: sends again, by the school, with its wait", (
-      tester,
-    ) async {
+    testWidgets("after 5 minutes: sends again, by the school; 5 minutes "
+        "again, the school's wait shorter", (tester) async {
       whenCodeSent();
       when(
         harness.sendOtp(
@@ -163,7 +162,9 @@ void main() {
       await harness.pump(tester, AppRoutes.otp, page);
       expect(find.text(l10n.resendCode), findsNothing);
 
-      await tester.pump(const Duration(seconds: 45));
+      await tester.pump(const Duration(seconds: 299));
+      expect(find.text(l10n.resendCode), findsNothing);
+      await tester.pump(const Duration(seconds: 1));
       await tester.tapShown(buttonLabeled(l10n.resendCode));
       await tester.pump();
 
@@ -171,7 +172,7 @@ void main() {
         harness.sendOtp(phone, resendToken: null, bySchool: false),
         harness.sendOtp(phone, resendToken: 7, bySchool: true),
       ]);
-      expect(find.textContaining('1:00', findRichText: true), findsOneWidget);
+      expect(find.textContaining('5:00', findRichText: true), findsOneWidget);
     });
 
     testWidgets('sending failed: says why, can resend right away', (

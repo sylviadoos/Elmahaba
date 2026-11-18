@@ -40,6 +40,9 @@ class AnnouncementsBloc
     });
     on<ReloadAnnouncementsIntent>((_, emit) => _load(emit, refresh: true));
     on<LoadMoreAnnouncementsIntent>(_onLoadMore);
+    on<ShowOneAnnouncementIntent>(
+      (intent, emit) => emit(state.copyWith(studentId: () => intent.studentId)),
+    );
     on<AnnouncementSeenIntent>(_onSeen);
     on<OpenAnnouncementFileIntent>(_onOpenFile);
     on<LoadAnnouncementImageIntent>(_onLoadImage);

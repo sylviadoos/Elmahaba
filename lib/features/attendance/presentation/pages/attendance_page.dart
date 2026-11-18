@@ -227,7 +227,7 @@ class _AttendanceViewState extends State<_AttendanceView> {
       children: [
         AttendanceSummaryCard(counts: counts),
         EqualHeightGrid(
-          columns: 3,
+          columns: 4,
           spacing: 10.w,
           children: [
             AttendanceCountTile(
@@ -239,6 +239,11 @@ class _AttendanceViewState extends State<_AttendanceView> {
               count: counts.absentDays,
               label: l10n.absent,
               style: CountTileStyle.solid,
+            ),
+            AttendanceCountTile(
+              count: counts.lateDays,
+              label: l10n.late,
+              style: CountTileStyle.dashed,
             ),
             AttendanceCountTile(
               count: counts.excusedDays,

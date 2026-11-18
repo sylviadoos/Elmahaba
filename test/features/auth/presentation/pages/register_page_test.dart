@@ -46,20 +46,38 @@ void main() {
 
   testWidgets('Create account waits for the terms', (tester) async {
     await harness.pump(tester, AppRoutes.register, const RegisterPage());
+    await fillIn(tester);
     expect(tester.isEnabled(l10n.createAccount), isFalse);
 
     await agree(tester);
     expect(tester.isEnabled(l10n.createAccount), isTrue);
   });
 
-  group('checks the fields first', () {
-    testWidgets('a short password', (tester) async {
+  group('the rules the password has to meet', () {
+    testWidgets('are listed under the fields', (tester) async {
+      await harness.pump(tester, AppRoutes.register, const RegisterPage());
+
+      expect(find.text(l10n.ruleEightCharacters), findsOneWidget);
+      expect(find.text(l10n.ruleHasLetter), findsOneWidget);
+      expect(find.text(l10n.ruleHasNumber), findsOneWidget);
+      expect(find.text(l10n.rulePasswordsMatch), findsOneWidget);
+    });
+
+    testWidgets('a short password: Create account stays off', (tester) async {
       await harness.pump(tester, AppRoutes.register, const RegisterPage());
       await fillIn(tester, pass: 'short', confirmation: 'short');
       await agree(tester);
-      await createAccount(tester);
 
-      expect(find.text(l10n.passwordTooShort), findsOneWidget);
+      expect(tester.isEnabled(l10n.createAccount), isFalse);
+      verifyZeroInteractions(harness.checkPhone);
+    });
+
+    testWidgets('a password with no number in it', (tester) async {
+      await harness.pump(tester, AppRoutes.register, const RegisterPage());
+      await fillIn(tester, pass: 'secretive', confirmation: 'secretive');
+      await agree(tester);
+
+      expect(tester.isEnabled(l10n.createAccount), isFalse);
       verifyZeroInteractions(harness.checkPhone);
     });
 
@@ -67,9 +85,8 @@ void main() {
       await harness.pump(tester, AppRoutes.register, const RegisterPage());
       await fillIn(tester, confirmation: 'secret124');
       await agree(tester);
-      await createAccount(tester);
 
-      expect(find.text(l10n.passwordsDoNotMatch), findsOneWidget);
+      expect(tester.isEnabled(l10n.createAccount), isFalse);
       verifyZeroInteractions(harness.checkPhone);
     });
   });

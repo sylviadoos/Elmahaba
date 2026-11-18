@@ -1007,7 +1007,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordHint.
   ///
   /// In en, this message translates to:
-  /// **'At least 8 characters'**
+  /// **'Enter a password'**
   String get passwordHint;
 
   /// No description provided for @confirmPasswordHint.
@@ -1796,6 +1796,18 @@ abstract class AppLocalizations {
   /// **'Absent'**
   String get absent;
 
+  /// No description provided for @late.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get late;
+
+  /// No description provided for @arrivedLate.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived late'**
+  String get arrivedLate;
+
   /// No description provided for @officialHoliday.
   ///
   /// In en, this message translates to:
@@ -2480,6 +2492,12 @@ abstract class AppLocalizations {
   /// **'Notifications are off. Turn them on to choose which ones ring.'**
   String get notificationsOffNote;
 
+  /// No description provided for @announcement.
+  ///
+  /// In en, this message translates to:
+  /// **'Announcement'**
+  String get announcement;
+
   /// No description provided for @announcements.
   ///
   /// In en, this message translates to:
@@ -2623,6 +2641,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View homework'**
   String get viewHomework;
+
+  /// No description provided for @viewAnnouncements.
+  ///
+  /// In en, this message translates to:
+  /// **'View announcements'**
+  String get viewAnnouncements;
 
   /// No description provided for @messages.
   ///

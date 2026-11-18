@@ -12,10 +12,7 @@ import 'package:al_mahhaba_school/features/children/presentation/widgets/child_p
 /// "All" for two or more, dotted when the others have unread items) and the
 /// shortcuts, dotted for what's unread.
 class ChatPageHeader extends StatelessWidget {
-  const ChatPageHeader({super.key, required this.scroll});
-
-  /// The chat's list, which the header collapses with.
-  final ScrollController scroll;
+  const ChatPageHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +29,6 @@ class ChatPageHeader extends StatelessWidget {
         final shown = state.shownIndex;
 
         return ChatHeader(
-          scroll: scroll,
           picker: children.isEmpty
               ? null
               : ChildPicker(

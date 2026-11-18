@@ -30,7 +30,11 @@ void main() {
       initialLocation: AppRoutes.home,
       routes: [
         GoRoute(path: AppRoutes.home, builder: (_, _) => const _Page('Home')),
-        for (final path in [AppRoutes.chat, AppRoutes.fees, AppRoutes.feesPay])
+        for (final path in [
+          AppRoutes.chat,
+          AppRoutes.fees,
+          AppRoutes.announcements,
+        ])
           GoRoute(
             path: path,
             builder: (_, _) => HomeOnBack(child: _Page(path)),
@@ -67,9 +71,9 @@ void main() {
       await openInTurn(tester, [
         AppRoutes.chat,
         AppRoutes.fees,
-        AppRoutes.feesPay,
+        AppRoutes.announcements,
       ]);
-      expect(find.text(AppRoutes.feesPay), findsOneWidget);
+      expect(find.text(AppRoutes.announcements), findsOneWidget);
 
       await pressBack(tester);
 
@@ -81,7 +85,7 @@ void main() {
       await openInTurn(tester, [
         AppRoutes.chat,
         AppRoutes.fees,
-        AppRoutes.feesPay,
+        AppRoutes.announcements,
       ]);
 
       await tapTheArrow(tester);

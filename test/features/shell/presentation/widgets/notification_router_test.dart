@@ -77,6 +77,7 @@ void main() {
         page(AppRoutes.fees),
         page(AppRoutes.complaints),
         page(AppRoutes.complaintDetails),
+        page(AppRoutes.announcements),
       ],
     );
     addTearDown(router.dispose);
@@ -123,6 +124,15 @@ void main() {
     await settle(tester);
 
     expect(shown(), AppRoutes.complaintDetailsOf(5521));
+  });
+
+  testWidgets('an announcement opens Announcements', (tester) async {
+    await pumpApp(tester, signedIn: true, at: AppRoutes.home);
+
+    notifications.tap(const {'screen': 'announcement', 'item_id': '7'});
+    await settle(tester);
+
+    expect(shown(), AppRoutes.announcements);
   });
 
   testWidgets('the chat is already open: it is not opened over itself', (

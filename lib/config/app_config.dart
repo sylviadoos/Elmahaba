@@ -27,7 +27,7 @@ abstract final class AppConfig {
   static String get websiteBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-      //'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
+      // 'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
       // Live:
       _liveWebsite,
     Environment.staging || Environment.prod => _liveWebsite,
@@ -37,7 +37,7 @@ abstract final class AppConfig {
   static String get schoolBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-      //'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
+      // 'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
       // Live:
       _liveSchool,
     //'http://192.168.0.106:8080/mariam_hany/almahaba316/Almahhaba-School-back-API/public/api/',
@@ -93,11 +93,19 @@ abstract final class AppConfig {
 
   /// Who sends the SMS codes first (sign-up, forgot password, linking a
   /// child): the school (SMS Misr) when true, Firebase when false — the
-  /// other only when the first fails. On: Firebase sends no SMS without
-  /// its billing (Blaze), yet says it did. Turn off once billing is on,
-  /// or try with `--dart-define=SMS_MISR_FIRST=false`.
+  /// other only when the first fails. Flip the value below to switch, or
+  /// run with `--dart-define=SMS_MISR_FIRST=true` for one run ("Debug +
+  /// school OTP").
+  ///
+  /// Off for now: the school answers `otp_sent` whether SMS Misr sent the
+  /// text or not, so one that never arrives reads as a success and nothing
+  /// falls back. Firebase has the opposite catch — it sends no SMS without
+  /// its billing (Blaze), yet says it did — so if no code arrives from it
+  /// either, that billing is where to look.
   static const bool smsMisrFirst = bool.fromEnvironment(
     'SMS_MISR_FIRST',
+    // true  → the school first, Firebase if it fails.
+    // false → Firebase first, the school if it fails.
     defaultValue: true,
   );
 

@@ -235,14 +235,14 @@ void main() {
       expect(find.text(en.tryAgain), findsOneWidget);
     });
 
-    testWidgets('the session ended: "Log in" instead of "Try again"', (
+    testWidgets('the session ended: "Log out" instead of "Try again"', (
       tester,
     ) async {
       answers([const Failure(exception: UnauthorizedException())]);
       await pump(tester);
       await tester.pump();
 
-      expect(find.text(en.login), findsOneWidget);
+      expect(find.text(en.logout), findsOneWidget);
       expect(find.text(en.tryAgain), findsNothing);
     });
   });

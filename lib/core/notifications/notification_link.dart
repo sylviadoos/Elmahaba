@@ -25,6 +25,7 @@ ChatLinkEntity? notificationLink(Map<String, dynamic> data) {
     'fees' || 'fee' || 'payment' => ChatScreen.fees,
     'complaints' || 'complaint' => ChatScreen.complaint,
     'homework' => ChatScreen.homework,
+    'announcements' || 'announcement' => ChatScreen.announcements,
     // "chat", "message", anything else, or nothing at all: the chat.
     _ => null,
   };

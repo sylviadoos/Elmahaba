@@ -3,9 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/widgets/dashed_border.dart';
 
 /// How a day looks on the calendar; [other] for a day not taken (yet).
-enum CalendarDay { present, absent, excused, holiday, weekend, other }
+/// A [late] day has a dashed red outline.
+enum CalendarDay { present, absent, late, excused, holiday, weekend, other }
 
 /// One day on the month calendar, colored by what it was.
 class CalendarDayCell extends StatelessWidget {
@@ -27,6 +29,7 @@ class CalendarDayCell extends StatelessWidget {
         AppColors.success,
         FontWeight.w700,
       ),
+      CalendarDay.late => (null, AppColors.mahabbahRed, FontWeight.w600),
       CalendarDay.excused => (
         AppColors.infoBg,
         AppColors.info,
@@ -42,7 +45,7 @@ class CalendarDayCell extends StatelessWidget {
     };
     final radius = 10.r;
 
-    return Container(
+    final cell = Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: background,
@@ -57,5 +60,9 @@ class CalendarDayCell extends StatelessWidget {
         ),
       ),
     );
+
+    return day == CalendarDay.late
+        ? DashedBorder(radius: radius, child: cell)
+        : cell;
   }
 }

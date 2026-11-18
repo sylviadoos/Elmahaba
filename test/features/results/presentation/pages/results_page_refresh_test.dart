@@ -359,24 +359,25 @@ void main() {
   });
 
   group('when it fails', () {
-    testWidgets('no internet: the message and "Try again", not "Log in"', (
+    testWidgets('no internet: the message and "Try again", not "Log out"', (
       tester,
     ) async {
       await pump(tester, const Failure(exception: NetworkException()));
 
       expect(find.text(en.noInternet), findsOneWidget);
       expect(find.text(en.tryAgain), findsOneWidget);
-      expect(find.text(en.login), findsNothing);
+      expect(find.text(en.logout), findsNothing);
     });
 
-    testWidgets('the session ended: "Log in", since trying again can\'t help', (
-      tester,
-    ) async {
-      await pump(tester, const Failure(exception: UnauthorizedException()));
+    testWidgets(
+      'the session ended: "Log out", since trying again can\'t help',
+      (tester) async {
+        await pump(tester, const Failure(exception: UnauthorizedException()));
 
-      expect(find.text(en.login), findsOneWidget);
-      expect(find.text(en.tryAgain), findsNothing);
-    });
+        expect(find.text(en.logout), findsOneWidget);
+        expect(find.text(en.tryAgain), findsNothing);
+      },
+    );
 
     testWidgets('a 500: the school\'s message, with "Try again"', (
       tester,

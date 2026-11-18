@@ -35,6 +35,8 @@ import 'package:al_mahhaba_school/features/fees/presentation/pages/fee_statement
 import 'package:al_mahhaba_school/features/fees/presentation/pages/fees_page.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/pages/pay_fees_page.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/pdf/fee_statement_pdf_file.dart';
+import 'package:al_mahhaba_school/features/announcements/presentation/announcement_args.dart';
+import 'package:al_mahhaba_school/features/announcements/presentation/pages/announcement_page.dart';
 import 'package:al_mahhaba_school/features/announcements/presentation/pages/announcements_page.dart';
 import 'package:al_mahhaba_school/features/home/presentation/pages/home_page.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/pages/homework_page.dart';
@@ -76,6 +78,7 @@ const Set<String> _parentRoutes = {
   AppRoutes.attendance,
   AppRoutes.homework,
   AppRoutes.announcements,
+  AppRoutes.announcementDetails,
   AppRoutes.fees,
   AppRoutes.feesPay,
   AppRoutes.feesCheckout,
@@ -305,7 +308,20 @@ final GoRouter appRouter = GoRouter(
         },
       ),
     ),
-    _parentPage(
+    // Not `_parentPage`: one announcement opens over what the parent was
+    // reading — Home or the chat — so back leaves them where they were.
+    GoRoute(
+      path: AppRoutes.announcementDetails,
+      // Needs the announcement that was tapped; opened any other way (a
+      // notification carrying only its id), the list opens instead.
+      redirect: (context, state) =>
+          state.extra is AnnouncementArgs ? null : AppRoutes.announcements,
+      builder: (context, state) =>
+          AnnouncementPage(args: state.extra! as AnnouncementArgs),
+    ),
+    // Not `_parentPage`: paying is a step on from the statement, not a
+    // page of its own, so back goes back to Fees where the parent was.
+    GoRoute(
       path: AppRoutes.feesPay,
       // Needs the statement Fees showed; opened any other way, start there.
       redirect: (context, state) =>
@@ -313,7 +329,8 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           PayFeesPage(statement: state.extra! as FeeStatementEntity),
     ),
-    _parentPage(
+    // The same: back goes to what is being paid, not Home.
+    GoRoute(
       path: AppRoutes.feesCheckout,
       // Needs the payment Pay fees started; opened any other way, go to
       // Fees.

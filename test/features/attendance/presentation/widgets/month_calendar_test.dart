@@ -147,4 +147,18 @@ void main() {
     expect(shown[13], CalendarDay.absent);
     expect(shown[14], CalendarDay.present);
   });
+
+  testWidgets('a late day is shown late, not present', (tester) async {
+    final late = DateTime(2026, 10, 15);
+
+    final shown = await pumpCalendar(
+      tester,
+      const {},
+      records: [
+        AttendanceRecordEntity(date: late, status: AttendanceStatus.late),
+      ],
+    );
+
+    expect(shown[15], CalendarDay.late);
+  });
 }

@@ -14,14 +14,10 @@ import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_lo
 /// The middle of the chat: loading, why it didn't load (with "Try again"),
 /// "No messages yet", or the items.
 class ChatTimeline extends StatelessWidget {
-  const ChatTimeline({super.key, required this.scroll, this.overlap = 0});
+  const ChatTimeline({super.key, required this.scroll});
 
   /// The items' list, newest at offset 0.
   final ScrollController scroll;
-
-  /// How far the open header lies over its top; it slides away as the
-  /// parent scrolls up.
-  final double overlap;
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +35,7 @@ class ChatTimeline extends StatelessWidget {
         if (page == null) {
           final exception = state.chat.exception;
           if (exception == null) return const AppLoading();
-          // Below the open header.
           return CenteredStateMessage(
-            top: overlap,
             icon: AppIcons.navChat,
             title: exception.localizedMessage(context),
             action: RetryOrLogInButton(
@@ -53,20 +47,12 @@ class ChatTimeline extends StatelessWidget {
         }
         if (page.items.isEmpty) {
           return CenteredStateMessage(
-            top: overlap,
             icon: AppIcons.navChat,
             title: l10n.noMessagesYet,
             subtitle: l10n.noMessagesHint,
           );
         }
-        return ChatItemsList(
-          state: state,
-          page: page,
-          scroll: scroll,
-          // The oldest clears the header even when the chat is barely
-          // taller than the screen (it then slides only part of the way).
-          topPadding: overlap / 2,
-        );
+        return ChatItemsList(state: state, page: page, scroll: scroll);
       },
     );
   }

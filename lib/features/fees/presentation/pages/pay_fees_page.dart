@@ -67,6 +67,30 @@ class _PayFeesViewState extends State<_PayFeesView> {
   /// The installments ticked (their `payKey`s).
   Set<String> _picked = {};
 
+  /// Ticks or unticks the installment with [payKey]. Unticked, the later
+  /// ones paid with it go too: they'd be out of order.
+  void _togglePicked(String payKey) => setState(() {
+    if (!_picked.contains(payKey)) {
+      _picked = {..._picked, payKey};
+      return;
+    }
+    final picked = {..._picked}..remove(payKey);
+    final byKey = {
+      for (final installment in widget.statement.installments)
+        installment.payKey: installment,
+    };
+    // Again until none goes: one gone may leave another out of order.
+    while (true) {
+      final outOfOrder = {
+        for (final key in picked)
+          if (byKey[key]?.isInOrderWith(picked) == false) key,
+      };
+      if (outOfOrder.isEmpty) break;
+      picked.removeAll(outOfOrder);
+    }
+    _picked = picked;
+  });
+
   void _payOnline(List<FeeInstallmentEntity> installments) {
     context.read<PayFeesViewModel>().doAction(
       PayOnlineEvent(
@@ -219,11 +243,7 @@ class _PayFeesViewState extends State<_PayFeesView> {
                                 statement: statement,
                                 picked: _picked,
                                 payable: amountNow,
-                                onTogglePicked: (id) => setState(
-                                  () => _picked = _picked.contains(id)
-                                      ? ({..._picked}..remove(id))
-                                      : {..._picked, id},
-                                ),
+                                onTogglePicked: _togglePicked,
                               ),
                           ],
                         ),

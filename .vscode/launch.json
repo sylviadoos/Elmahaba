@@ -1,7 +1,8 @@
 {
   // Flutter runs. Servers are picked in AppConfig (comment out the ones you
   // don't want). "+ Clarity" / "+ Sentry" also record the session / send
-  // errors (off in other debug runs).
+  // errors (off in other debug runs). "+ school OTP" has the school text
+  // the codes instead of Firebase (AppConfig.smsMisrFirst).
   "version": "0.2.0",
   "configurations": [
     {
@@ -23,6 +24,13 @@
       "type": "dart",
       "program": "lib/main.dart",
       "toolArgs": ["--dart-define=SENTRY=true"]
+    },
+    {
+      "name": "Debug + school OTP",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": ["--dart-define=SMS_MISR_FIRST=true"]
     },
     {
       "name": "Release",

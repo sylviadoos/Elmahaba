@@ -45,33 +45,71 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// Ticks only the bus installment, leaving the education one out.
-  Future<void> tickTheBusOnly(WidgetTester tester) async {
+  const bus = ValueKey('8473|قسط اول|2026-10-01');
+  const education = ValueKey(firstEducation);
+
+  Future<void> payInInstallments(WidgetTester tester) async {
     await tester.tap(find.text(l10n.payInInstallments));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('الباص').first);
     await tester.pumpAndSettle();
   }
 
-  testWidgets("out of order: the school's own sentence, not the app's", (
-    tester,
-  ) async {
+  Future<void> tap(WidgetTester tester, Key row) async {
+    await tester.ensureVisible(find.byKey(row));
+    await tester.tap(find.byKey(row));
+    await tester.pumpAndSettle();
+  }
+
+  bool ticked(WidgetTester tester, Key row) => tester
+      .widget<Checkbox>(
+        find.descendant(of: find.byKey(row), matching: find.byType(Checkbox)),
+      )
+      .value!;
+
+  /// The toast gone, so no timer is left running.
+  Future<void> letTheToastGo(WidgetTester tester) async {
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets("before the education one: the bus can't be ticked, the "
+      "school's sentence says why", (tester) async {
     await pumpPage(tester, statement());
+    await payInInstallments(tester);
 
-    await tickTheBusOnly(tester);
+    await tap(tester, bus);
 
+    expect(ticked(tester, bus), isFalse);
     expect(find.text(busReason), findsOneWidget);
     expect(find.text(l10n.tickEarlierInstallmentsFirst), findsNothing);
+    await letTheToastGo(tester);
   });
 
   testWidgets('the school sends no sentence: the app says it plainly', (
     tester,
   ) async {
     await pumpPage(tester, statement(reason: ''));
+    await payInInstallments(tester);
 
-    await tickTheBusOnly(tester);
+    await tap(tester, bus);
 
+    expect(ticked(tester, bus), isFalse);
     expect(find.text(l10n.tickEarlierInstallmentsFirst), findsOneWidget);
+    await letTheToastGo(tester);
+  });
+
+  testWidgets('the education one ticked: the bus can be; unticked, the bus '
+      'goes too', (tester) async {
+    await pumpPage(tester, statement());
+    await payInInstallments(tester);
+
+    await tap(tester, education);
+    await tap(tester, bus);
+    expect(ticked(tester, bus), isTrue);
+    expect(find.text(busReason), findsNothing);
+
+    await tap(tester, education);
+    expect(ticked(tester, education), isFalse);
+    expect(ticked(tester, bus), isFalse);
   });
 
   testWidgets('nothing out of order: no sentence at all', (tester) async {

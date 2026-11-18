@@ -12,6 +12,7 @@ import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_bloc.dart
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_state.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_labels.dart';
+import 'package:al_mahhaba_school/features/announcements/presentation/extensions/open_announcement.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_link_navigation.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_day_label.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_older_failed.dart';
@@ -35,7 +36,6 @@ class ChatItemsList extends StatelessWidget {
     required this.state,
     required this.page,
     required this.scroll,
-    this.topPadding = 0,
   });
 
   final ChatState state;
@@ -43,9 +43,6 @@ class ChatItemsList extends StatelessWidget {
   /// [state]'s items.
   final ChatPageEntity page;
   final ScrollController scroll;
-
-  /// Room above the oldest, so it clears what lies over the list's top.
-  final double topPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +56,7 @@ class ChatItemsList extends StatelessWidget {
       controller: scroll,
       reverse: true,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.fromLTRB(16.w, 8.h + topPadding, 16.w, 16.h),
+      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
       itemCount: rows.length,
       findChildIndexCallback: (key) => indexOf[key],
       itemBuilder: (context, index) {
@@ -144,12 +141,24 @@ class ChatItemsList extends StatelessWidget {
               padding: EdgeInsets.only(top: 18.h),
               child: ChatSchoolItem(
                 item: item,
-                // Homework of the child it's about (or the one shown).
-                onOpenLink: (link) => context.openChatLink(
-                  link,
-                  studentId:
-                      item.children.firstOrNull?.studentId ?? state.studentId,
-                ),
+                // What it leads to, for the child it is about (or the
+                // one shown): homework, an announcement, a complaint's
+                // page 26
+                onOpenLink: (link) {
+                  final studentId =
+                      item.children.firstOrNull?.studentId ?? state.studentId;
+                  // An announcement opens on its own, from what the chat
+                  // already holds; everything else opens its screen.
+                  final announcement = chatItemAnnouncement(item, link);
+                  if (announcement != null) {
+                    context.openAnnouncement(
+                      announcement,
+                      studentId: studentId,
+                    );
+                  } else {
+                    context.openChatLink(link, studentId: studentId);
+                  }
+                },
                 onReply: state.canReplyTo(item)
                     ? () => bloc.add(StartReplyIntent(item))
                     : null,

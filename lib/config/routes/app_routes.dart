@@ -40,6 +40,12 @@ abstract final class AppRoutes {
 
   /// With the child to show first as `extra` (an `int` student id).
   static const String announcements = '/announcements';
+
+  /// One announcement on a page of its own, with an `AnnouncementArgs`
+  /// as `extra`: the parent already has it, so nothing is loaded.
+  static const String announcementDetails = '/announcements/:id';
+  static String announcementDetailsOf(int announcementId) =>
+      '/announcements/$announcementId';
   static const String fees = '/fees';
   static const String feesPay = '/fees/pay';
   static const String feesCheckout = '/fees/pay/checkout';

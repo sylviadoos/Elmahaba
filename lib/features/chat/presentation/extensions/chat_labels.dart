@@ -113,6 +113,7 @@ extension ChatScreenLabel on ChatScreen {
       ChatScreen.fees => l10n.viewFees,
       ChatScreen.complaint => l10n.viewComplaint,
       ChatScreen.homework => l10n.viewHomework,
+      ChatScreen.announcements => l10n.viewAnnouncements,
     };
   }
 }

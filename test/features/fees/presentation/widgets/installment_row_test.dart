@@ -30,7 +30,11 @@ void main() {
 
   setUp(() => picks = []);
 
-  Future<void> pump(WidgetTester tester, FeeInstallmentEntity installment) {
+  Future<void> pump(
+    WidgetTester tester,
+    FeeInstallmentEntity installment, {
+    String? waitingReason,
+  }) {
     tester.usePhoneScreen();
     final router = GoRouter(
       routes: [
@@ -41,6 +45,7 @@ void main() {
               installment: installment,
               isPicked: false,
               onPickedChanged: picks.add,
+              waitingReason: waitingReason,
             ),
           ),
         ),
@@ -91,6 +96,25 @@ void main() {
     expect(box.side?.color, AppColors.unmet);
     await tester.tap(find.byType(InstallmentRow));
     expect(picks, isEmpty);
+  });
+
+  testWidgets('waiting for earlier ones: greyed out, a tap says why', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      installment(status: InstallmentStatus.upcoming, canPay: true),
+      waitingReason: 'Tick the first installment first.',
+    );
+
+    expect(background(tester), AppColors.surface);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).onChanged, isNull);
+    await tester.tap(find.byType(InstallmentRow));
+    await tester.pumpAndSettle();
+    expect(picks, isEmpty);
+    expect(find.text('Tick the first installment first.'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('paid: ticked in grey, not greyed out', (tester) async {
