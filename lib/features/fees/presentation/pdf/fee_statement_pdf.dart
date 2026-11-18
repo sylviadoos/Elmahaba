@@ -7,35 +7,35 @@ import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/features/fees/domain/entities/fee_installment_entity.dart';
 import 'package:al_mahhaba_school/features/fees/domain/entities/fee_statement_entity.dart';
-import 'package:al_mahhaba_school/features/fees/domain/entities/installment_status.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/pdf/fee_statement_pdf_file.dart';
 
 /// The school's official fee statement, laid out like the one its system
 /// prints: the student, then every fee (no [installments]) or the
-/// installments being paid, the totals, and a notice when some fees are
-/// being settled. Its labels are in English like the school's; names stay
-/// as the school wrote them.
+/// installments being paid, the totals, and the settlement notice (on
+/// every statement, like the school's). Its labels are in English like the
+/// school's; names stay as the school wrote them.
 abstract final class FeeStatementPdf {
   static Future<FeeStatementPdfFile> build(
     FeeStatementEntity statement, {
     List<FeeInstallmentEntity>? installments,
     DateTime? date,
   }) async {
+    // Montserrat like the school's statement; Cairo for the Arabic names.
     final regular = pw.Font.ttf(
-      await rootBundle.load('assets/fonts/Cairo-Regular.ttf'),
-    );
-    final bold = pw.Font.ttf(
-      await rootBundle.load('assets/fonts/Cairo-Bold.ttf'),
+      await rootBundle.load('assets/fonts/Montserrat-Medium.ttf'),
     );
     final brand = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Montserrat-Bold.ttf'),
+    );
+    final arabic = pw.Font.ttf(
+      await rootBundle.load('assets/fonts/Cairo-Regular.ttf'),
     );
     final logo = await rootBundle.loadString(AppImages.logoMarkRed);
 
     final document = pw.Document(
       title: 'Fee statement',
       author: 'Al Mahabbah Schools',
-      theme: pw.ThemeData.withFont(base: regular, bold: bold),
+      theme: pw.ThemeData.withFont(base: regular, bold: brand),
     );
     final student = statement.student;
     final List<List<String>> rows;
@@ -64,10 +64,6 @@ abstract final class FeeStatementPdf {
       paid = 0;
       remaining = total;
     }
-    final underSettlement = statement.installments.any(
-      (installment) => installment.status == InstallmentStatus.underSettlement,
-    );
-
     document.addPage(
       pw.MultiPage(
         pageTheme: pw.PageTheme(
@@ -122,7 +118,7 @@ abstract final class FeeStatementPdf {
             ),
             ('National ID', student.nationalId),
             ('Grade', student.grade),
-          ]),
+          ], arabic),
           pw.SizedBox(height: 18),
           _section(
             installments == null ? 'FEE STATEMENT' : 'INSTALLMENT SCHEDULE',
@@ -137,30 +133,27 @@ abstract final class FeeStatementPdf {
             ],
             rows: rows,
             boldNames: installments == null,
+            arabic: arabic,
           ),
           _totalsTable([
             ('Total Amount', total),
             ('Paid Amount', paid),
             ('Remaining Balance', remaining),
           ]),
-          if (underSettlement) ...[
-            pw.SizedBox(height: 18),
-            _section('SETTLEMENT NOTICE', brand),
-            pw.Container(
-              width: double.infinity,
-              padding: const pw.EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 8,
-              ),
-              decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: _border, width: 0.7),
-              ),
-              child: pw.Text(
-                'These fees are under settlement.',
-                style: const pw.TextStyle(fontSize: 9.5, color: _slate),
-              ),
+          // On every statement, like the school's.
+          pw.SizedBox(height: 18),
+          _section('SETTLEMENT NOTICE', brand),
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: _border, width: 0.7),
             ),
-          ],
+            child: pw.Text(
+              'These fees are under settlement.',
+              style: const pw.TextStyle(fontSize: 9.5, color: _slate),
+            ),
+          ),
           pw.SizedBox(height: 22),
           pw.Divider(color: _line, thickness: 0.7, height: 0.7),
           pw.SizedBox(height: 14),
@@ -196,7 +189,7 @@ abstract final class FeeStatementPdf {
   static const _mist = PdfColor.fromInt(0xFFA3A7B4);
   static const _line = PdfColor.fromInt(0xFFE6E7EC);
   static const _border = PdfColor.fromInt(0xFFA9AEBF);
-  static const _cell = PdfColor.fromInt(0xFFF8F9FB);
+  static const _cellColor = PdfColor.fromInt(0xFFF8F9FB);
   static const _blush = PdfColor.fromInt(0xFFF8E3E6);
 
   static PdfColor _color(Color color) => PdfColor.fromInt(color.toARGB32());
@@ -270,84 +263,119 @@ abstract final class FeeStatementPdf {
     ),
   );
 
+  /// Arabic (a name as the school wrote it) in [arabic], unbolded like the
+  /// school's statement; Montserrat has no Arabic letters.
   static pw.Widget _cellText(
     String text, {
     bool bold = false,
     PdfColor color = _ink,
     double size = 10,
     pw.TextAlign align = pw.TextAlign.left,
-  }) => pw.Text(
-    text,
-    textDirection: _direction(text),
-    textAlign: align,
-    style: pw.TextStyle(
-      fontSize: size,
-      fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
-      color: color,
-    ),
+    pw.Font? arabic,
+  }) {
+    final direction = _direction(text);
+    final isArabic = arabic != null && direction == pw.TextDirection.rtl;
+    return pw.Text(
+      text,
+      textDirection: direction,
+      textAlign: align,
+      style: pw.TextStyle(
+        font: isArabic ? arabic : null,
+        fontBold: isArabic ? arabic : null,
+        fontSize: isArabic ? size - 0.5 : size,
+        fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
+        color: color,
+      ),
+    );
+  }
+
+  static const _padding = pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8);
+
+  /// A cell's [child], centred down the row: an Arabic line is taller.
+  static pw.Widget _cell(
+    pw.Widget child, {
+    PdfColor? color,
+    bool end = false,
+  }) => pw.Container(
+    color: color,
+    padding: _padding,
+    alignment: end ? pw.Alignment.centerRight : pw.Alignment.centerLeft,
+    child: child,
   );
 
-  static const _padding = pw.EdgeInsets.symmetric(horizontal: 10, vertical: 7);
-
-  static pw.Widget _infoTable(List<(String, String)> rows) => pw.Table(
-    border: pw.TableBorder.all(color: _border, width: 0.7),
-    columnWidths: const {0: pw.FlexColumnWidth(1), 1: pw.FlexColumnWidth(2.1)},
-    children: [
-      for (final (label, value) in rows)
-        pw.TableRow(
-          children: [
-            pw.Container(
-              color: _cell,
-              padding: _padding,
-              child: _cellText(label, bold: true, color: _slate, size: 9.5),
+  static pw.Widget _infoTable(List<(String, String)> rows, pw.Font arabic) =>
+      pw.Table(
+        border: pw.TableBorder.all(color: _border, width: 0.7),
+        columnWidths: const {
+          0: pw.FlexColumnWidth(1),
+          1: pw.FlexColumnWidth(2.1),
+        },
+        children: [
+          for (final (label, value) in rows)
+            pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.full,
+              children: [
+                _cell(
+                  _cellText(label, bold: true, color: _slate, size: 9.5),
+                  color: _cellColor,
+                ),
+                _cell(_cellText(value, bold: true, arabic: arabic)),
+              ],
             ),
-            pw.Padding(padding: _padding, child: _cellText(value, bold: true)),
-          ],
-        ),
-    ],
-  );
+        ],
+      );
 
   static pw.Widget _feesTable({
     required List<String> headers,
     required List<List<String>> rows,
     required bool boldNames,
+    required pw.Font arabic,
   }) {
     final last = headers.length - 1;
+    // As wide as the school's: the account widest, the installment
+    // narrowest; with no installment column, the fee and the account share
+    // its width.
+    final widths = headers.length == 4
+        ? const [1.62, 1.9, 1.33, 1.57]
+        : const [2.28, 2.57, 1.57];
     return pw.Table(
       border: pw.TableBorder.all(color: _border, width: 0.7),
       columnWidths: {
-        for (var i = 0; i < headers.length; i++)
-          i: pw.FlexColumnWidth(i == 0 || i == 1 ? 2.2 : 1.6),
+        for (final (i, width) in widths.indexed) i: pw.FlexColumnWidth(width),
       },
       children: [
         pw.TableRow(
-          decoration: const pw.BoxDecoration(color: _cell),
+          decoration: const pw.BoxDecoration(color: _cellColor),
           children: [
-            for (final header in headers)
-              pw.Padding(
-                padding: _padding,
-                child: _cellText(
+            for (final (i, header) in headers.indexed)
+              _cell(
+                _cellText(
                   header,
                   bold: true,
-                  align: pw.TextAlign.center,
+                  align: i == last ? pw.TextAlign.right : pw.TextAlign.left,
                 ),
+                end: i == last,
               ),
           ],
         ),
         for (final row in rows)
           pw.TableRow(
+            verticalAlignment: pw.TableCellVerticalAlignment.full,
             children: [
               for (final (i, value) in row.indexed)
-                pw.Padding(
-                  padding: _padding,
-                  child: i == last
-                      ? _cellText(value, bold: true, align: pw.TextAlign.right)
-                      : _cellText(
+                i == last
+                    ? _cell(
+                        _cellText(value, bold: true, align: pw.TextAlign.right),
+                        end: true,
+                      )
+                    : _cell(
+                        _cellText(
                           value,
                           bold: i == 0 && boldNames,
                           color: i == 0 && boldNames ? _ink : _slate,
+                          arabic: arabic,
                         ),
-                ),
+                      ),
             ],
           ),
       ],

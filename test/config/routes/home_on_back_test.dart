@@ -22,6 +22,9 @@ class _Page extends StatelessWidget {
 /// The chat's photo viewer: over the chat, and back closes it.
 const String _photo = '/photo';
 
+/// An excuse, opened from Attendance: back is Attendance.
+const String _excuse = '/excuse';
+
 void main() {
   late GoRouter router;
 
@@ -30,12 +33,21 @@ void main() {
       initialLocation: AppRoutes.home,
       routes: [
         GoRoute(path: AppRoutes.home, builder: (_, _) => const _Page('Home')),
-        for (final path in [AppRoutes.chat, AppRoutes.fees, AppRoutes.feesPay])
+        for (final path in [
+          AppRoutes.chat,
+          AppRoutes.fees,
+          AppRoutes.announcements,
+        ])
           GoRoute(
             path: path,
             builder: (_, _) => HomeOnBack(child: _Page(path)),
           ),
         GoRoute(path: _photo, builder: (_, _) => const _Page(_photo)),
+        GoRoute(
+          path: AppRoutes.attendance,
+          builder: (_, _) => const HomeOnBack(child: _Page('Attendance')),
+        ),
+        GoRoute(path: _excuse, builder: (_, _) => const _Page(_excuse)),
       ],
     );
     addTearDown(router.dispose);
@@ -67,9 +79,9 @@ void main() {
       await openInTurn(tester, [
         AppRoutes.chat,
         AppRoutes.fees,
-        AppRoutes.feesPay,
+        AppRoutes.announcements,
       ]);
-      expect(find.text(AppRoutes.feesPay), findsOneWidget);
+      expect(find.text(AppRoutes.announcements), findsOneWidget);
 
       await pressBack(tester);
 
@@ -81,7 +93,7 @@ void main() {
       await openInTurn(tester, [
         AppRoutes.chat,
         AppRoutes.fees,
-        AppRoutes.feesPay,
+        AppRoutes.announcements,
       ]);
 
       await tapTheArrow(tester);
@@ -116,5 +128,26 @@ void main() {
     await tapTheArrow(tester);
 
     expect(find.text(AppRoutes.chat), findsOneWidget);
+  });
+
+  group('an excuse, from Attendance: back is Attendance, then Home', () {
+    testWidgets("the phone's back button", (tester) async {
+      await openInTurn(tester, [AppRoutes.attendance, _excuse]);
+
+      await pressBack(tester);
+      expect(find.text('Attendance'), findsOneWidget);
+      expect(find.text(_excuse), findsNothing);
+
+      await pressBack(tester);
+      expect(find.text('Home'), findsOneWidget);
+    });
+
+    testWidgets('the arrow in the page', (tester) async {
+      await openInTurn(tester, [AppRoutes.attendance, _excuse]);
+
+      await tapTheArrow(tester);
+
+      expect(find.text('Attendance'), findsOneWidget);
+    });
   });
 }

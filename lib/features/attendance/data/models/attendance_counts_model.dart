@@ -4,16 +4,16 @@ class AttendanceCountsModel extends AttendanceCountsEntity {
   const AttendanceCountsModel({
     required super.presentDays,
     required super.absentDays,
+    required super.lateDays,
     required super.excusedDays,
   });
 
-  /// { "present": 15, "absent": 1, "late": 1, "excused_or_medical": 0 }:
-  /// late days count as present (the app doesn't show "late").
+  /// { "present": 15, "absent": 1, "late": 1, "excused_or_medical": 0 }
   factory AttendanceCountsModel.fromJson(Map<String, dynamic> json) =>
       AttendanceCountsModel(
-        presentDays:
-            (json['present'] as int? ?? 0) + (json['late'] as int? ?? 0),
+        presentDays: json['present'] as int? ?? 0,
         absentDays: json['absent'] as int? ?? 0,
+        lateDays: json['late'] as int? ?? 0,
         excusedDays: json['excused_or_medical'] as int? ?? 0,
       );
 }

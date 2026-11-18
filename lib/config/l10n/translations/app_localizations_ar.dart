@@ -482,7 +482,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fullPhoneHint => '010 1234 5678';
 
   @override
-  String get passwordHint => '8 أحرف على الأقل';
+  String get passwordHint => 'أدخل كلمة المرور';
 
   @override
   String get confirmPasswordHint => 'اكتب كلمة المرور مرة أخرى';
@@ -937,6 +937,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get absent => 'غائب';
 
   @override
+  String get late => 'متأخر';
+
+  @override
+  String get arrivedLate => 'وصل متأخرًا';
+
+  @override
   String get officialHoliday => 'إجازة رسمية';
 
   @override
@@ -1325,6 +1331,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'الإشعارات متوقفة. شغّلها لتختار ما يصلك منها.';
 
   @override
+  String get announcement => 'إعلان';
+
+  @override
   String get announcements => 'الإعلانات';
 
   @override
@@ -1425,6 +1434,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get viewHomework => 'عرض الواجبات';
+
+  @override
+  String get viewAnnouncements => 'عرض الإعلانات';
 
   @override
   String get messages => 'الرسائل';

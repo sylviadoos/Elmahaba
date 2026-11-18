@@ -49,6 +49,8 @@ class MonthCalendar extends StatelessWidget {
         return excuseDates.contains(date)
             ? CalendarDay.excused
             : CalendarDay.absent;
+      case AttendanceStatus.late:
+        return CalendarDay.late;
       case AttendanceStatus.excused:
         return CalendarDay.excused;
       case AttendanceStatus.unknown || null:

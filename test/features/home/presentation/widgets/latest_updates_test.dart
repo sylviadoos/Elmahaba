@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:al_mahhaba_school/config/l10n/translations/app_localizations.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
+import 'package:al_mahhaba_school/features/announcements/presentation/announcement_args.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_updates.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
@@ -49,6 +50,7 @@ void main() {
         ),
         ...stubRoutes([
           AppRoutes.announcements,
+          AppRoutes.announcementDetailsOf(holiday.id),
           AppRoutes.homework,
           AppRoutes.results,
         ], extras: extras),
@@ -86,14 +88,21 @@ void main() {
     expect(find.text(holiday.title), findsOneWidget);
   });
 
-  testWidgets('opens the child\'s announcements and homework, and the '
+  testWidgets('opens the announcement tapped, the homework, and the '
       'results', (tester) async {
     await pump(tester);
 
+    // The announcement itself, not the list: Home already has it.
     await tester.tap(find.text(holiday.title));
     await tester.pumpAndSettle();
-    expect(find.text(AppRoutes.announcements), findsOneWidget);
-    expect(extras[AppRoutes.announcements], 1208);
+    final opened = AppRoutes.announcementDetailsOf(holiday.id);
+    expect(find.text(opened), findsOneWidget);
+    expect(
+      extras[opened],
+      isA<AnnouncementArgs>()
+          .having((args) => args.announcement, 'announcement', holiday)
+          .having((args) => args.studentId, 'studentId', 1208),
+    );
 
     await pump(tester);
     await tester.tap(find.text(en.seeAll).first);

@@ -33,6 +33,8 @@ extension ChatLinkRouting on GoRouter {
         );
       case ChatScreen.homework:
         push(AppRoutes.homework, extra: link.studentId ?? studentId);
+      case ChatScreen.announcements:
+        push(AppRoutes.announcements, extra: link.studentId ?? studentId);
     }
   }
 }

@@ -5,20 +5,23 @@ import 'package:intl/intl.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/extensions/string_extensions.dart';
+import 'package:al_mahhaba_school/core/widgets/app_toast_type.dart';
 import 'package:al_mahhaba_school/features/fees/domain/entities/fee_installment_entity.dart';
 import 'package:al_mahhaba_school/features/fees/domain/entities/installment_status.dart';
 import 'package:al_mahhaba_school/features/fees/presentation/extensions/money_text.dart';
 
 /// An installment to tick for paying now. Only one the school says can be
-/// paid can be ticked; a paid one shows ticked in grey. The others are
-/// locked: greyed out, the box faded, so they don't look tickable; the
-/// status says why.
+/// paid can be ticked, and only once the earlier ones it's paid with are;
+/// a paid one shows ticked in grey. The others are locked: greyed out, the
+/// box faded, so they don't look tickable; the status says why, or a tap
+/// on one waiting for earlier installments.
 class InstallmentRow extends StatelessWidget {
   const InstallmentRow({
     super.key,
     required this.installment,
     required this.isPicked,
     required this.onPickedChanged,
+    this.waitingReason,
   });
 
   final FeeInstallmentEntity installment;
@@ -27,11 +30,16 @@ class InstallmentRow extends StatelessWidget {
   final bool isPicked;
   final ValueChanged<bool> onPickedChanged;
 
+  /// Why it can't be ticked yet — the earlier installments it's paid with
+  /// aren't ticked — shown when it's tapped. Null when it can be.
+  final String? waitingReason;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
-    final canPick = installment.canPay;
+    final waitingReason = this.waitingReason;
+    final canPick = installment.canPay && waitingReason == null;
     final isPaid = installment.status == InstallmentStatus.paid;
     final isLocked = !canPick && !isPaid;
     final ticked = isPaid || (canPick && isPicked);
@@ -97,7 +105,14 @@ class InstallmentRow extends StatelessWidget {
         ),
       ),
       child: InkWell(
-        onTap: canPick ? () => onPickedChanged(!isPicked) : null,
+        onTap: canPick
+            ? () => onPickedChanged(!isPicked)
+            : waitingReason != null
+            ? () => context.showSnackBar(
+                waitingReason,
+                type: AppToastType.warning,
+              )
+            : null,
         child: Padding(
           padding: EdgeInsets.all(12.r),
           child: Row(

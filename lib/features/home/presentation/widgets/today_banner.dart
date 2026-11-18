@@ -41,8 +41,8 @@ class TodayBanner extends StatelessWidget {
             : '${l10n.officialHoliday} · $holiday',
       null when isWeekend => l10n.friSatOff,
       null => l10n.attendanceNotTaken,
-      // Late is present: the child came.
-      'present' || 'late' => l10n.present,
+      'present' => l10n.present,
+      'late' => l10n.late,
       'absent' => l10n.absent,
       // TODO: name the other statuses once the API lists them.
       final other => other,

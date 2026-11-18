@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/widgets/dashed_border.dart';
 
 /// What the calendar's colors mean.
 class CalendarLegend extends StatelessWidget {
@@ -23,6 +24,13 @@ class CalendarLegend extends StatelessWidget {
     final items = [
       (swatch(AppColors.successBg), l10n.present),
       (swatch(AppColors.mahabbahRed), l10n.absent),
+      (
+        DashedBorder(
+          radius: 4.r,
+          child: SizedBox.square(dimension: size),
+        ),
+        l10n.late,
+      ),
       (swatch(AppColors.infoBg), l10n.excusedOrMedical),
       (swatch(AppColors.gold), l10n.officialHoliday),
       (swatch(AppColors.surface), l10n.friSatOff),

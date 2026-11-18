@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:al_mahhaba_school/features/attendance/data/models/month_attendance_model.dart';
+import 'package:al_mahhaba_school/features/attendance/domain/entities/attendance_status.dart';
 
 /// A school closed Fridays and Sundays, as the new response says it.
 const _weekly = {
@@ -63,6 +64,22 @@ void main() {
     expect(weekendOf(const {}), {DateTime.friday, DateTime.saturday});
   });
 
+  test('a late day: its own status, not present', () {
+    final month = MonthAttendanceModel.fromJson({
+      'month': '2026-10',
+      'records': [
+        {'date': '2026-10-27', 'status': 'late'},
+        {'date': '2026-10-28', 'status': 'present'},
+      ],
+      ..._weekly,
+    }, month: october);
+
+    expect(month.records.map((record) => record.status), [
+      AttendanceStatus.late,
+      AttendanceStatus.present,
+    ]);
+  });
+
   test('the rest of the month is read as it was', () {
     final month = MonthAttendanceModel.fromJson({
       'month': '2026-10',
@@ -77,8 +94,11 @@ void main() {
     }, month: october);
 
     expect(month.month, october);
-    // The late day counts as present, as before.
-    expect(month.counts.presentDays, 16);
+    // Late days counted on their own, and as attended.
+    expect(month.counts.presentDays, 15);
+    expect(month.counts.lateDays, 1);
+    expect(month.counts.attendedDays, 16);
+    expect(month.counts.schoolDays, 17);
     expect(month.records.single.date, DateTime(2026, 10, 26));
     expect(month.holidays.single.nameAr, '6 اكتوبر');
   });

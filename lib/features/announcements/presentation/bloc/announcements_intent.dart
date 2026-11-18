@@ -63,3 +63,12 @@ final class LoadAnnouncementImageIntent extends AnnouncementsIntent {
 
   final ChatAttachmentEntity attachment;
 }
+
+/// The page of one announcement opened: whose it is, so seeing it is
+/// marked for the right child. Nothing is loaded — the parent came with
+/// the announcement in hand, from Home or the chat.
+final class ShowOneAnnouncementIntent extends AnnouncementsIntent {
+  const ShowOneAnnouncementIntent(this.studentId);
+
+  final int? studentId;
+}

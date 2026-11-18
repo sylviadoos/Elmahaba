@@ -17,6 +17,7 @@ class ChatLinkModel extends ChatLinkEntity {
       'fees' || 'fee' => ChatScreen.fees,
       'complaints' || 'complaint' => ChatScreen.complaint,
       'homework' => ChatScreen.homework,
+      'announcements' || 'announcement' => ChatScreen.announcements,
       _ => null,
     };
     if (screen == null) return null;

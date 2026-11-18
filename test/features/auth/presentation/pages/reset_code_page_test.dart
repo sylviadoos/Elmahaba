@@ -103,10 +103,10 @@ void main() {
     ));
   });
 
-  testWidgets('resends after 45 seconds, by the school', (tester) async {
+  testWidgets('resends after 5 minutes, by the school', (tester) async {
     whenCodeSent();
     await harness.pump(tester, AppRoutes.resetCode, page);
-    await tester.pump(const Duration(seconds: 45));
+    await tester.pump(const Duration(minutes: 5));
     await tester.tapShown(buttonLabeled(l10n.resendCode));
     await tester.pump();
 

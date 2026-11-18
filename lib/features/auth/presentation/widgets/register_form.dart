@@ -10,12 +10,15 @@ import 'package:al_mahhaba_school/core/widgets/app_checkbox.dart';
 import 'package:al_mahhaba_school/core/widgets/app_text_field.dart';
 import 'package:al_mahhaba_school/core/widgets/country_code_prefix.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/register_request_entity.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/widgets/password_rules.dart';
 
 enum _Field { phone, password, passwordConfirmation }
 
-/// The sign-up form: mobile, password twice and the terms. Checks its
-/// fields, then hands them to [onSubmit]. [serverErrors] (keyed by the
-/// API's field names) show under their fields until the field is edited.
+/// The sign-up form: mobile, password twice and the terms. The password
+/// is checked against the same [PasswordRule]s as a reset one, as it is
+/// typed, and Create account waits for them. Then the fields go to
+/// [onSubmit]. [serverErrors] (keyed by the API's field names) show under
+/// their fields until the field is edited.
 class RegisterForm extends StatefulWidget {
   const RegisterForm({
     super.key,
@@ -103,6 +106,8 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final password = _password.text;
+    final confirmation = _passwordConfirmation.text;
     const linkStyle = TextStyle(
       fontWeight: FontWeight.w600,
       color: AppColors.actionRed,
@@ -124,7 +129,8 @@ class _RegisterFormState extends State<RegisterForm> {
       isPassword: true,
       textInputAction: action,
       autofillHints: const [AutofillHints.newPassword],
-      onChanged: (_) => _clearError(field),
+      // The rules follow what is typed; the field's error goes with it.
+      onChanged: (_) => setState(() => _errors.remove(field)),
     );
 
     return AutofillGroup(
@@ -164,6 +170,7 @@ class _RegisterFormState extends State<RegisterForm> {
             l10n.confirmPasswordHint,
             TextInputAction.done,
           ),
+          PasswordRules(password: password, confirmation: confirmation),
           AppCheckbox(
             value: _agreed,
             onChanged: (value) => setState(() => _agreed = value),
@@ -182,8 +189,10 @@ class _RegisterFormState extends State<RegisterForm> {
           AppButton(
             label: l10n.createAccount,
             isLoading: widget.isSending,
-            // Enabled once the terms are accepted.
-            onPressed: _agreed ? _submit : null,
+            // Enabled once the rules are met and the terms accepted.
+            onPressed: _agreed && PasswordRule.allMet(password, confirmation)
+                ? _submit
+                : null,
           ),
         ],
       ),

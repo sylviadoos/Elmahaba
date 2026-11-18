@@ -47,6 +47,8 @@ void main() {
         ('complaints', ChatScreen.complaint),
         (' homework ', ChatScreen.homework),
         ('absence', ChatScreen.attendance),
+        ('announcement', ChatScreen.announcements),
+        ('Announcements', ChatScreen.announcements),
       ]) {
         expect(
           notificationLink({'screen': named})?.screen,

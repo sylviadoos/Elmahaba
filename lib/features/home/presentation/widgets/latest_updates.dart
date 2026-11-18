@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/config/theme/app_colors.dart';
+import 'package:al_mahhaba_school/features/announcements/presentation/extensions/open_announcement.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
 import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
@@ -62,7 +63,10 @@ class LatestUpdates extends StatelessWidget {
                 ?_date(context, announcement.publishedAt),
               ],
             ),
-            onTap: openAnnouncements,
+            // Home has the announcement itself, so tapping it opens that
+            // one, with no list loaded and none scrolled through.
+            onTap: () =>
+                context.openAnnouncement(announcement, studentId: childId),
           ),
         ),
         LatestCard<HomeworkEntity>(

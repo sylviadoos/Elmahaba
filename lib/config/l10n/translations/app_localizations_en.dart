@@ -483,7 +483,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fullPhoneHint => '010 1234 5678';
 
   @override
-  String get passwordHint => 'At least 8 characters';
+  String get passwordHint => 'Enter a password';
 
   @override
   String get confirmPasswordHint => 'Type the password again';
@@ -936,6 +936,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get absent => 'Absent';
 
   @override
+  String get late => 'Late';
+
+  @override
+  String get arrivedLate => 'Arrived late';
+
+  @override
   String get officialHoliday => 'Official holiday';
 
   @override
@@ -1325,6 +1331,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Notifications are off. Turn them on to choose which ones ring.';
 
   @override
+  String get announcement => 'Announcement';
+
+  @override
   String get announcements => 'Announcements';
 
   @override
@@ -1421,6 +1430,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewHomework => 'View homework';
+
+  @override
+  String get viewAnnouncements => 'View announcements';
 
   @override
   String get messages => 'Messages';
