@@ -167,16 +167,13 @@ jobs:
             --release \
             --export-options-plist=ios/ExportOptions.plist
 
-      # TEMP DEBUG: locate the real Firebase SPM checkout path under
-      # DerivedData, since the flutterfire upload-symbols fallback path
-      # (.../SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run)
-      # isn't being found.
+      # TEMP DEBUG: print diagnostics written by the Xcode build phase
+      # itself (see project.pbxproj) to find the real Firebase SPM
+      # checkout location.
       - name: Debug Firebase SPM checkout location
         run: |
-          echo "--- searching DerivedData for Crashlytics/firebase checkouts ---"
-          find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 6 -type d \( -iname "*firebase*" -o -iname "checkouts" \) 2>&1 || true
-          echo "--- contents of any checkouts dir found ---"
-          find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 6 -type d -iname "checkouts" -exec ls -la {} \; 2>&1 || true
+          echo "--- /tmp/flutterfire_debug.log ---"
+          cat /tmp/flutterfire_debug.log 2>&1 || echo "no debug log found"
           echo "--- re-fail the job since the real build failed ---"
           exit 1
 
