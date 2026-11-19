@@ -38,6 +38,11 @@ jobs:
           cd ios
           pod install --repo-update
 
+      # 5b. Install the FlutterFire CLI, needed by the Xcode "FlutterFire:
+      # flutterfire upload-crashlytics-symbols" build phase.
+      - name: Install FlutterFire CLI
+        run: dart pub global activate flutterfire_cli
+
       # 6. Install Apple Distribution Certificate
       - name: Install signing certificate
         env:
