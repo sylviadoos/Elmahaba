@@ -17,10 +17,17 @@ import 'package:al_mahhaba_school/core/analytics/session_recorder_impl.dart'
     as _i194;
 import 'package:al_mahhaba_school/core/app_settings/locale_theme_cubit.dart'
     as _i439;
+import 'package:al_mahhaba_school/core/image/photo_compressor.dart' as _i660;
+import 'package:al_mahhaba_school/core/image/photo_compressor_impl.dart'
+    as _i387;
 import 'package:al_mahhaba_school/core/network/api_service.dart' as _i438;
 import 'package:al_mahhaba_school/core/network/auth_interceptor.dart' as _i575;
 import 'package:al_mahhaba_school/core/network/language_interceptor.dart'
     as _i133;
+import 'package:al_mahhaba_school/core/notifications/app_icon_badge.dart'
+    as _i1030;
+import 'package:al_mahhaba_school/core/notifications/app_icon_badge_impl.dart'
+    as _i977;
 import 'package:al_mahhaba_school/core/notifications/notification_service.dart'
     as _i614;
 import 'package:al_mahhaba_school/core/notifications/notification_service_impl.dart'
@@ -400,12 +407,14 @@ extension GetItInjectableX on _i174.GetIt {
       instanceName: 'signedFilesApi',
     );
     gh.lazySingleton<_i480.PdfPreviewer>(() => _i190.PdfPreviewerImpl());
+    gh.lazySingleton<_i1030.AppIconBadge>(() => _i977.AppIconBadgeImpl());
     gh.lazySingleton<_i9.SecureStorage>(
       () => _i9.SecureStorage(gh<_i558.FlutterSecureStorage>()),
     );
     gh.lazySingleton<_i694.ChatLocalDataSource>(
       () => _i33.ChatLocalDataSourceImpl(),
     );
+    gh.lazySingleton<_i660.PhotoCompressor>(() => _i387.PhotoCompressorImpl());
     gh.lazySingleton<_i1049.ChildrenLocalDataSource>(
       () => _i275.ChildrenLocalDataSourceImpl(gh<_i558.FlutterSecureStorage>()),
     );

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import 'package:al_mahhaba_school/core/error/dio_exception_handler.dart';
@@ -121,8 +123,12 @@ class ApiService {
     ),
   );
 
-  /// Saves the file at [path] to [savePath] (an attachment…). Nothing is
-  /// left at [savePath] when it fails.
+  /// Saves the file at [path] to [savePath] (an attachment…). Only a whole
+  /// file is ever at [savePath]: it comes into a file of its own first and
+  /// takes that name once it's all here. So the app closing halfway leaves
+  /// nothing there that looks downloaded (the half is cleared with the
+  /// temporary files), and two downloads of the same file at once don't
+  /// write into one another.
   ///
   /// ```dart
   /// await apiService.download(
@@ -134,7 +140,12 @@ class ApiService {
     String path,
     String savePath, {
     CancelToken? cancelToken,
-  }) => _request(() => _dio.download(path, savePath, cancelToken: cancelToken));
+  }) async {
+    final part = '$savePath.${DateTime.now().microsecondsSinceEpoch}.part';
+    // Dio deletes the part itself when the download fails or is cancelled.
+    await _request(() => _dio.download(path, part, cancelToken: cancelToken));
+    await File(part).rename(savePath);
+  }
 
   Future<dynamic> _request(Future<Response<dynamic>> Function() send) async {
     try {

@@ -12,12 +12,12 @@ import 'package:al_mahhaba_school/core/analytics/session_recorder.dart';
 import 'package:al_mahhaba_school/core/app_settings/locale_theme_state.dart';
 import 'package:al_mahhaba_school/core/widgets/screen_util_scope.dart';
 import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_bloc.dart';
-import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_intent.dart';
 import 'package:al_mahhaba_school/features/app_status/presentation/widgets/app_status_refresher.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_state.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
+import 'package:al_mahhaba_school/features/shell/presentation/widgets/app_icon_badge_sync.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/badge_refresher.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/notification_router.dart';
 
@@ -37,13 +37,10 @@ class AlMahhabaApp extends StatelessWidget {
           BlocProvider(create: (_) => getIt<ChildrenViewModel>()),
           // The badge on Chat, which the chat updates as it's read.
           BlocProvider(create: (_) => getIt<ChatUnreadBloc>()),
-          // Whether visitors get "Log in": asked at launch, so it's known by
-          // the first visitor page.
-          BlocProvider(
-            lazy: false,
-            create: (_) =>
-                getIt<AppStatusBloc>()..add(const LoadAppStatusIntent()),
-          ),
+          // Whether visitors get "Log in": asked by the splash for a visitor
+          // only, so it's known by the first visitor page; never for a
+          // signed-in parent, who uses the app whatever it says.
+          BlocProvider(create: (_) => getIt<AppStatusBloc>()),
         ],
         // Recorded sessions go by the parent signed in (their id, nothing
         // personal); logging out starts a new one.
@@ -57,24 +54,26 @@ class AlMahhabaApp extends StatelessWidget {
           },
           // Under the blocs they refresh, over every page that shows them.
           child: BadgeRefresher(
-            child: NotificationRouter(
-              child: AppStatusRefresher(
-                child: BlocBuilder<LocaleThemeCubit, LocaleThemeState>(
-                  builder: (context, state) => MaterialApp.router(
-                    title: AppConfig.appName,
-                    debugShowCheckedModeBanner: false,
-                    theme: AppTheme.light(state.locale),
-                    darkTheme: AppTheme.dark(state.locale),
-                    themeMode: state.themeMode,
-                    // Not DevicePreview.locale(context): it would override the
-                    // language chosen in the app (LocaleThemeCubit) in debug
-                    // builds.
-                    locale: state.locale,
-                    localizationsDelegates:
-                        AppLocalizations.localizationsDelegates,
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    routerConfig: appRouter,
-                    builder: DevicePreview.appBuilder,
+            child: AppIconBadgeSync(
+              child: NotificationRouter(
+                child: AppStatusRefresher(
+                  child: BlocBuilder<LocaleThemeCubit, LocaleThemeState>(
+                    builder: (context, state) => MaterialApp.router(
+                      title: AppConfig.appName,
+                      debugShowCheckedModeBanner: false,
+                      theme: AppTheme.light(state.locale),
+                      darkTheme: AppTheme.dark(state.locale),
+                      themeMode: state.themeMode,
+                      // Not DevicePreview.locale(context): it would override the
+                      // language chosen in the app (LocaleThemeCubit) in debug
+                      // builds.
+                      locale: state.locale,
+                      localizationsDelegates:
+                          AppLocalizations.localizationsDelegates,
+                      supportedLocales: AppLocalizations.supportedLocales,
+                      routerConfig: appRouter,
+                      builder: DevicePreview.appBuilder,
+                    ),
                   ),
                 ),
               ),

@@ -27,7 +27,7 @@ abstract final class AppConfig {
   static String get websiteBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-      // 'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
+      //'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
       // Live:
       _liveWebsite,
     Environment.staging || Environment.prod => _liveWebsite,
@@ -37,7 +37,7 @@ abstract final class AppConfig {
   static String get schoolBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-      // 'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
+      //'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
       // Live:
       _liveSchool,
     //'http://192.168.0.106:8080/mariam_hany/almahaba316/Almahhaba-School-back-API/public/api/',

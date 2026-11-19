@@ -16,5 +16,12 @@ class ChatLocalDataSourceImpl implements ChatLocalDataSource {
       _newest[studentId] = page;
 
   @override
+  void markRead(int? studentId, Set<String> keys, {required int unread}) {
+    final page = _newest[studentId];
+    if (page == null) return;
+    _newest[studentId] = page.withRead(keys, isRead: true, unread: unread);
+  }
+
+  @override
   void clear() => _newest.clear();
 }

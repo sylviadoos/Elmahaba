@@ -11,6 +11,7 @@ class HomeState extends Equatable {
     this.dashboard = const BaseState.initial(),
     this.isRefreshing = false,
     this.calendar,
+    this.failedLoads = 0,
   });
 
   /// The child shown, by `studentId`; null before the children load.
@@ -27,18 +28,31 @@ class HomeState extends Equatable {
   /// holiday or a day off; null until it comes, or when it didn't.
   final MonthAttendanceEntity? calendar;
 
+  /// How many dashboards in a row didn't come, back to 0 as soon as one
+  /// does. Home feeds the badge on Chat from the dashboard, so while it
+  /// is counting up the badge has to ask for itself (see `HomePage`).
+  final int failedLoads;
+
   HomeState copyWith({
     int? childId,
     BaseState<ChildDashboardEntity>? dashboard,
     bool? isRefreshing,
     MonthAttendanceEntity? calendar,
+    int? failedLoads,
   }) => HomeState(
     childId: childId ?? this.childId,
     dashboard: dashboard ?? this.dashboard,
     isRefreshing: isRefreshing ?? this.isRefreshing,
     calendar: calendar ?? this.calendar,
+    failedLoads: failedLoads ?? this.failedLoads,
   );
 
   @override
-  List<Object?> get props => [childId, dashboard, isRefreshing, calendar];
+  List<Object?> get props => [
+    childId,
+    dashboard,
+    isRefreshing,
+    calendar,
+    failedLoads,
+  ];
 }

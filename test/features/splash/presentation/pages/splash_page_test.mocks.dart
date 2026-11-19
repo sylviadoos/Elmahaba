@@ -7,6 +7,10 @@
 import 'dart:async' as _i5;
 
 import 'package:al_mahhaba_school/core/base/base_state.dart' as _i2;
+import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_bloc.dart'
+    as _i13;
+import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_intent.dart'
+    as _i14;
 import 'package:al_mahhaba_school/features/auth/domain/entities/parent_entity.dart'
     as _i8;
 import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.dart'
@@ -242,6 +246,109 @@ class MockChildrenViewModel extends _i1.Mock implements _i11.ChildrenViewModel {
 
   @override
   void onChange(_i10.Change<_i3.ChildrenState>? change) => super.noSuchMethod(
+    Invocation.method(#onChange, [change]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void addError(Object? error, [StackTrace? stackTrace]) => super.noSuchMethod(
+    Invocation.method(#addError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onError(Object? error, StackTrace? stackTrace) => super.noSuchMethod(
+    Invocation.method(#onError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+}
+
+/// A class which mocks [AppStatusBloc].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockAppStatusBloc extends _i1.Mock implements _i13.AppStatusBloc {
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(
+            Invocation.getter(#isClosed),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  bool get state =>
+      (super.noSuchMethod(
+            Invocation.getter(#state),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  _i5.Stream<bool> get stream =>
+      (super.noSuchMethod(
+            Invocation.getter(#stream),
+            returnValue: _i5.Stream<bool>.empty(),
+            returnValueForMissingStub: _i5.Stream<bool>.empty(),
+          )
+          as _i5.Stream<bool>);
+
+  @override
+  void add(_i14.AppStatusIntent? event) => super.noSuchMethod(
+    Invocation.method(#add, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onEvent(_i14.AppStatusIntent? event) => super.noSuchMethod(
+    Invocation.method(#onEvent, [event]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void emit(bool? state) => super.noSuchMethod(
+    Invocation.method(#emit, [state]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void on<E extends _i14.AppStatusIntent>(
+    _i10.EventHandler<E, bool>? handler, {
+    _i10.EventTransformer<E>? transformer,
+  }) => super.noSuchMethod(
+    Invocation.method(#on, [handler], {#transformer: transformer}),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onTransition(_i10.Transition<_i14.AppStatusIntent, bool>? transition) =>
+      super.noSuchMethod(
+        Invocation.method(#onTransition, [transition]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void onDone(
+    _i14.AppStatusIntent? event, [
+    Object? error,
+    StackTrace? stackTrace,
+  ]) => super.noSuchMethod(
+    Invocation.method(#onDone, [event, error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i5.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i5.Future<void>.value(),
+            returnValueForMissingStub: _i5.Future<void>.value(),
+          )
+          as _i5.Future<void>);
+
+  @override
+  void onChange(_i10.Change<bool>? change) => super.noSuchMethod(
     Invocation.method(#onChange, [change]),
     returnValueForMissingStub: null,
   );

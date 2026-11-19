@@ -295,8 +295,8 @@ void main() {
       await bloc.close();
     });
 
-    test('older items didn\'t load: the news still waits, and comes with '
-        'the next try', () async {
+    test('older items didn\'t load: the news comes at once all the same, '
+        'and "Try again" stays', () async {
       final older = Completer<Result<ChatPageEntity>>();
       final bloc = build();
       await openOn(
@@ -319,11 +319,14 @@ void main() {
       older.complete(const Failure(exception: NetworkException()));
       await Future<void>.delayed(Duration.zero);
       await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
 
-      // Nothing was asked over a chat still showing why it didn't load.
+      // The parent is down at the newest: the news doesn't wait for a
+      // "Try again" far up top, which still says the older ones failed.
+      expect(bloc.state.page?.items, [omarItem, newest]);
       expect(bloc.state.chat.state, StateType.error);
-      expect(bloc.state.page?.items, [omarItem]);
 
+      // Tried again: the older ones come, the news stays.
       when(
         getChat(
           studentId: omar.studentId,
@@ -336,6 +339,39 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(bloc.state.page?.items, [omarItem, newest]);
+      expect(bloc.state.chat.state, StateType.success);
+      await bloc.close();
+    });
+
+    test('older items didn\'t load: news after that still comes (a '
+        'notification, back to the app)', () async {
+      final bloc = build();
+      await openOn(
+        bloc,
+        chatPage([omarItem], hasMore: true, nextBefore: 'cursor-1'),
+      );
+      when(
+        getChat(
+          studentId: omar.studentId,
+          before: 'cursor-1',
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException()));
+      latestFew(omar.studentId, chatPage([newest]));
+
+      bloc.add(const LoadOlderChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      expect(bloc.state.chat.state, StateType.error);
+
+      bloc.add(const RefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(bloc.state.page?.items, [omarItem, newest]);
+      // "Try again" up top stays, with why.
+      expect(bloc.state.chat.state, StateType.error);
+      expect(bloc.state.chat.exception, isA<NetworkException>());
       await bloc.close();
     });
 

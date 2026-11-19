@@ -10,6 +10,7 @@ import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
+import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/core/notifications/notification_service.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/entities/month_attendance_entity.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
@@ -213,5 +214,19 @@ void main() {
 
     // The moment a chat badge matters most.
     expect(asked, [omar.studentId]);
+  });
+
+  testWidgets('Home could not load: the badge asks for itself, as Home has '
+      'no count to pass it', (tester) async {
+    when(repo.getChildDashboard(any)).thenAnswer((invocation) async {
+      asked.add(invocation.positionalArguments.first as int);
+      return const Failure(exception: NetworkException());
+    });
+
+    await pumpApp(tester);
+
+    // Home's, which didn't come, then the badge's own: without the second
+    // the badge would keep the count it had while Home sits there failing.
+    expect(asked, [omar.studentId, omar.studentId]);
   });
 }

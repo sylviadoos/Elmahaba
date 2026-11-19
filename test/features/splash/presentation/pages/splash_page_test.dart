@@ -10,6 +10,8 @@ import 'package:mockito/mockito.dart';
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/l10n/translations/app_localizations.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
+import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_bloc.dart';
+import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_intent.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.dart';
 import 'package:al_mahhaba_school/features/auth/domain/use_cases/check_session_use_case.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_event.dart';
@@ -25,6 +27,7 @@ import 'splash_page_test.mocks.dart';
   MockSpec<CheckSessionUseCase>(),
   MockSpec<ParentViewModel>(),
   MockSpec<ChildrenViewModel>(),
+  MockSpec<AppStatusBloc>(),
 ])
 void main() {
   final l10n = lookupAppLocalizations(const Locale('en'));
@@ -32,13 +35,25 @@ void main() {
   late MockCheckSessionUseCase checkSession;
   late MockParentViewModel parentViewModel;
   late MockChildrenViewModel childrenViewModel;
+  late MockAppStatusBloc appStatusBloc;
 
   setUp(() {
     checkSession = MockCheckSessionUseCase();
     parentViewModel = MockParentViewModel();
     childrenViewModel = MockChildrenViewModel();
+    appStatusBloc = MockAppStatusBloc();
+    when(appStatusBloc.stream).thenAnswer((_) => const Stream.empty());
     getIt.registerSingleton<CheckSessionUseCase>(checkSession);
   });
+
+  /// Whether the splash asked the school if visitors get "Log in".
+  void verifyAskedAppStatus({required bool asked}) {
+    if (asked) {
+      verify(appStatusBloc.add(argThat(isA<LoadAppStatusIntent>()))).called(1);
+    } else {
+      verifyNever(appStatusBloc.add(argThat(isA<LoadAppStatusIntent>())));
+    }
+  }
 
   tearDown(getIt.reset);
 
@@ -68,6 +83,7 @@ void main() {
         providers: [
           BlocProvider<ParentViewModel>.value(value: parentViewModel),
           BlocProvider<ChildrenViewModel>.value(value: childrenViewModel),
+          BlocProvider<AppStatusBloc>.value(value: appStatusBloc),
         ],
       ),
     );
@@ -110,6 +126,8 @@ void main() {
       expect(find.text(AppRoutes.onboarding), findsOneWidget);
       verifyNever(parentViewModel.doAction(any));
       verifyNever(childrenViewModel.doAction(any));
+      // A visitor: whether "Log in" shows is asked.
+      verifyAskedAppStatus(asked: true);
     });
 
     testWidgets('signed in: shows the saved parent and children, opens Home', (
@@ -126,6 +144,8 @@ void main() {
       verify(
         childrenViewModel.doAction(argThat(isA<LoadChildrenEvent>())),
       ).called(1);
+      // Signed in: the app works whatever the school says; nothing asked.
+      verifyAskedAppStatus(asked: false);
     });
 
     testWidgets('session ended: opens Log in and says why', (tester) async {

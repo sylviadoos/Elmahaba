@@ -213,6 +213,10 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
   /// while scrolling stay). Only while the chat shows and isn't loading;
   /// one at a time. Dropped when another child is picked meanwhile, and
   /// when it doesn't load: what's shown stays, no snack bar.
+  ///
+  /// Also when older items didn't load: the parent is down at the newest,
+  /// far from "Try again" up top, and the school's news mustn't wait for
+  /// it. That row stays as it is.
   Future<void> _onRefresh(
     RefreshChatIntent intent,
     Emitter<ChatState> emit,
@@ -224,7 +228,11 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
       _refreshPending = true;
       return;
     }
-    if (state.chat.state != StateType.success || _refreshing != null) return;
+    final settled = switch (state.chat.state) {
+      StateType.success || StateType.error => true,
+      _ => false,
+    };
+    if (!settled || _refreshing != null) return;
     final load = _loads;
     final cancel = _refreshing = CancelHandle();
     final studentId = state.studentId;
@@ -245,11 +253,20 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     // Not a later one, started once another child was picked meanwhile.
     if (identical(_refreshing, cancel)) _refreshing = null;
     if (load != _loads) return;
-    final shown = state.chat.data;
+    final chat = state.chat;
+    final shown = chat.data;
     if (shown == null) return;
     result.when(
-      success: (newest) =>
-          emit(state.showing(BaseState.success(newest.after(shown)))),
+      // As it was: older ones that didn't load still say so.
+      success: (newest) => emit(
+        state.showing(
+          BaseState.all(
+            state: chat.state,
+            data: newest.after(shown),
+            exception: chat.exception,
+          ),
+        ),
+      ),
       failure: (exception) => debugPrint('Refreshing the chat: $exception'),
     );
   }
@@ -301,16 +318,23 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
           add(const RefreshChatIntent());
         }
       },
-      // It keeps waiting: these come again when the parent tries again.
-      failure: (exception) => emit(
-        state.copyWith(
-          chat: BaseState.all(
-            state: StateType.error,
-            data: shown,
-            exception: exception,
+      // These come again when the parent tries again; the news asked for
+      // meanwhile doesn't wait for that.
+      failure: (exception) {
+        emit(
+          state.copyWith(
+            chat: BaseState.all(
+              state: StateType.error,
+              data: shown,
+              exception: exception,
+            ),
           ),
-        ),
-      ),
+        );
+        if (_refreshPending) {
+          _refreshPending = false;
+          add(const RefreshChatIntent());
+        }
+      },
     );
   }
 

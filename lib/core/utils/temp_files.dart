@@ -11,6 +11,10 @@ abstract final class TempFiles {
   /// open again without downloading it.
   static const Duration keepOpened = Duration(days: 7);
 
+  /// Where the lighter copies of the photos picked to send are saved (see
+  /// `PhotoCompressorImpl`): all cleared, like the picker's copies.
+  static const String compressedPhotos = 'compressed_photos';
+
   /// Where those files are saved (see the remote data sources).
   static const List<String> _openedFolders = [
     'chat_attachments',
@@ -18,14 +22,22 @@ abstract final class TempFiles {
     'excuse_documents',
   ];
 
-  /// The copies of the files picked to send (the picker keeps them), and
-  /// the files opened more than [keepOpened] ago. Never fails: what can't
-  /// be deleted now is tried at the next start.
+  /// The copies of the files picked to send (the picker keeps them, and the
+  /// lighter photos made of them), and the files opened more than
+  /// [keepOpened] ago. Never fails: what can't be deleted now is tried at
+  /// the next start.
   static Future<void> clean() async {
     try {
       await FilePicker.clearTemporaryFiles();
     } catch (e) {
       debugPrint('Clearing picked files: $e');
+    }
+    try {
+      final temp = await getTemporaryDirectory();
+      final photos = Directory('${temp.path}/$compressedPhotos');
+      if (await photos.exists()) await photos.delete(recursive: true);
+    } catch (e) {
+      debugPrint('Clearing compressed photos: $e');
     }
     try {
       final temp = await getTemporaryDirectory();

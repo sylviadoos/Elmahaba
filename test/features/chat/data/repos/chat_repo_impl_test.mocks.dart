@@ -197,6 +197,13 @@ class MockChatLocalDataSource extends _i1.Mock
       );
 
   @override
+  void markRead(int? studentId, Set<String>? keys, {required int? unread}) =>
+      super.noSuchMethod(
+        Invocation.method(#markRead, [studentId, keys], {#unread: unread}),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   void clear() => super.noSuchMethod(
     Invocation.method(#clear, []),
     returnValueForMissingStub: null,

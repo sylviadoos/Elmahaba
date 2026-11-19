@@ -166,6 +166,8 @@ void main() {
       );
       await Future<void>.delayed(Duration.zero);
       expect(told, [const ChatReadEntity(studentId: 1208, unread: 2)]);
+      // The chat kept for opening again: read there too.
+      verify(localDataSource.markRead(1208, {'event:40'}, unread: 2)).called(1);
     });
 
     test('a file: asked for the child whose page it\'s on', () async {
@@ -221,6 +223,9 @@ void main() {
       expect(await repo.markRead(['event:40']), isFailure<NetworkException>());
       await Future<void>.delayed(Duration.zero);
       expect(told, isEmpty);
+      verifyNever(
+        localDataSource.markRead(any, any, unread: anyNamed('unread')),
+      );
     });
   });
 

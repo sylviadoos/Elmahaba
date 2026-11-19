@@ -43,15 +43,19 @@ class NotificationServiceImpl implements NotificationService {
   @override
   Future<void> init() async {
     if (!_isPhone) return;
-    // iOS, and Android 13 and later, ask the parent first.
-    await _messaging.requestPermission();
-    // iOS shows a push while the app is open itself; Android doesn't, so
-    // it gets a local notification instead (_showWhileOpen).
+    // Before the permission dialog, not after it: iOS keeps a push hidden
+    // while the app is open unless these are set, and the plugin reads
+    // them from the phone's own settings, not from the school — asking
+    // needs no permission. Waiting on the parent's answer (or on it
+    // failing) would leave them unset, and every push would then arrive
+    // silently with the app open.
     await _messaging.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
+    // iOS, and Android 13 and later, ask the parent first.
+    await _messaging.requestPermission();
     if (_isAndroid) {
       await _localNotifications.initialize(
         settings: const InitializationSettings(
@@ -75,8 +79,19 @@ class NotificationServiceImpl implements NotificationService {
     final opening = await _messaging.getInitialMessage();
     if (opening != null) _taps.add(opening.data);
 
-    // For sending a test push from the Firebase console.
-    if (AppConfig.enableLogging) debugPrint('FCM token: ${await getToken()}');
+    // For sending a test push from the Firebase console, and for telling
+    // a push the phone refused from one the app never got: iOS keeps its
+    // own switches per app, and `alert` off there hides every banner
+    // whatever the app asks for.
+    if (AppConfig.enableLogging) {
+      final settings = await _messaging.getNotificationSettings();
+      debugPrint(
+        'Notifications: ${settings.authorizationStatus.name}, '
+        'alert ${settings.alert.name}, sound ${settings.sound.name}, '
+        'badge ${settings.badge.name}',
+      );
+      debugPrint('FCM token: ${await getToken()}');
+    }
   }
 
   // The registration token every server library sends to. FCM 17 deprecates
@@ -119,6 +134,16 @@ class NotificationServiceImpl implements NotificationService {
   /// back as the payload when it's tapped.
   Future<void> _showWhileOpen(RemoteMessage message) async {
     final notification = message.notification;
+    // Reached means the push arrived with the app open. No line for a push
+    // that was shown on the phone is the app never getting it; a line with
+    // `notification false` is the school sending data only, which iOS
+    // never shows.
+    if (AppConfig.enableLogging) {
+      debugPrint(
+        'Push while open: notification ${notification != null}, '
+        'title ${notification?.title}, data ${message.data}',
+      );
+    }
     if (!_isAndroid || notification == null) return;
     await _localNotifications.show(
       id: (message.messageId ?? '${message.sentTime}').hashCode,
