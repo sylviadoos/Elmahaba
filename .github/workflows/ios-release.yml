@@ -43,17 +43,6 @@ jobs:
       - name: Install FlutterFire CLI
         run: dart pub global activate flutterfire_cli
 
-      # TEMP DEBUG: inspect what pod install actually produced for
-      # FirebaseCrashlytics, to find why the flutterfire upload-symbols
-      # script path detection fails on CI.
-      - name: Debug FirebaseCrashlytics pod contents
-        run: |
-          echo "pod --version: $(pod --version)"
-          echo "--- ios/Pods/FirebaseCrashlytics ---"
-          find ios/Pods/FirebaseCrashlytics -maxdepth 1 2>&1 || echo "MISSING"
-          echo "--- permissions ---"
-          ls -la ios/Pods/FirebaseCrashlytics/run ios/Pods/FirebaseCrashlytics/upload-symbols 2>&1 || true
-
       # 6. Install Apple Distribution Certificate
       - name: Install signing certificate
         env:
@@ -172,10 +161,24 @@ jobs:
 
       # 10. Build signed IPA
       - name: Build iOS IPA
+        continue-on-error: true
         run: |
           flutter build ipa \
             --release \
             --export-options-plist=ios/ExportOptions.plist
+
+      # TEMP DEBUG: locate the real Firebase SPM checkout path under
+      # DerivedData, since the flutterfire upload-symbols fallback path
+      # (.../SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run)
+      # isn't being found.
+      - name: Debug Firebase SPM checkout location
+        run: |
+          echo "--- searching DerivedData for Crashlytics/firebase checkouts ---"
+          find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 6 -type d \( -iname "*firebase*" -o -iname "checkouts" \) 2>&1 || true
+          echo "--- contents of any checkouts dir found ---"
+          find "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 6 -type d -iname "checkouts" -exec ls -la {} \; 2>&1 || true
+          echo "--- re-fail the job since the real build failed ---"
+          exit 1
 
       # 11. Show generated IPA
       - name: Check IPA
