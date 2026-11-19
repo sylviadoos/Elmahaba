@@ -161,21 +161,10 @@ jobs:
 
       # 10. Build signed IPA
       - name: Build iOS IPA
-        continue-on-error: true
         run: |
           flutter build ipa \
             --release \
             --export-options-plist=ios/ExportOptions.plist
-
-      # TEMP DEBUG: print diagnostics written by the Xcode build phase
-      # itself (see project.pbxproj) to find the real Firebase SPM
-      # checkout location.
-      - name: Debug Firebase SPM checkout location
-        run: |
-          echo "--- /tmp/flutterfire_debug.log ---"
-          cat /tmp/flutterfire_debug.log 2>&1 || echo "no debug log found"
-          echo "--- re-fail the job since the real build failed ---"
-          exit 1
 
       # 11. Show generated IPA
       - name: Check IPA
