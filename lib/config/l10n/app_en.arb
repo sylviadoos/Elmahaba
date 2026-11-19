@@ -254,7 +254,6 @@
   },
   "childLinkPending": "Request sent to the school. You’ll see your child once the school confirms it.",
   "noChildrenYet": "No children added yet",
-  "goodMorning": "Good morning",
   "today": "Today",
   "results": "Results",
   "attendance": "Attendance",
@@ -633,6 +632,8 @@
     }
   },
   "homework": "Homework",
+  "homeworkOne": "Homework",
+  "homeworkNotFound": "This homework is no longer here.",
   "homeworkCount": "{count, plural, =0{No homework} =1{1 homework} other{{count} homework}}",
   "@homeworkCount": {
     "placeholders": {

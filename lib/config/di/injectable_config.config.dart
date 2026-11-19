@@ -286,6 +286,8 @@ import 'package:al_mahhaba_school/features/homework/data/repos/homework_repo_imp
     as _i372;
 import 'package:al_mahhaba_school/features/homework/domain/repos/homework_repo.dart'
     as _i243;
+import 'package:al_mahhaba_school/features/homework/domain/use_cases/find_homework_use_case.dart'
+    as _i670;
 import 'package:al_mahhaba_school/features/homework/domain/use_cases/get_homework_use_case.dart'
     as _i417;
 import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_bloc.dart'
@@ -713,6 +715,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i480.PdfPreviewer>(),
       ),
     );
+    gh.lazySingleton<_i670.FindHomeworkUseCase>(
+      () => _i670.FindHomeworkUseCase(gh<_i243.HomeworkRepo>()),
+    );
     gh.lazySingleton<_i417.GetHomeworkUseCase>(
       () => _i417.GetHomeworkUseCase(gh<_i243.HomeworkRepo>()),
     );
@@ -845,6 +850,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i374.GetAnnouncementsUseCase>(
       () => _i374.GetAnnouncementsUseCase(gh<_i58.AnnouncementsRepo>()),
     );
+    gh.factory<_i1002.HomeworkBloc>(
+      () => _i1002.HomeworkBloc(
+        gh<_i417.GetHomeworkUseCase>(),
+        gh<_i670.FindHomeworkUseCase>(),
+        gh<_i25.MarkChatReadUseCase>(),
+        gh<_i778.DownloadChatAttachmentUseCase>(),
+        gh<_i165.PreviewChatAttachmentUseCase>(),
+      ),
+    );
     gh.factory<_i1065.PayFeesViewModel>(
       () => _i1065.PayFeesViewModel(gh<_i261.PayOnlineUseCase>()),
     );
@@ -889,14 +903,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i341.AnnouncementsBloc>(
       () => _i341.AnnouncementsBloc(
         gh<_i374.GetAnnouncementsUseCase>(),
-        gh<_i25.MarkChatReadUseCase>(),
-        gh<_i778.DownloadChatAttachmentUseCase>(),
-        gh<_i165.PreviewChatAttachmentUseCase>(),
-      ),
-    );
-    gh.factory<_i1002.HomeworkBloc>(
-      () => _i1002.HomeworkBloc(
-        gh<_i417.GetHomeworkUseCase>(),
         gh<_i25.MarkChatReadUseCase>(),
         gh<_i778.DownloadChatAttachmentUseCase>(),
         gh<_i165.PreviewChatAttachmentUseCase>(),

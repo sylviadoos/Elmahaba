@@ -43,12 +43,12 @@ void main() {
     sendCode = MockSendChildLinkCodeUseCase();
     resendCode = MockResendChildLinkCodeUseCase();
     checkFirebaseCode = MockVerifyOtpUseCase();
+    // Firebase first; the school first is its own group, at the end.
     viewModel = LinkChildCodeViewModel(
       verifyChildLink,
       sendCode,
       resendCode,
       checkFirebaseCode,
-      // Firebase first; the school first is tested on its own.
       false,
     );
   });
@@ -286,13 +286,16 @@ void main() {
         verifyZeroInteractions(checkFirebaseCode);
       });
 
-      test('again: straight from the school', () async {
-        await viewModel.doAction(SendLinkCodeEvent(withPhone));
-        await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      test(
+        'again: Firebase tried first again, the school once it fails',
+        () async {
+          await viewModel.doAction(SendLinkCodeEvent(withPhone));
+          await viewModel.doAction(SendLinkCodeEvent(withPhone));
 
-        verify(sendCode(any, resendToken: anyNamed('resendToken'))).called(1);
-        verify(resendCode(withPhone.token)).called(2);
-      });
+          verify(sendCode(any, resendToken: anyNamed('resendToken'))).called(2);
+          verify(resendCode(withPhone.token)).called(2);
+        },
+      );
 
       test("the school fails too: its error", () async {
         when(resendCode(any)).thenAnswer(
@@ -311,52 +314,54 @@ void main() {
     });
   });
 
-  group('the school (SMS Misr) first', () {
-    late LinkChildCodeViewModel schoolFirst;
-
-    setUp(
-      () => schoolFirst = LinkChildCodeViewModel(
-        verifyChildLink,
-        sendCode,
-        resendCode,
-        checkFirebaseCode,
-        true,
-      ),
-    );
-    tearDown(() => schoolFirst.close());
-
-    test('the school texts it, even with a number for Firebase', () async {
+  group('"Didn\'t get it" takes turns (the school takes either code)', () {
+    setUp(() {
+      whenFirebaseSends();
       when(
         resendCode(any),
       ).thenAnswer((_) async => Success(data: verification));
-
-      await schoolFirst.doAction(SendLinkCodeEvent(withPhone));
-
-      verify(resendCode(withPhone.token)).called(1);
-      verifyZeroInteractions(sendCode);
-      expect(schoolFirst.state.resending.data, verification);
-    });
-
-    test('SMS Misr fails: Firebase sends it, and checks the code', () async {
-      when(resendCode(any)).thenAnswer(
-        (_) async => const Failure(
-          exception: ServerException(statusCode: 503, code: 'otp_send_failed'),
-        ),
-      );
-      whenFirebaseSends();
       when(
         checkFirebaseCode(verificationId: 'vid', smsCode: '123456'),
       ).thenAnswer((_) async => const Success(data: 'firebase-id-token'));
       when(
         verifyChildLink(token: anyNamed('token'), proof: anyNamed('proof')),
       ).thenAnswer((_) async => const Success(data: ereny));
+    });
 
-      await schoolFirst.doAction(SendLinkCodeEvent(withPhone));
-      await schoolFirst.doAction(
+    test('Firebase, then the school, then Firebase again', () async {
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      expect(viewModel.state.nextByFirebase, isFalse);
+
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      verify(resendCode(withPhone.token)).called(1);
+      // The school's sent: the next is Firebase's.
+      expect(viewModel.state.nextByFirebase, isTrue);
+
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      verify(sendCode('01012344567', resendToken: 7)).called(1);
+      expect(viewModel.state.nextByFirebase, isFalse);
+      verifyNoMoreInteractions(resendCode);
+    });
+
+    test('the code typed goes as the last one came', () async {
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      // After the school's: its code, as it is.
+      await viewModel.doAction(
         CheckLinkCodeEvent(token: withPhone.token, code: '123456'),
       );
+      verify(
+        verifyChildLink(
+          token: withPhone.token,
+          proof: const SchoolCodeProof('123456'),
+        ),
+      ).called(1);
 
-      verify(sendCode('01012344567', resendToken: null)).called(1);
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      // After Firebase's again: its proof, with the same token.
+      await viewModel.doAction(
+        CheckLinkCodeEvent(token: withPhone.token, code: '123456'),
+      );
       verify(
         verifyChildLink(
           token: withPhone.token,
@@ -365,19 +370,82 @@ void main() {
       ).called(1);
     });
 
-    test('the school refuses on purpose: its error, no Firebase', () async {
+    test('no number for Firebase: the school every time, none of '
+        'Firebase\'s turn', () async {
+      await viewModel.doAction(SendLinkCodeEvent(verification));
+      await viewModel.doAction(SendLinkCodeEvent(verification));
+
+      verify(resendCode(verification.token)).called(2);
+      verifyZeroInteractions(sendCode);
+      expect(viewModel.state.nextByFirebase, isFalse);
+    });
+  });
+
+  group('the school sends first (SMS Misr)', () {
+    setUp(() async {
+      await viewModel.close();
+      viewModel = LinkChildCodeViewModel(
+        verifyChildLink,
+        sendCode,
+        resendCode,
+        checkFirebaseCode,
+        true,
+      );
+      whenFirebaseSends();
+    });
+
+    test('the school texts the first code, not Firebase', () async {
+      when(
+        resendCode(any),
+      ).thenAnswer((_) async => Success(data: verification));
+
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+
+      verify(resendCode(withPhone.token)).called(1);
+      verifyZeroInteractions(sendCode);
+      expect(viewModel.state.resending.data, verification);
+      // "Didn't get it": Firebase's turn.
+      expect(viewModel.state.nextByFirebase, isTrue);
+    });
+
+    test("again: Firebase's turn", () async {
+      when(
+        resendCode(any),
+      ).thenAnswer((_) async => Success(data: verification));
+
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+
+      verify(resendCode(withPhone.token)).called(1);
+      verify(sendCode('01012344567', resendToken: null)).called(1);
+    });
+
+    test("the school can't: Firebase sends it instead", () async {
       when(resendCode(any)).thenAnswer(
         (_) async =>
-            const Failure(exception: ServerException(code: 'otp_resend_limit')),
+            const Failure(exception: ServerException(code: 'otp_send_failed')),
       );
 
-      await schoolFirst.doAction(SendLinkCodeEvent(withPhone));
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
 
+      verify(sendCode('01012344567', resendToken: null)).called(1);
+      expect(viewModel.state.resending.data, withPhone);
+    });
+
+    test("neither can: Firebase's error, the school not asked twice", () async {
+      when(resendCode(any)).thenAnswer(
+        (_) async =>
+            const Failure(exception: ServerException(code: 'otp_send_failed')),
+      );
+      whenFirebaseFails();
+
+      await viewModel.doAction(SendLinkCodeEvent(withPhone));
+
+      verify(resendCode(any)).called(1);
       expect(
-        (schoolFirst.state.resending.exception! as ServerException).code,
-        'otp_resend_limit',
+        viewModel.state.resending.exception,
+        isA<PhoneVerificationException>(),
       );
-      verifyZeroInteractions(sendCode);
     });
   });
 

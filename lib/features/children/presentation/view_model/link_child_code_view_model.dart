@@ -6,7 +6,6 @@ import 'package:al_mahhaba_school/core/base/base_cubit.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
-import 'package:al_mahhaba_school/features/auth/domain/school_sms_down.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_proof_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/phone_verification_entity.dart';
 import 'package:al_mahhaba_school/features/auth/domain/use_cases/verify_otp_use_case.dart';
@@ -17,11 +16,24 @@ import 'package:al_mahhaba_school/features/children/domain/use_cases/verify_chil
 import 'package:al_mahhaba_school/features/children/presentation/view_model/link_child_code_event.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/link_child_code_state.dart';
 
-/// The code sent to the school's phone for the child, on its page: sent by
-/// the school (SMS Misr) or Firebase — whichever goes first
-/// (`AppConfig.smsMisrFirst`), the other when it fails; checked (the child
-/// is linked), or asked for again. One per page. No navigation actions,
-/// hence `void`; the page reacts to the state.
+/// Who sent the code the parent is waiting for.
+enum _Sender { none, firebase, school }
+
+/// The code sent to the school's phone for the child, on its page. The
+/// school takes either kind with the same `verification_token` for its 5
+/// minutes, and links the child with the first that's right:
+/// - The first, when the school gave its number (`verification.phone`):
+///   the school texts it (SMS Misr, `resend-otp`) when it sends first
+///   (`AppConfig.smsMisrFirst`), Firebase only if it can't; otherwise
+///   Firebase sends it, the school at once if Firebase can't.
+/// - "Didn't get it" takes turns: after Firebase's, the school texts one;
+///   after the school's, Firebase sends one again. Each says it sent a code
+///   that may never arrive, so asking again tries the other way.
+/// - The code typed is checked as the last one came: Firebase's gives its
+///   `firebase_id_token`, the school's goes as `code`.
+///
+/// One per page. No navigation actions, hence `void`; the page reacts to
+/// the state.
 @injectable
 class LinkChildCodeViewModel
     extends BaseCubit<LinkChildCodeState, LinkChildCodeEvent, void> {
@@ -33,6 +45,10 @@ class LinkChildCodeViewModel
     @Named(AppConfig.smsMisrFirstName) this._smsMisrFirst,
   ) : super(const LinkChildCodeState());
 
+  /// Whether the school texts the first code (`AppConfig.smsMisrFirst`),
+  /// Firebase only when it can't.
+  final bool _smsMisrFirst;
+
   final VerifyChildLinkUseCase _verifyChildLink;
   final SendChildLinkCodeUseCase _sendByFirebase;
   final ResendChildLinkCodeUseCase _textBySchool;
@@ -40,17 +56,14 @@ class LinkChildCodeViewModel
   /// Checks a code Firebase sent; gives its proof of the number.
   final VerifyOtpUseCase _checkFirebaseCode;
 
-  /// Whether the school texts the code first, Firebase only when it fails.
-  final bool _smsMisrFirst;
-
   /// From the last code Firebase sent: checks the typed code, and sends it
   /// again.
   String? _verificationId;
   int? _resendToken;
 
-  /// Whether the school texts the codes: it gave no number for Firebase, or
-  /// Firebase couldn't send one.
-  bool _bySchool = false;
+  /// Who sent the last code that went: the typed code is checked that way,
+  /// and asking again goes the other way.
+  _Sender _last = _Sender.none;
 
   @override
   Future<void> doAction(LinkChildCodeEvent event) async {
@@ -69,7 +82,7 @@ class LinkChildCodeViewModel
     emit(state.copyWith(checking: const BaseState.loading()));
     final verificationId = _verificationId;
     // The school's code goes as it is: the school checks it.
-    if (_bySchool || verificationId == null) {
+    if (_last != _Sender.firebase || verificationId == null) {
       return _link(token, SchoolCodeProof(code));
     }
     final checked = await _checkFirebaseCode(
@@ -100,51 +113,26 @@ class LinkChildCodeViewModel
   Future<void> _send(LinkVerificationEntity verification) async {
     emit(state.copyWith(resending: const BaseState.loading()));
     final phone = verification.phone;
-    // The school texts it: first, or with no number for Firebase, or after
-    // a code of its own — or Firebase sent one already and the parent asks
-    // again, so it didn't come (Firebase can say it sent one that never
-    // arrives).
-    if (_smsMisrFirst ||
-        _bySchool ||
-        phone == null ||
-        _verificationId != null) {
-      final failure = await _sendBySchool(verification.token);
-      if (failure == null || isClosed) return;
-      // SMS Misr failed and the school goes first: Firebase sends it.
-      if (_smsMisrFirst && phone != null && failure.isSchoolSmsDown) {
-        debugPrint(
-          'The school sent no linking code ($failure): Firebase sends one.',
-        );
-        return _sendByFirebaseOr(verification, phone, onFailure: null);
+    // The school texts it: without a number for Firebase, after Firebase's,
+    // or first when the school sends first. Else Firebase: first, or after
+    // the school's.
+    final first = _last == _Sender.none;
+    if (phone == null || _last == _Sender.firebase) {
+      final failure = await _sendBySchool(verification);
+      if (failure != null && !isClosed) {
+        emit(state.copyWith(resending: BaseState.error(failure)));
       }
-      emit(state.copyWith(resending: BaseState.error(failure)));
       return;
     }
-    await _sendByFirebaseOr(
-      verification,
-      phone,
-      // Firebase couldn't send it (blocked, out of quota, set up wrong…):
-      // the school texts it instead, and the next ones too.
-      onFailure: (exception) async {
-        debugPrint(
-          'Firebase sent no linking code ($exception): the school '
-          'sends one.',
-        );
-        final failure = await _sendBySchool(verification.token);
-        if (failure != null && !isClosed) {
-          emit(state.copyWith(resending: BaseState.error(failure)));
-        }
-      },
-    );
-  }
-
-  /// Has Firebase send the code to [phone]. When it fails: [onFailure], or
-  /// its error with none.
-  Future<void> _sendByFirebaseOr(
-    LinkVerificationEntity verification,
-    String phone, {
-    required Future<void> Function(AppException exception)? onFailure,
-  }) async {
+    final bySchool = first && _smsMisrFirst;
+    if (bySchool) {
+      final failure = await _sendBySchool(verification);
+      if (failure == null || isClosed) return;
+      // The school's first text didn't go: Firebase sends it instead.
+      debugPrint(
+        'The school sent no linking code ($failure): Firebase sends one.',
+      );
+    }
     final sent = await _sendByFirebase(phone, resendToken: _resendToken);
     if (isClosed) return;
     switch (sent) {
@@ -153,32 +141,56 @@ class LinkChildCodeViewModel
       ):
         _verificationId = verificationId;
         _resendToken = resendToken;
-        // Firebase's: Firebase checks it.
-        _bySchool = false;
-        emit(state.copyWith(resending: BaseState.success(verification)));
+        _last = _Sender.firebase;
+        emit(
+          state.copyWith(
+            resending: BaseState.success(verification),
+            // Asked again: the school texts one.
+            nextByFirebase: false,
+          ),
+        );
       // Android verified the number by itself: linked at once.
       case Success(data: PhoneAutoVerified(:final firebaseIdToken)):
         emit(state.copyWith(resending: const BaseState.initial()));
         await _link(verification.token, FirebaseProof(firebaseIdToken));
       case Success():
         emit(state.copyWith(resending: BaseState.success(verification)));
-      case Failure(:final exception):
-        if (onFailure != null) return onFailure(exception);
+      // Firebase couldn't either, after the school: its error.
+      case Failure(:final exception) when bySchool:
         emit(state.copyWith(resending: BaseState.error(exception)));
+      // Firebase couldn't send it (blocked, out of quota, set up wrong…):
+      // the school texts it at once, without waiting for "Didn't get it".
+      case Failure(:final exception):
+        debugPrint(
+          'Firebase sent no linking code ($exception): the school sends one.',
+        );
+        final failure = await _sendBySchool(verification);
+        if (failure != null && !isClosed) {
+          emit(state.copyWith(resending: BaseState.error(failure)));
+        }
     }
   }
 
   /// Has the school text the code; null once it has, else why not (not
   /// emitted: the caller decides). Once the school has texted a code, it's
-  /// the one the parent types: checked by the school, not Firebase. Until
-  /// then (it failed) a late Firebase code still counts.
-  Future<AppException?> _sendBySchool(String token) async {
-    final result = await _textBySchool(token);
+  /// the one the parent types: checked by the school. Until then (it
+  /// failed) the last code — Firebase's — still counts.
+  Future<AppException?> _sendBySchool(
+    LinkVerificationEntity verification,
+  ) async {
+    final result = await _textBySchool(verification.token);
     if (isClosed) return null;
     switch (result) {
       case Success(:final data):
-        _bySchool = true;
-        emit(state.copyWith(resending: BaseState.success(data)));
+        _last = _Sender.school;
+        emit(
+          state.copyWith(
+            resending: BaseState.success(data),
+            // Asked again: Firebase sends one, when there's a number for it
+            // — not counted against the school's resends.
+            nextByFirebase: verification.phone != null,
+          ),
+        );
         return null;
       case Failure(:final exception):
         return exception;

@@ -716,9 +716,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noChildrenYet => 'لم تتم إضافة أطفال بعد';
 
   @override
-  String get goodMorning => 'صباح الخير';
-
-  @override
   String get today => 'اليوم';
 
   @override
@@ -1366,6 +1363,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get homework => 'الواجبات';
+
+  @override
+  String get homeworkOne => 'واجب';
+
+  @override
+  String get homeworkNotFound => 'هذا الواجب لم يعد موجودًا.';
 
   @override
   String homeworkCount(int count) {

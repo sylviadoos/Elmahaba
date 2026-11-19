@@ -15,6 +15,7 @@ import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_image_loa
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_filter.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_page_entity.dart';
+import 'package:al_mahhaba_school/features/homework/domain/use_cases/find_homework_use_case.dart';
 import 'package:al_mahhaba_school/features/homework/domain/use_cases/get_homework_use_case.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_effect.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_intent.dart';
@@ -29,6 +30,7 @@ class HomeworkBloc
     extends BaseBloc<HomeworkIntent, HomeworkState, HomeworkEffect> {
   HomeworkBloc(
     this._getHomework,
+    this._findHomework,
     this._markRead,
     this._downloadAttachment,
     this._previewAttachment,
@@ -51,6 +53,7 @@ class HomeworkBloc
       if (intent.subjectId == state.subjectId) return null;
       return _load(emit, subjectId: () => intent.subjectId);
     });
+    on<ShowOneHomeworkIntent>(_onShowOne);
     on<ReloadHomeworkIntent>((_, emit) => _load(emit, refresh: true));
     on<LoadMoreHomeworkIntent>(_onLoadMore);
     on<HomeworkSeenIntent>(_onSeen);
@@ -59,6 +62,7 @@ class HomeworkBloc
   }
 
   final GetHomeworkUseCase _getHomework;
+  final FindHomeworkUseCase _findHomework;
   final MarkChatReadUseCase _markRead;
   final DownloadChatAttachmentUseCase _downloadAttachment;
   final PreviewChatAttachmentUseCase _previewAttachment;
@@ -215,6 +219,42 @@ class HomeworkBloc
           return;
         }
         emit(state.copyWith(homework: BaseState.error(exception)));
+      },
+    );
+  }
+
+  /// One homework, for its own page: shown as Home holds it, or looked for
+  /// (the chat only names it). Again on "Try again".
+  Future<void> _onShowOne(
+    ShowOneHomeworkIntent intent,
+    Emitter<HomeworkState> emit,
+  ) async {
+    final studentId = intent.studentId;
+    final held = intent.homework;
+    emit(
+      state.copyWith(
+        studentId: () => studentId,
+        one: held == null ? const BaseState.loading() : BaseState.success(held),
+      ),
+    );
+    if (held != null) return;
+    if (studentId == null) {
+      emit(state.copyWith(one: const BaseState.success(null)));
+      return;
+    }
+    _loading?.cancel();
+    final cancel = _loading = CancelHandle();
+    final result = await _findHomework(
+      studentId,
+      intent.homeworkId,
+      cancel: cancel,
+    );
+    result.when(
+      success: (homework) =>
+          emit(state.copyWith(one: BaseState.success(homework))),
+      failure: (exception) {
+        if (exception is CancelledException) return;
+        emit(state.copyWith(one: BaseState.error(exception)));
       },
     );
   }

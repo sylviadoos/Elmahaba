@@ -38,6 +38,11 @@ abstract final class AppRoutes {
   /// With the child to show first as `extra` (an `int` student id).
   static const String homework = '/homework';
 
+  /// One homework on a page of its own, with a `HomeworkArgs` as `extra`
+  /// when the parent holds it (else it's looked for by its id).
+  static const String homeworkDetails = '/homework/:id';
+  static String homeworkDetailsOf(int homeworkId) => '/homework/$homeworkId';
+
   /// With the child to show first as `extra` (an `int` student id).
   static const String announcements = '/announcements';
 

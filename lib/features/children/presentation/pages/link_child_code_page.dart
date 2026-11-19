@@ -36,10 +36,12 @@ import 'package:al_mahhaba_school/features/children/presentation/view_model/link
 import 'package:al_mahhaba_school/features/children/presentation/view_model/link_child_code_view_model.dart';
 
 /// Adding a child, step 2 when the school has another phone for them: the
-/// 6-digit code sent there, with a resend countdown. Firebase sends it when
-/// the school gave the number (as the page opens); otherwise — or when
-/// Firebase can't — the school texts it. Once it's right the child is
-/// linked, and Add children shows it.
+/// 6-digit code sent there, with a 5-minute resend countdown. When the
+/// school gave the number, it's sent as the page opens — by the school
+/// first or Firebase first (`AppConfig.smsMisrFirst`); otherwise the school
+/// texted it already. "Didn't get it" takes turns between the two (see
+/// `LinkChildCodeViewModel`). Once it's right the child is linked, and Add
+/// children shows it.
 class LinkChildCodePage extends StatelessWidget {
   const LinkChildCodePage({super.key, required this.verification});
 
@@ -74,6 +76,9 @@ class _LinkChildCodeView extends StatefulWidget {
 class _LinkChildCodeViewState extends State<_LinkChildCodeView> {
   static const int _codeLength = 6;
 
+  /// 5 minutes: as long as the code lasts.
+  static const int _resendSeconds = 300;
+
   final TextEditingController _codeController = TextEditingController();
   Timer? _timer;
   int _secondsLeft = 0;
@@ -90,7 +95,7 @@ class _LinkChildCodeViewState extends State<_LinkChildCodeView> {
   @override
   void initState() {
     super.initState();
-    _startCountdown(_verification.resendAfter.inSeconds);
+    _countFrom(_verification);
   }
 
   @override
@@ -99,6 +104,11 @@ class _LinkChildCodeViewState extends State<_LinkChildCodeView> {
     _codeController.dispose();
     super.dispose();
   }
+
+  /// A code sent: 5 minutes, or the school's wait when longer.
+  void _countFrom(LinkVerificationEntity verification) => _startCountdown(
+    math.max(verification.resendAfter.inSeconds, _resendSeconds),
+  );
 
   void _startCountdown(int seconds) {
     _timer?.cancel();
@@ -186,7 +196,7 @@ class _LinkChildCodeViewState extends State<_LinkChildCodeView> {
       _verification = verification;
       _codeController.clear();
       setState(() => _codeError = null);
-      _startCountdown(verification.resendAfter.inSeconds);
+      _countFrom(verification);
       return;
     }
     final exception = resending.exception;
@@ -228,7 +238,9 @@ class _LinkChildCodeViewState extends State<_LinkChildCodeView> {
     final l10n = context.l10n;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final isComplete = _codeController.text.length == _codeLength;
-    final canResend = !_noResends && _verification.resendsLeft > 0;
+    // The school's resends are counted; Firebase's aren't — after the
+    // school's code, Firebase sends the next even with none left.
+    final schoolCanResend = !_noResends && _verification.resendsLeft > 0;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -325,7 +337,7 @@ class _LinkChildCodeViewState extends State<_LinkChildCodeView> {
                                     ),
                                 ],
                               ),
-                              if (canResend)
+                              if (state.nextByFirebase || schoolCanResend)
                                 Center(
                                   child: _secondsLeft > 0
                                       ? ResendCountdown(seconds: _secondsLeft)

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -113,7 +113,7 @@ void main() {
 
     expect(find.textContaining(en.linkCodeSentTo), findsOneWidget);
     expect(find.textContaining('••• ••• 4567'), findsOneWidget);
-    // Another code only after a minute (resend_after: 60).
+    // Another code only after 5 minutes, as long as the code lasts.
     expect(find.text(en.resendCode), findsNothing);
   });
 
@@ -287,6 +287,46 @@ void main() {
         ),
       ).called(1);
       verifyZeroInteractions(checkFirebaseCode);
+    });
+
+    testWidgets('the school\'s resends used up: "Didn\'t get it" still has '
+        'Firebase send one', (tester) async {
+      var firebaseCalls = 0;
+      when(sendCode(any, resendToken: anyNamed('resendToken'))).thenAnswer((
+        _,
+      ) async {
+        // Firebase can't the first time; the school texts it instead.
+        if (firebaseCalls++ == 0) {
+          return const Failure(
+            exception: PhoneVerificationException(code: 'quota-exceeded'),
+          );
+        }
+        return const Success(
+          data: SmsCodeSent(verificationId: 'vid', resendToken: 1),
+        );
+      });
+      // As in the school's answer: no resends of its own left.
+      when(resendCode(any)).thenAnswer(
+        (_) async => Success(
+          data: LinkVerificationModel.fromJson({
+            ...verificationJson,
+            'phone': '01012344567',
+            'resends_left': 0,
+          }),
+        ),
+      );
+      await pump(tester, opened: withPhone);
+      verify(resendCode(withPhone.token)).called(1);
+
+      await tester.pump(const Duration(minutes: 5));
+      expect(find.text(en.resendCode), findsOneWidget);
+      await tester.tap(find.text(en.resendCode));
+      await tester.pump();
+      await tester.pump();
+
+      expect(firebaseCalls, 2);
+      verifyNoMoreInteractions(resendCode);
+      await tester.pump(const Duration(minutes: 5));
     });
 
     testWidgets('a wrong Firebase code: the app\'s message, under the boxes', (

@@ -1400,12 +1400,6 @@ abstract class AppLocalizations {
   /// **'No children added yet'**
   String get noChildrenYet;
 
-  /// No description provided for @goodMorning.
-  ///
-  /// In en, this message translates to:
-  /// **'Good morning'**
-  String get goodMorning;
-
   /// No description provided for @today.
   ///
   /// In en, this message translates to:
@@ -2539,6 +2533,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Homework'**
   String get homework;
+
+  /// No description provided for @homeworkOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Homework'**
+  String get homeworkOne;
+
+  /// No description provided for @homeworkNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This homework is no longer here.'**
+  String get homeworkNotFound;
 
   /// No description provided for @homeworkCount.
   ///
