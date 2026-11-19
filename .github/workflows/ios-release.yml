@@ -43,6 +43,17 @@ jobs:
       - name: Install FlutterFire CLI
         run: dart pub global activate flutterfire_cli
 
+      # TEMP DEBUG: inspect what pod install actually produced for
+      # FirebaseCrashlytics, to find why the flutterfire upload-symbols
+      # script path detection fails on CI.
+      - name: Debug FirebaseCrashlytics pod contents
+        run: |
+          echo "pod --version: $(pod --version)"
+          echo "--- ios/Pods/FirebaseCrashlytics ---"
+          find ios/Pods/FirebaseCrashlytics -maxdepth 1 2>&1 || echo "MISSING"
+          echo "--- permissions ---"
+          ls -la ios/Pods/FirebaseCrashlytics/run ios/Pods/FirebaseCrashlytics/upload-symbols 2>&1 || true
+
       # 6. Install Apple Distribution Certificate
       - name: Install signing certificate
         env:
