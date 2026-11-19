@@ -28,8 +28,9 @@ String shownRoutePath(GoRouterDelegate router) {
 /// changed at school, so it's never stale and never asked on a timer:
 /// - a notification arrives while it's shown (the school posted, accepted
 ///   an excuse, changed something…);
-/// - the app comes back to the front (notifications that arrived while it
-///   was away don't reach the app);
+/// - the app comes back from another app or the home screen
+///   (notifications that arrived while it was away don't reach the app;
+///   a window over the app is not being away);
 /// - the page shows again: back from a page opened over it, or from
 ///   another tab (tabs stay alive underneath).
 ///
@@ -55,6 +56,14 @@ class _PageRefresherState extends State<PageRefresher>
     with WidgetsBindingObserver {
   StreamSubscription<Map<String, dynamic>>? _notifications;
   GoRouterDelegate? _router;
+
+  /// Whether the app went properly away since it was last in front —
+  /// another app, or the home screen. A window over the app only makes it
+  /// inactive: the notification permission, the fingerprint sheet, the
+  /// shade pulled down, a dialog from another app. Nothing happens at
+  /// school while one of those is up, and coming back from it would
+  /// otherwise cost a request every time.
+  bool _wasAway = false;
 
   /// Whether the page is the one shown, as of the router's last change.
   bool _shown = true;
@@ -88,7 +97,16 @@ class _PageRefresherState extends State<PageRefresher>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _refreshIfShown();
+    switch (state) {
+      case AppLifecycleState.paused || AppLifecycleState.hidden:
+        _wasAway = true;
+      case AppLifecycleState.resumed when _wasAway:
+        _wasAway = false;
+        _refreshIfShown();
+      // Back from a window over the app, or on the way to one: nothing
+      // came in behind it.
+      default:
+    }
   }
 
   void _onRouteChanged() {

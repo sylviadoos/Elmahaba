@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +13,7 @@ import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/core/widgets/state_message.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/widgets/retry_or_log_in_button.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_unread_context.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_intent.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
 import 'package:al_mahhaba_school/features/children/presentation/extensions/children_context.dart';
@@ -53,10 +56,21 @@ class _HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<_HomeView> {
+  /// Told when Home opens and closes: while it's open, Home's dashboard
+  /// gives it the count after reads.
+  late final ChatUnreadBloc _chatUnread = context.read<ChatUnreadBloc>();
+
   @override
   void initState() {
     super.initState();
+    _chatUnread.add(const HomeOpenedIntent());
     _showSelectedChild();
+  }
+
+  @override
+  void dispose() {
+    _chatUnread.add(const HomeClosedIntent());
+    super.dispose();
   }
 
   /// The selected child's dashboard; nothing to show without children.
@@ -125,6 +139,16 @@ class _HomeViewState extends State<_HomeView> {
             );
           },
         ),
+        BlocListener<HomeBloc, HomeState>(
+          // The dashboard didn't come, so the listener above had nothing to
+          // pass on and the badge would keep yesterday's count while Home
+          // is shown (`BadgeRefresher` stays quiet for it). It asks for
+          // itself instead — a count is a far smaller ask than the whole
+          // dashboard, and comes where that one didn't.
+          listenWhen: (previous, current) =>
+              current.failedLoads > previous.failedLoads,
+          listener: (context, _) => context.loadChatUnread(),
+        ),
       ],
       child: PageRefresher(
         path: AppRoutes.home,
@@ -141,25 +165,38 @@ class _HomeViewState extends State<_HomeView> {
                   onChildSelected: (index) =>
                       context.selectChild(children[index].studentId),
                 ),
+                // The room left under the header, so that what stands in
+                // for the whole dashboard — an error, no internet — sits in
+                // the middle of it instead of up against the header.
                 Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: _pullToRefresh,
-                    child: SingleChildScrollView(
-                      // Pulls down even when it all fits.
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(
-                        20.w,
-                        4.h,
-                        20.w,
-                        MainNavBar.contentPadding(context),
-                      ),
-                      child: children.isEmpty
-                          ? NoChildrenState(
-                              children: childrenState,
-                              loading: const HomeDashboardSkeleton(),
-                            )
-                          : const _Dashboard(),
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, viewport) {
+                      final top = 4.h;
+                      final bottom = MainNavBar.contentPadding(context);
+                      return RefreshIndicator(
+                        onRefresh: _pullToRefresh,
+                        child: SingleChildScrollView(
+                          // Pulls down even when it all fits.
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.fromLTRB(20.w, top, 20.w, bottom),
+                          child: ConstrainedBox(
+                            // Taller than this and it scrolls, as before.
+                            constraints: BoxConstraints(
+                              minHeight: math.max(
+                                0,
+                                viewport.maxHeight - top - bottom,
+                              ),
+                            ),
+                            child: children.isEmpty
+                                ? NoChildrenState(
+                                    children: childrenState,
+                                    loading: const HomeDashboardSkeleton(),
+                                  )
+                                : const _Dashboard(),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -184,13 +221,18 @@ class _Dashboard extends StatelessWidget {
       builder: (context, state) => state.dashboard.when(
         initial: () => const HomeDashboardSkeleton(),
         loading: () => const HomeDashboardSkeleton(),
-        error: (exception) => StateMessage(
-          icon: AppIcons.navResults,
-          title: exception.localizedMessage(context),
-          action: RetryOrLogInButton(
-            exception: exception,
-            onRetry: () =>
-                context.read<HomeBloc>().add(const RefreshHomeIntent()),
+        // In the middle of the room under the header, not under it.
+        error: (exception) => Center(
+          child: StateMessage(
+            icon: AppIcons.navResults,
+            title: exception.localizedMessage(context),
+            // Centred: no room of its own above it.
+            topPadding: 0,
+            action: RetryOrLogInButton(
+              exception: exception,
+              onRetry: () =>
+                  context.read<HomeBloc>().add(const RefreshHomeIntent()),
+            ),
           ),
         ),
         success: (dashboard) => Column(

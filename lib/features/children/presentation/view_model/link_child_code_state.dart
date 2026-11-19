@@ -10,6 +10,7 @@ class LinkChildCodeState extends Equatable {
   const LinkChildCodeState({
     this.checking = const BaseState.initial(),
     this.resending = const BaseState.initial(),
+    this.nextByFirebase = false,
   });
 
   /// The code checked: success with the child once it's linked.
@@ -20,6 +21,11 @@ class LinkChildCodeState extends Equatable {
   /// Firebase sent it.
   final BaseState<LinkVerificationEntity> resending;
 
+  /// Whether asking again has Firebase send the code: after the school's.
+  /// Firebase's aren't counted against the school's resends, so it can be
+  /// asked for when those are used up.
+  final bool nextByFirebase;
+
   bool get isBusy =>
       checking.state == StateType.loading ||
       resending.state == StateType.loading;
@@ -27,11 +33,13 @@ class LinkChildCodeState extends Equatable {
   LinkChildCodeState copyWith({
     BaseState<ChildEntity>? checking,
     BaseState<LinkVerificationEntity>? resending,
+    bool? nextByFirebase,
   }) => LinkChildCodeState(
     checking: checking ?? this.checking,
     resending: resending ?? this.resending,
+    nextByFirebase: nextByFirebase ?? this.nextByFirebase,
   );
 
   @override
-  List<Object?> get props => [checking, resending];
+  List<Object?> get props => [checking, resending, nextByFirebase];
 }

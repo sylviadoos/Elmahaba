@@ -4,15 +4,23 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
 
-import 'package:al_mahhaba_school/core/base/result.dart' as _i4;
+import 'package:al_mahhaba_school/core/base/base_state.dart' as _i2;
+import 'package:al_mahhaba_school/core/base/result.dart' as _i5;
 import 'package:al_mahhaba_school/features/app_status/domain/entities/app_status_entity.dart'
-    as _i5;
+    as _i6;
 import 'package:al_mahhaba_school/features/app_status/domain/use_cases/get_app_status_use_case.dart'
-    as _i2;
+    as _i3;
+import 'package:al_mahhaba_school/features/auth/domain/entities/parent_entity.dart'
+    as _i9;
+import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_event.dart'
+    as _i10;
+import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart'
+    as _i8;
+import 'package:flutter_bloc/flutter_bloc.dart' as _i11;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i6;
+import 'package:mockito/src/dummies.dart' as _i7;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -29,28 +37,130 @@ import 'package:mockito/src/dummies.dart' as _i6;
 // ignore_for_file: subtype_of_sealed_class
 // ignore_for_file: invalid_use_of_internal_member
 
+class _FakeBaseState_0<T> extends _i1.SmartFake implements _i2.BaseState<T> {
+  _FakeBaseState_0(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
 /// A class which mocks [GetAppStatusUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGetAppStatusUseCase extends _i1.Mock
-    implements _i2.GetAppStatusUseCase {
+    implements _i3.GetAppStatusUseCase {
   @override
-  _i3.Future<_i4.Result<_i5.AppStatusEntity>> call() =>
+  _i4.Future<_i5.Result<_i6.AppStatusEntity>> call() =>
       (super.noSuchMethod(
             Invocation.method(#call, []),
-            returnValue: _i3.Future<_i4.Result<_i5.AppStatusEntity>>.value(
-              _i6.dummyValue<_i4.Result<_i5.AppStatusEntity>>(
+            returnValue: _i4.Future<_i5.Result<_i6.AppStatusEntity>>.value(
+              _i7.dummyValue<_i5.Result<_i6.AppStatusEntity>>(
                 this,
                 Invocation.method(#call, []),
               ),
             ),
             returnValueForMissingStub:
-                _i3.Future<_i4.Result<_i5.AppStatusEntity>>.value(
-                  _i6.dummyValue<_i4.Result<_i5.AppStatusEntity>>(
+                _i4.Future<_i5.Result<_i6.AppStatusEntity>>.value(
+                  _i7.dummyValue<_i5.Result<_i6.AppStatusEntity>>(
                     this,
                     Invocation.method(#call, []),
                   ),
                 ),
           )
-          as _i3.Future<_i4.Result<_i5.AppStatusEntity>>);
+          as _i4.Future<_i5.Result<_i6.AppStatusEntity>>);
+}
+
+/// A class which mocks [ParentViewModel].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockParentViewModel extends _i1.Mock implements _i8.ParentViewModel {
+  @override
+  _i4.Stream<void> get navigationStream =>
+      (super.noSuchMethod(
+            Invocation.getter(#navigationStream),
+            returnValue: _i4.Stream<void>.empty(),
+            returnValueForMissingStub: _i4.Stream<void>.empty(),
+          )
+          as _i4.Stream<void>);
+
+  @override
+  _i2.BaseState<_i9.ParentEntity> get state =>
+      (super.noSuchMethod(
+            Invocation.getter(#state),
+            returnValue: _FakeBaseState_0<_i9.ParentEntity>(
+              this,
+              Invocation.getter(#state),
+            ),
+            returnValueForMissingStub: _FakeBaseState_0<_i9.ParentEntity>(
+              this,
+              Invocation.getter(#state),
+            ),
+          )
+          as _i2.BaseState<_i9.ParentEntity>);
+
+  @override
+  _i4.Stream<_i2.BaseState<_i9.ParentEntity>> get stream =>
+      (super.noSuchMethod(
+            Invocation.getter(#stream),
+            returnValue: _i4.Stream<_i2.BaseState<_i9.ParentEntity>>.empty(),
+            returnValueForMissingStub:
+                _i4.Stream<_i2.BaseState<_i9.ParentEntity>>.empty(),
+          )
+          as _i4.Stream<_i2.BaseState<_i9.ParentEntity>>);
+
+  @override
+  bool get isClosed =>
+      (super.noSuchMethod(
+            Invocation.getter(#isClosed),
+            returnValue: false,
+            returnValueForMissingStub: false,
+          )
+          as bool);
+
+  @override
+  _i4.Future<void> doAction(_i10.ParentEvent? event) =>
+      (super.noSuchMethod(
+            Invocation.method(#doAction, [event]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  void doNavigationAction(dynamic navigationAction) => super.noSuchMethod(
+    Invocation.method(#doNavigationAction, [navigationAction]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  _i4.Future<void> close() =>
+      (super.noSuchMethod(
+            Invocation.method(#close, []),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  void emit(_i2.BaseState<_i9.ParentEntity>? state) => super.noSuchMethod(
+    Invocation.method(#emit, [state]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onChange(_i11.Change<_i2.BaseState<_i9.ParentEntity>>? change) =>
+      super.noSuchMethod(
+        Invocation.method(#onChange, [change]),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void addError(Object? error, [StackTrace? stackTrace]) => super.noSuchMethod(
+    Invocation.method(#addError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void onError(Object? error, StackTrace? stackTrace) => super.noSuchMethod(
+    Invocation.method(#onError, [error, stackTrace]),
+    returnValueForMissingStub: null,
+  );
 }

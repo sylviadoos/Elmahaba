@@ -39,6 +39,8 @@ import 'package:al_mahhaba_school/features/announcements/presentation/announceme
 import 'package:al_mahhaba_school/features/announcements/presentation/pages/announcement_page.dart';
 import 'package:al_mahhaba_school/features/announcements/presentation/pages/announcements_page.dart';
 import 'package:al_mahhaba_school/features/home/presentation/pages/home_page.dart';
+import 'package:al_mahhaba_school/features/homework/presentation/homework_args.dart';
+import 'package:al_mahhaba_school/features/homework/presentation/pages/homework_details_page.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/pages/homework_page.dart';
 import 'package:al_mahhaba_school/features/news/domain/entities/news_entity.dart';
 import 'package:al_mahhaba_school/features/onboarding/presentation/pages/onboarding_page.dart';
@@ -77,6 +79,7 @@ const Set<String> _parentRoutes = {
   AppRoutes.results,
   AppRoutes.attendance,
   AppRoutes.homework,
+  AppRoutes.homeworkDetails,
   AppRoutes.announcements,
   AppRoutes.announcementDetails,
   AppRoutes.fees,
@@ -295,6 +298,19 @@ final GoRouter appRouter = GoRouter(
         studentId: switch (state.extra) {
           final int studentId => studentId,
           _ => null,
+        },
+      ),
+    ),
+    // Not `_parentPage`: one homework opens over what the parent was
+    // reading — Home or the chat — so back leaves them where they were.
+    GoRoute(
+      path: AppRoutes.homeworkDetails,
+      builder: (context, state) => HomeworkDetailsPage(
+        // A bad id: nowhere in the child's homework, so "no longer here".
+        homeworkId: int.tryParse(state.pathParameters['id']!) ?? 0,
+        args: switch (state.extra) {
+          final HomeworkArgs args => args,
+          _ => const HomeworkArgs(),
         },
       ),
     ),

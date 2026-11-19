@@ -1,5 +1,6 @@
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
+import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_filter.dart';
 
 /// What the parent does on Homework, sent to `HomeworkBloc`.
@@ -30,6 +31,21 @@ final class ShowChildHomeworkIntent extends HomeworkIntent {
   const ShowChildHomeworkIntent(this.studentId);
 
   final int studentId;
+}
+
+/// One homework on its own page, the child with [studentId]'s: [homework]
+/// when the parent tapped it on Home (shown as it is), else found by
+/// [homeworkId] — the chat names it, but doesn't carry it.
+final class ShowOneHomeworkIntent extends HomeworkIntent {
+  const ShowOneHomeworkIntent({
+    required this.studentId,
+    required this.homeworkId,
+    this.homework,
+  });
+
+  final int? studentId;
+  final int homeworkId;
+  final HomeworkEntity? homework;
 }
 
 /// Lists the homework [filter] picks.

@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_image_loads.dart';
 import 'package:al_mahhaba_school/features/children/domain/entities/child_entity.dart';
+import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_filter.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_page_entity.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_subject_entity.dart';
@@ -19,6 +20,7 @@ class HomeworkState extends Equatable {
     this.subjects = const [],
     this.downloadingId,
     this.images = const {},
+    this.one = const BaseState.initial(),
   });
 
   /// The parent's children.
@@ -49,6 +51,10 @@ class HomeworkState extends Equatable {
   /// once, apart from [downloadingId].
   final ChatImages images;
 
+  /// One homework on its own page (opened from Home or the chat), in
+  /// place of the list: success with null when it's gone.
+  final BaseState<HomeworkEntity?> one;
+
   HomeworkPageEntity? get page => homework.data;
 
   /// Where the child shown is in [children]; -1 for none.
@@ -68,6 +74,7 @@ class HomeworkState extends Equatable {
     List<HomeworkSubjectEntity>? subjects,
     int? Function()? downloadingId,
     ChatImages? images,
+    BaseState<HomeworkEntity?>? one,
   }) => HomeworkState(
     children: children ?? this.children,
     isRequested: isRequested ?? this.isRequested,
@@ -78,6 +85,7 @@ class HomeworkState extends Equatable {
     subjects: subjects ?? this.subjects,
     downloadingId: downloadingId != null ? downloadingId() : this.downloadingId,
     images: images ?? this.images,
+    one: one ?? this.one,
   );
 
   @override
@@ -91,5 +99,6 @@ class HomeworkState extends Equatable {
     subjects,
     downloadingId,
     images,
+    one,
   ];
 }

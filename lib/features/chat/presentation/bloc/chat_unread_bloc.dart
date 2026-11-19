@@ -16,7 +16,8 @@ import 'package:al_mahhaba_school/features/home/domain/use_cases/get_new_message
 ///
 /// Asked again after every read the school confirms (even one sent as a
 /// page closed): what a read answers is the chat's own count, with its
-/// events, not the card's.
+/// events, not the card's. Not while Home is open: it asks for the same
+/// dashboard after a read and sets the count, and one request is enough.
 @injectable
 class ChatUnreadBloc extends Bloc<ChatUnreadIntent, int> {
   ChatUnreadBloc(this._getNewMessagesCount, WatchChatReadsUseCase watchReads)
@@ -27,6 +28,8 @@ class ChatUnreadBloc extends Bloc<ChatUnreadIntent, int> {
       _loads++;
       emit(intent.count);
     });
+    on<HomeOpenedIntent>((_, _) => _homes++);
+    on<HomeClosedIntent>((_, _) => _homes--);
     on<ClearChatUnreadIntent>((_, emit) {
       _studentId = null;
       _loads++;
@@ -47,7 +50,11 @@ class ChatUnreadBloc extends Bloc<ChatUnreadIntent, int> {
     return super.close();
   }
 
+  /// How many Homes are open: Home sets the count after reads then.
+  int _homes = 0;
+
   void _onRead(ChatReadEntity _) {
+    if (_homes > 0) return;
     final counted = _studentId;
     if (counted != null) add(LoadChatUnreadIntent(counted));
   }

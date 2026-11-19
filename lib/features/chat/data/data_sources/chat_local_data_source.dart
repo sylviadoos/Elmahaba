@@ -9,6 +9,10 @@ abstract interface class ChatLocalDataSource {
 
   void saveNewestPage(int? studentId, ChatPageEntity page);
 
+  /// [keys] read in [studentId]'s kept page, [unread] left there: opened
+  /// again, they don't show as new — nor are they marked read again.
+  void markRead(int? studentId, Set<String> keys, {required int unread});
+
   /// Forgets every chat (log out: the next parent mustn't see them).
   void clear();
 }

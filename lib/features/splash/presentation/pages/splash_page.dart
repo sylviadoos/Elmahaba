@@ -14,6 +14,8 @@ import 'package:al_mahhaba_school/config/theme/app_colors.dart';
 import 'package:al_mahhaba_school/core/constants/app_assets.dart';
 import 'package:al_mahhaba_school/core/constants/app_constants.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_bloc.dart';
+import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_intent.dart';
 import 'package:al_mahhaba_school/features/auth/domain/entities/session_status.dart';
 import 'package:al_mahhaba_school/features/auth/domain/use_cases/check_session_use_case.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_event.dart';
@@ -61,6 +63,16 @@ class _SplashPageState extends State<SplashPage> {
     _session = getIt<CheckSessionUseCase>()().timeout(
       _maxSessionCheck,
       onTimeout: () => SessionStatus.active,
+    );
+    // A visitor: whether "Log in" shows, asked now so it's known by the
+    // first visitor page. A signed-in parent isn't asked: only the
+    // visitors' button depends on it.
+    unawaited(
+      _session.then((session) {
+        if (session != SessionStatus.active && mounted) {
+          context.read<AppStatusBloc>().add(const LoadAppStatusIntent());
+        }
+      }),
     );
     _timer = Timer(_duration, _leave);
   }

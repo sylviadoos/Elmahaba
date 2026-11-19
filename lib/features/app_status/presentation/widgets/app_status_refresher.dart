@@ -5,11 +5,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_bloc.dart';
 import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_intent.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_state.dart';
+import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
 
-/// Asks the school again, while the app runs, whether parents can log in,
-/// so "Log in" comes and goes with it instead of waiting for the next
-/// launch. The school has no way to tell the app the moment it changes, so
-/// this asks on coming back to the app and every [_every] it stays open.
+/// Asks the school again, while a visitor uses the app, whether parents can
+/// log in, so "Log in" on the visitor pages comes and goes with it instead
+/// of waiting for the next launch. The school has no way to tell the app
+/// the moment it changes, so this asks on coming back to the app and every
+/// [_every] it stays open — and once a parent logs out, back to the
+/// visitor pages.
+///
+/// Only "Log in" depends on it: a signed-in parent uses the app whatever
+/// the school says, so nothing is asked while one is (the splash asks at
+/// launch, for a visitor only).
 ///
 /// It wraps the whole app (see `app.dart`): the answer reaches every
 /// visitor page, which show the button as the state says.
@@ -34,7 +42,6 @@ class _AppStatusRefresherState extends State<AppStatusRefresher>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Launch asks once already (`app.dart`); this follows it.
     _startAsking();
   }
 
@@ -61,11 +68,21 @@ class _AppStatusRefresherState extends State<AppStatusRefresher>
     _timer = Timer.periodic(_every, (_) => _ask());
   }
 
+  /// Only for a visitor: "Log in" is theirs.
   void _ask() {
-    if (!mounted) return;
+    if (!mounted || context.read<ParentViewModel>().state.data != null) {
+      return;
+    }
     context.read<AppStatusBloc>().add(const LoadAppStatusIntent());
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) =>
+      BlocListener<ParentViewModel, ParentState>(
+        // Logged out: back to the visitor pages, "Log in" as it is now.
+        listenWhen: (previous, current) =>
+            previous.data != null && current.data == null,
+        listener: (_, _) => _ask(),
+        child: widget.child,
+      );
 }

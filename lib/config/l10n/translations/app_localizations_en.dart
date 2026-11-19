@@ -715,9 +715,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noChildrenYet => 'No children added yet';
 
   @override
-  String get goodMorning => 'Good morning';
-
-  @override
   String get today => 'Today';
 
   @override
@@ -1364,6 +1361,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homework => 'Homework';
+
+  @override
+  String get homeworkOne => 'Homework';
+
+  @override
+  String get homeworkNotFound => 'This homework is no longer here.';
 
   @override
   String homeworkCount(int count) {

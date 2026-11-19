@@ -9,17 +9,23 @@ import 'dart:async' as _i3;
 import 'package:al_mahhaba_school/core/base/cancel_handle.dart' as _i7;
 import 'package:al_mahhaba_school/core/base/result.dart' as _i4;
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_attachment_entity.dart'
-    as _i11;
+    as _i14;
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/download_chat_attachment_use_case.dart'
-    as _i10;
+    as _i13;
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/mark_chat_read_use_case.dart'
-    as _i9;
-import 'package:al_mahhaba_school/features/chat/domain/use_cases/preview_chat_attachment_use_case.dart'
     as _i12;
+import 'package:al_mahhaba_school/features/chat/domain/use_cases/preview_chat_attachment_use_case.dart'
+    as _i15;
+import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart'
+    as _i10;
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_filter.dart'
     as _i6;
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_page_entity.dart'
     as _i5;
+import 'package:al_mahhaba_school/features/homework/domain/repos/homework_repo.dart'
+    as _i11;
+import 'package:al_mahhaba_school/features/homework/domain/use_cases/find_homework_use_case.dart'
+    as _i9;
 import 'package:al_mahhaba_school/features/homework/domain/use_cases/get_homework_use_case.dart'
     as _i2;
 import 'package:mockito/mockito.dart' as _i1;
@@ -99,11 +105,107 @@ class MockGetHomeworkUseCase extends _i1.Mock
           as _i3.Future<_i4.Result<_i5.HomeworkPageEntity>>);
 }
 
+/// A class which mocks [FindHomeworkUseCase].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockFindHomeworkUseCase extends _i1.Mock
+    implements _i9.FindHomeworkUseCase {
+  @override
+  _i3.Future<_i4.Result<_i10.HomeworkEntity?>> call(
+    int? childId,
+    int? homeworkId, {
+    _i7.CancelHandle? cancel,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(#call, [childId, homeworkId], {#cancel: cancel}),
+            returnValue: _i3.Future<_i4.Result<_i10.HomeworkEntity?>>.value(
+              _i8.dummyValue<_i4.Result<_i10.HomeworkEntity?>>(
+                this,
+                Invocation.method(
+                  #call,
+                  [childId, homeworkId],
+                  {#cancel: cancel},
+                ),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i3.Future<_i4.Result<_i10.HomeworkEntity?>>.value(
+                  _i8.dummyValue<_i4.Result<_i10.HomeworkEntity?>>(
+                    this,
+                    Invocation.method(
+                      #call,
+                      [childId, homeworkId],
+                      {#cancel: cancel},
+                    ),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<_i10.HomeworkEntity?>>);
+}
+
+/// A class which mocks [HomeworkRepo].
+///
+/// See the documentation for Mockito's code generation for more information.
+class MockHomeworkRepo extends _i1.Mock implements _i11.HomeworkRepo {
+  @override
+  _i3.Future<_i4.Result<_i5.HomeworkPageEntity>> getHomework(
+    int? childId, {
+    _i6.HomeworkFilter? filter = _i6.HomeworkFilter.all,
+    int? subjectId,
+    int? page = 1,
+    _i7.CancelHandle? cancel,
+  }) =>
+      (super.noSuchMethod(
+            Invocation.method(
+              #getHomework,
+              [childId],
+              {
+                #filter: filter,
+                #subjectId: subjectId,
+                #page: page,
+                #cancel: cancel,
+              },
+            ),
+            returnValue: _i3.Future<_i4.Result<_i5.HomeworkPageEntity>>.value(
+              _i8.dummyValue<_i4.Result<_i5.HomeworkPageEntity>>(
+                this,
+                Invocation.method(
+                  #getHomework,
+                  [childId],
+                  {
+                    #filter: filter,
+                    #subjectId: subjectId,
+                    #page: page,
+                    #cancel: cancel,
+                  },
+                ),
+              ),
+            ),
+            returnValueForMissingStub:
+                _i3.Future<_i4.Result<_i5.HomeworkPageEntity>>.value(
+                  _i8.dummyValue<_i4.Result<_i5.HomeworkPageEntity>>(
+                    this,
+                    Invocation.method(
+                      #getHomework,
+                      [childId],
+                      {
+                        #filter: filter,
+                        #subjectId: subjectId,
+                        #page: page,
+                        #cancel: cancel,
+                      },
+                    ),
+                  ),
+                ),
+          )
+          as _i3.Future<_i4.Result<_i5.HomeworkPageEntity>>);
+}
+
 /// A class which mocks [MarkChatReadUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockMarkChatReadUseCase extends _i1.Mock
-    implements _i9.MarkChatReadUseCase {
+    implements _i12.MarkChatReadUseCase {
   @override
   _i3.Future<_i4.Result<int>> call(List<String>? keys, {int? studentId}) =>
       (super.noSuchMethod(
@@ -128,10 +230,10 @@ class MockMarkChatReadUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockDownloadChatAttachmentUseCase extends _i1.Mock
-    implements _i10.DownloadChatAttachmentUseCase {
+    implements _i13.DownloadChatAttachmentUseCase {
   @override
   _i3.Future<_i4.Result<String>> call(
-    _i11.ChatAttachmentEntity? attachment, {
+    _i14.ChatAttachmentEntity? attachment, {
     int? studentId,
     _i7.CancelHandle? cancel,
   }) =>
@@ -169,10 +271,10 @@ class MockDownloadChatAttachmentUseCase extends _i1.Mock
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockPreviewChatAttachmentUseCase extends _i1.Mock
-    implements _i12.PreviewChatAttachmentUseCase {
+    implements _i15.PreviewChatAttachmentUseCase {
   @override
   _i3.Future<_i4.Result<String>> call(
-    _i11.ChatAttachmentEntity? attachment, {
+    _i14.ChatAttachmentEntity? attachment, {
     int? studentId,
     _i7.CancelHandle? cancel,
   }) =>

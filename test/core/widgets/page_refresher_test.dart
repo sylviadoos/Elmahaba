@@ -168,10 +168,38 @@ void main() {
 
   group('alive is not shown', aliveIsNotShown);
 
-  testWidgets('back to the app: asks again', (tester) async {
+  testWidgets('back from another app: asks again', (tester) async {
+    await pump(tester);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    expect(refreshes, 1);
+  });
+
+  testWidgets('a window over the app: nothing is asked', (tester) async {
+    await pump(tester);
+
+    // The notification permission, the fingerprint sheet, the shade
+    // pulled down: the app is never away, so nothing arrived behind it.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    expect(refreshes, 0);
+  });
+
+  testWidgets('away once, back twice: asked for the first only', (
+    tester,
+  ) async {
     await pump(tester);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
 

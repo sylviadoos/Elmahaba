@@ -16,6 +16,7 @@ import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_card
 import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_row.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/extensions/homework_labels.dart';
+import 'package:al_mahhaba_school/features/homework/presentation/extensions/open_homework.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/widgets/homework_due_badge.dart';
 
 /// Under Home's cards: the child's newest announcements, homework and
@@ -87,7 +88,9 @@ class LatestUpdates extends StatelessWidget {
                 label: homework.dueLabel(context),
               ),
             ),
-            onTap: openHomework,
+            // Home has the homework itself, so tapping it opens that one,
+            // with no list loaded and none scrolled through.
+            onTap: () => context.openHomework(homework, studentId: childId),
           ),
         ),
         LatestCard<LatestResultEntity>(

@@ -14,7 +14,8 @@ import 'package:al_mahhaba_school/features/children/presentation/widgets/child_p
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/complaints_button.dart';
 import 'package:al_mahhaba_school/features/profile/presentation/widgets/settings_button.dart';
 
-/// Greeting, profile and complaints, and the child picker.
+/// The parent's name (their profile), Settings and complaints, and the
+/// child picker.
 class HomeHeader extends StatelessWidget {
   const HomeHeader({
     super.key,
@@ -102,12 +103,6 @@ class _ProfileLink extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  context.l10n.goodMorning,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.85),
-                  ),
-                ),
                 if (parent != null)
                   Row(
                     spacing: 4.w,

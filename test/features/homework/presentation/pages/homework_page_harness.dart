@@ -38,6 +38,7 @@ const Size smallPhone = Size(320, 568);
 /// Create one in `setUp`, then [register]; `getIt.reset` in `tearDown`.
 class HomeworkPageHarness {
   final getHomework = MockGetHomeworkUseCase();
+  final findHomework = MockFindHomeworkUseCase();
   final markRead = MockMarkChatReadUseCase();
   final downloadAttachment = MockDownloadChatAttachmentUseCase();
   final previewAttachment = MockPreviewChatAttachmentUseCase();
@@ -53,6 +54,7 @@ class HomeworkPageHarness {
     getIt.registerFactory<HomeworkBloc>(
       () => HomeworkBloc(
         getHomework,
+        findHomework,
         markRead,
         downloadAttachment,
         previewAttachment,

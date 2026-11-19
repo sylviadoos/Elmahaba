@@ -66,10 +66,12 @@ void main() {
     int childId,
     ChildDashboardEntity dashboard, {
     bool isRefreshing = false,
+    int failedLoads = 0,
   }) => HomeState(
     childId: childId,
     dashboard: BaseState.success(dashboard),
     isRefreshing: isRefreshing,
+    failedLoads: failedLoads,
   );
 
   test('starts with no child', () => expect(build().state, const HomeState()));
@@ -121,7 +123,10 @@ void main() {
     build: build,
     seed: () => shown(1, first),
     act: (bloc) => bloc.add(const RefreshHomeIntent()),
-    expect: () => [shown(1, first, isRefreshing: true), shown(1, first)],
+    expect: () => [
+      shown(1, first, isRefreshing: true),
+      shown(1, first, failedLoads: 1),
+    ],
   );
 
   late Completer<Result<ChildDashboardEntity>> pending;
@@ -217,8 +222,14 @@ void main() {
       const HomeState(
         childId: 1,
         dashboard: BaseState.error(NetworkException()),
+        failedLoads: 1,
       ),
-      const HomeState(childId: 1, dashboard: BaseState.loading()),
+      // "Try again" loads, the count still standing until one comes.
+      const HomeState(
+        childId: 1,
+        dashboard: BaseState.loading(),
+        failedLoads: 1,
+      ),
       shown(1, first),
     ],
   );
@@ -379,10 +390,12 @@ void reviewScenarios() {
     int childId,
     ChildDashboardEntity dashboard, {
     bool isRefreshing = false,
+    int failedLoads = 0,
   }) => HomeState(
     childId: childId,
     dashboard: BaseState.success(dashboard),
     isRefreshing: isRefreshing,
+    failedLoads: failedLoads,
   );
 
   /// Lets every pending microtask run.
@@ -402,6 +415,7 @@ void reviewScenarios() {
         const HomeState(
           childId: 1,
           dashboard: BaseState.error(NetworkException()),
+          failedLoads: 1,
         ),
       ],
     );
@@ -586,5 +600,62 @@ void reviewScenarios() {
 
     // Only the first load: the stream is let go when Home closes.
     verify(getDashboard(1)).called(1);
+  });
+
+  group('the dashboard threw instead of answering', () {
+    // Nothing is meant to: the use case answers with a `Result`. But a
+    // state left mid-refresh would stop Home refreshing for good, so it
+    // is put right whatever threw.
+    void throws(int childId) =>
+        when(getDashboard(childId)).thenThrow(StateError('boom'));
+
+    blocTest<HomeBloc, HomeState>(
+      'on a refresh: the spinner stops and what is shown stays',
+      setUp: () => throws(1),
+      build: build,
+      seed: () => shown(1, first),
+      act: (bloc) => bloc.add(const RefreshHomeIntent()),
+      expect: () => [
+        shown(1, first, isRefreshing: true),
+        shown(1, first, failedLoads: 1),
+      ],
+    );
+
+    blocTest<HomeBloc, HomeState>(
+      'and Home is not frozen: the next refresh asks as usual',
+      build: build,
+      seed: () => shown(1, first),
+      act: (bloc) async {
+        throws(1);
+        bloc.add(const RefreshHomeIntent());
+        await settle();
+        // The school is back.
+        when(getDashboard(1)).thenAnswer((_) async => Success(data: other));
+        bloc.add(const RefreshHomeIntent());
+      },
+      expect: () => [
+        shown(1, first, isRefreshing: true),
+        shown(1, first, failedLoads: 1),
+        shown(1, first, isRefreshing: true, failedLoads: 1),
+        // The one that came through puts the count back to 0.
+        shown(1, other),
+      ],
+      verify: (_) => verify(getDashboard(1)).called(2),
+    );
+
+    blocTest<HomeBloc, HomeState>(
+      'with nothing shown yet: "Try again", not a skeleton that never ends',
+      setUp: () => throws(1),
+      build: build,
+      act: (bloc) => bloc.add(const ShowChildIntent(1)),
+      expect: () => [
+        const HomeState(childId: 1, dashboard: BaseState.loading()),
+        const HomeState(
+          childId: 1,
+          dashboard: BaseState.error(UnknownException()),
+          failedLoads: 1,
+        ),
+      ],
+    );
   });
 }

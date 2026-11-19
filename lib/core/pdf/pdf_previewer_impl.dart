@@ -21,7 +21,14 @@ class PdfPreviewerImpl implements PdfPreviewer {
       pages: const [0],
       dpi: _dpi,
     )) {
-      await preview.writeAsBytes(await page.toPng(), flush: true);
+      // Written apart, then named: only a whole picture is ever taken as
+      // done, even if the app closes while it's written (the half is
+      // cleared with the temporary files).
+      final part = File(
+        '${preview.path}.${DateTime.now().microsecondsSinceEpoch}.part',
+      );
+      await part.writeAsBytes(await page.toPng(), flush: true);
+      await part.rename(preview.path);
       return preview.path;
     }
     // A PDF without pages.

@@ -116,6 +116,7 @@ class HomeBloc extends Bloc<HomeIntent, HomeState> {
   }
 
   Future<void> _load(int childId, Emitter<HomeState> emit) async {
+    
     final result = await _getChildDashboard(childId);
     // Another child was picked meanwhile: theirs is on its way.
     if (state.childId != childId) return;

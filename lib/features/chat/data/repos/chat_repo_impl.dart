@@ -81,6 +81,8 @@ class ChatRepoImpl implements ChatRepo {
           keys,
           studentId: studentId,
         );
+        // The chat kept for opening again says so too.
+        _localDataSource.markRead(studentId, keys.toSet(), unread: unread);
         _markedRead.add(ChatReadEntity(studentId: studentId, unread: unread));
         return unread;
       });

@@ -27,7 +27,7 @@ abstract final class AppConfig {
   static String get websiteBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-      // 'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
+      //'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
       // Live:
       _liveWebsite,
     Environment.staging || Environment.prod => _liveWebsite,
@@ -37,7 +37,7 @@ abstract final class AppConfig {
   static String get schoolBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-      // 'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
+      //'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
       // Live:
       _liveSchool,
     //'http://192.168.0.106:8080/mariam_hany/almahaba316/Almahhaba-School-back-API/public/api/',
@@ -97,9 +97,10 @@ abstract final class AppConfig {
   /// run with `--dart-define=SMS_MISR_FIRST=true` for one run ("Debug +
   /// school OTP").
   ///
-  /// Off for now: the school answers `otp_sent` whether SMS Misr sent the
-  /// text or not, so one that never arrives reads as a success and nothing
-  /// falls back. Firebase has the opposite catch — it sends no SMS without
+  /// On: the school first. Its catch: the school answers `otp_sent`
+  /// whether SMS Misr sent the text or not, so one that never arrives
+  /// reads as a success and nothing falls back. Firebase has the opposite
+  /// catch — it sends no SMS without
   /// its billing (Blaze), yet says it did — so if no code arrives from it
   /// either, that billing is where to look.
   static const bool smsMisrFirst = bool.fromEnvironment(

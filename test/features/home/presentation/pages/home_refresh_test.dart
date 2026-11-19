@@ -220,6 +220,22 @@ void main() {
       expect(find.text('${dashboard.attendance.presentDays}'), findsOneWidget);
     });
 
+    testWidgets('in the middle of the room under the header, not up '
+        'against it', (tester) async {
+      answers([const Failure(exception: NetworkException())]);
+      await pump(tester);
+      await tester.pump();
+
+      final screen = tester.getRect(find.byType(Scaffold).first);
+      final message = tester.getRect(find.byType(StateMessage));
+      final fromTop = (message.center.dy - screen.top) / screen.height;
+
+      // It stands for the whole page, so it sits in the middle of it.
+      // Up against the header — what this guards against — it would be
+      // about 0.38 of the way down instead.
+      expect(fromTop, closeTo(0.53, 0.05));
+    });
+
     testWidgets('the server broke: its own message, with "Try again"', (
       tester,
     ) async {

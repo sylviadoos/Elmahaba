@@ -6,7 +6,12 @@ import FirebaseMessaging
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
-
+    // A push that arrives while the app is open goes to the app delegate,
+    // which hands it to every plugin: Firebase shows it as a banner (see
+    // `setForegroundNotificationPresentationOptions`) and tells the app
+    // (`onMessage`). Without this, nothing is set up to take it until
+    // Firebase sets itself up late — the plugins register only once the
+    // scene's engine starts — and a push while the app is open is lost.
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?

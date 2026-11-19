@@ -17,10 +17,17 @@ import 'package:al_mahhaba_school/core/analytics/session_recorder_impl.dart'
     as _i194;
 import 'package:al_mahhaba_school/core/app_settings/locale_theme_cubit.dart'
     as _i439;
+import 'package:al_mahhaba_school/core/image/photo_compressor.dart' as _i660;
+import 'package:al_mahhaba_school/core/image/photo_compressor_impl.dart'
+    as _i387;
 import 'package:al_mahhaba_school/core/network/api_service.dart' as _i438;
 import 'package:al_mahhaba_school/core/network/auth_interceptor.dart' as _i575;
 import 'package:al_mahhaba_school/core/network/language_interceptor.dart'
     as _i133;
+import 'package:al_mahhaba_school/core/notifications/app_icon_badge.dart'
+    as _i1030;
+import 'package:al_mahhaba_school/core/notifications/app_icon_badge_impl.dart'
+    as _i977;
 import 'package:al_mahhaba_school/core/notifications/notification_service.dart'
     as _i614;
 import 'package:al_mahhaba_school/core/notifications/notification_service_impl.dart'
@@ -286,6 +293,8 @@ import 'package:al_mahhaba_school/features/homework/data/repos/homework_repo_imp
     as _i372;
 import 'package:al_mahhaba_school/features/homework/domain/repos/homework_repo.dart'
     as _i243;
+import 'package:al_mahhaba_school/features/homework/domain/use_cases/find_homework_use_case.dart'
+    as _i670;
 import 'package:al_mahhaba_school/features/homework/domain/use_cases/get_homework_use_case.dart'
     as _i417;
 import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_bloc.dart'
@@ -398,12 +407,14 @@ extension GetItInjectableX on _i174.GetIt {
       instanceName: 'signedFilesApi',
     );
     gh.lazySingleton<_i480.PdfPreviewer>(() => _i190.PdfPreviewerImpl());
+    gh.lazySingleton<_i1030.AppIconBadge>(() => _i977.AppIconBadgeImpl());
     gh.lazySingleton<_i9.SecureStorage>(
       () => _i9.SecureStorage(gh<_i558.FlutterSecureStorage>()),
     );
     gh.lazySingleton<_i694.ChatLocalDataSource>(
       () => _i33.ChatLocalDataSourceImpl(),
     );
+    gh.lazySingleton<_i660.PhotoCompressor>(() => _i387.PhotoCompressorImpl());
     gh.lazySingleton<_i1049.ChildrenLocalDataSource>(
       () => _i275.ChildrenLocalDataSourceImpl(gh<_i558.FlutterSecureStorage>()),
     );
@@ -713,6 +724,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i480.PdfPreviewer>(),
       ),
     );
+    gh.lazySingleton<_i670.FindHomeworkUseCase>(
+      () => _i670.FindHomeworkUseCase(gh<_i243.HomeworkRepo>()),
+    );
     gh.lazySingleton<_i417.GetHomeworkUseCase>(
       () => _i417.GetHomeworkUseCase(gh<_i243.HomeworkRepo>()),
     );
@@ -845,6 +859,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i374.GetAnnouncementsUseCase>(
       () => _i374.GetAnnouncementsUseCase(gh<_i58.AnnouncementsRepo>()),
     );
+    gh.factory<_i1002.HomeworkBloc>(
+      () => _i1002.HomeworkBloc(
+        gh<_i417.GetHomeworkUseCase>(),
+        gh<_i670.FindHomeworkUseCase>(),
+        gh<_i25.MarkChatReadUseCase>(),
+        gh<_i778.DownloadChatAttachmentUseCase>(),
+        gh<_i165.PreviewChatAttachmentUseCase>(),
+      ),
+    );
     gh.factory<_i1065.PayFeesViewModel>(
       () => _i1065.PayFeesViewModel(gh<_i261.PayOnlineUseCase>()),
     );
@@ -889,14 +912,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i341.AnnouncementsBloc>(
       () => _i341.AnnouncementsBloc(
         gh<_i374.GetAnnouncementsUseCase>(),
-        gh<_i25.MarkChatReadUseCase>(),
-        gh<_i778.DownloadChatAttachmentUseCase>(),
-        gh<_i165.PreviewChatAttachmentUseCase>(),
-      ),
-    );
-    gh.factory<_i1002.HomeworkBloc>(
-      () => _i1002.HomeworkBloc(
-        gh<_i417.GetHomeworkUseCase>(),
         gh<_i25.MarkChatReadUseCase>(),
         gh<_i778.DownloadChatAttachmentUseCase>(),
         gh<_i165.PreviewChatAttachmentUseCase>(),

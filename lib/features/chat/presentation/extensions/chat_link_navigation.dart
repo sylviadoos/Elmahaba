@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_link_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_screen.dart';
+import 'package:al_mahhaba_school/features/homework/presentation/homework_args.dart';
 
 extension ChatLinkNavigation on BuildContext {
   /// Opens the screen a chat item leads to: a tab, a complaint, or the
-  /// homework of the link's child (else [studentId], the item's).
+  /// homework it names (else the homework list) of the link's child (else
+  /// [studentId], the item's).
   void openChatLink(ChatLinkEntity link, {int? studentId}) =>
       GoRouter.of(this).openChatLink(link, studentId: studentId);
 }
@@ -31,8 +33,18 @@ extension ChatLinkRouting on GoRouter {
               ? AppRoutes.complaints
               : AppRoutes.complaintDetailsOf(complaintId),
         );
+      // The homework it names, on its own page; the list without one.
       case ChatScreen.homework:
-        push(AppRoutes.homework, extra: link.studentId ?? studentId);
+        final homeworkId = link.itemId;
+        final childId = link.studentId ?? studentId;
+        if (homeworkId == null) {
+          push(AppRoutes.homework, extra: childId);
+        } else {
+          push(
+            AppRoutes.homeworkDetailsOf(homeworkId),
+            extra: HomeworkArgs(studentId: childId),
+          );
+        }
       case ChatScreen.announcements:
         push(AppRoutes.announcements, extra: link.studentId ?? studentId);
     }

@@ -8,6 +8,7 @@ import 'package:al_mahhaba_school/features/announcements/presentation/announceme
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_updates.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
+import 'package:al_mahhaba_school/features/homework/presentation/homework_args.dart';
 
 import '../../../../helpers/stub_routes.dart';
 import '../../../../helpers/test_app.dart';
@@ -52,6 +53,7 @@ void main() {
           AppRoutes.announcements,
           AppRoutes.announcementDetailsOf(holiday.id),
           AppRoutes.homework,
+          AppRoutes.homeworkDetailsOf(mathSheet.id),
           AppRoutes.results,
         ], extras: extras),
       ],
@@ -109,8 +111,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(AppRoutes.announcements), findsOneWidget);
 
+    // The homework itself too, not the list.
     await pump(tester);
     await tester.tap(find.text(mathSheet.title));
+    await tester.pumpAndSettle();
+    final homework = AppRoutes.homeworkDetailsOf(mathSheet.id);
+    expect(find.text(homework), findsOneWidget);
+    expect(
+      extras[homework],
+      isA<HomeworkArgs>()
+          .having((args) => args.homework, 'homework', mathSheet)
+          .having((args) => args.studentId, 'studentId', 1208),
+    );
+
+    // "See all" on homework: the list.
+    await pump(tester);
+    await tester.tap(find.text(en.seeAll).at(1));
     await tester.pumpAndSettle();
     expect(find.text(AppRoutes.homework), findsOneWidget);
     expect(extras[AppRoutes.homework], 1208);

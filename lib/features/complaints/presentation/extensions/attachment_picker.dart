@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
+import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/core/extensions/context_extensions.dart';
+import 'package:al_mahhaba_school/core/image/lighter_photo.dart';
+import 'package:al_mahhaba_school/core/image/photo_compressor.dart';
+import 'package:al_mahhaba_school/core/widgets/app_loading.dart';
 import 'package:al_mahhaba_school/features/complaints/domain/entities/new_complaint_entity.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/extensions/picked_attachment.dart';
 import 'package:al_mahhaba_school/features/complaints/presentation/widgets/attachment_source_sheet.dart';
@@ -20,10 +25,6 @@ typedef AttachmentLimits = ({
 });
 
 extension AttachmentPicker on BuildContext {
-  /// JPEG quality photos are saved at: an iPhone's HEIC or a Samsung's 15 MB
-  /// photo comes out a JPEG the school takes, well under the size limit.
-  static const int _photoQuality = 80;
-
   static const AttachmentLimits _complaintLimits = (
     photoExtensions: ComplaintAttachmentRules.photoExtensions,
     documentExtensions: ComplaintAttachmentRules.documentExtensions,
@@ -45,14 +46,11 @@ extension AttachmentPicker on BuildContext {
     var dropped = false;
     final picked = <PickedAttachment>[];
     for (final file in files) {
-      final path = file.path;
-      if (path == null) continue;
-      final size = file.lengthSync() ?? await file.length() ?? 0;
       final checked = PickedAttachment(
         name: file.name,
-        path: path,
-        size: size,
-        problem: await _problemOf(file.name, path, size, bytesLeft),
+        path: file.path,
+        size: file.size,
+        problem: await _problemOf(file.name, file.path, file.size, bytesLeft),
       );
       if (checked.isValid) {
         if (room == 0) {
@@ -60,7 +58,7 @@ extension AttachmentPicker on BuildContext {
           continue;
         }
         room--;
-        bytesLeft -= size;
+        bytesLeft -= file.size;
       }
       picked.add(checked);
     }
@@ -90,13 +88,14 @@ extension AttachmentPicker on BuildContext {
     final maxBytes = limits.maxMegabytes * 1024 * 1024;
     final allowed = <PickedAttachment>[];
     for (final file in files) {
-      final path = file.path;
-      final size = file.lengthSync() ?? await file.length();
-      if (path != null &&
-          extensions.contains(file.extension?.toLowerCase()) &&
-          size != null &&
-          size <= maxBytes) {
-        allowed.add(PickedAttachment(name: file.name, path: path, size: size));
+      final attachment = PickedAttachment(
+        name: file.name,
+        path: file.path,
+        size: file.size,
+      );
+      if (extensions.contains(attachment.extension) &&
+          attachment.size <= maxBytes) {
+        allowed.add(attachment);
       }
     }
     if (!mounted) return const [];
@@ -113,27 +112,68 @@ extension AttachmentPicker on BuildContext {
     return allowed.take(room).toList();
   }
 
-  /// Photos or documents, as the parent chooses; none when they cancel or
-  /// the phone can't open them (said in a snack bar).
-  Future<List<PlatformFile>> _pickFiles(AttachmentLimits limits) async {
+  /// Photos or documents, as the parent chooses, the photos made lighter
+  /// (see [LighterPhoto]); none when they cancel or the phone can't open
+  /// them (said in a snack bar).
+  Future<List<PickedFile>> _pickFiles(AttachmentLimits limits) async {
     final source = await AttachmentSourceSheet.show(this);
     if (source == null || !mounted) return const [];
+    final List<PlatformFile> files;
     try {
-      final files = switch (source) {
+      files = switch (source) {
         AttachmentSource.photos => await FilePicker.pickFiles(
           type: FileType.image,
-          compressionQuality: _photoQuality,
+          // An iPhone's HEIC comes as a JPEG; made lighter here after.
+          darwinOptions: const DarwinOptions(
+            assetRepresentationMode: DarwinAssetRepresentationMode.compatible,
+          ),
         ),
         AttachmentSource.documents => await FilePicker.pickFiles(
           type: FileType.custom,
           allowedExtensions: limits.documentExtensions,
         ),
       };
-      return mounted ? files : const [];
     } on Exception catch (e) {
       debugPrint('pickAttachments: $e');
       if (mounted) showSnackBar(l10n.couldNotOpenFiles, isError: true);
       return const [];
+    }
+    if (!mounted) return const [];
+    final lighter = await _lighter(files);
+    return mounted ? lighter : const [];
+  }
+
+  /// [files] as they're to be sent, the photos made lighter, with a
+  /// loading over the page meanwhile; one not on the phone left out.
+  Future<List<PickedFile>> _lighter(List<PlatformFile> files) async {
+    final compressor = getIt<PhotoCompressor>();
+    final anyPhoto = files.any(
+      (file) => LighterPhoto.photoExtensions.contains(
+        file.extension?.toLowerCase(),
+      ),
+    );
+    final navigator = Navigator.of(this, rootNavigator: true);
+    final loading = anyPhoto
+        ? DialogRoute<void>(
+            context: this,
+            barrierDismissible: false,
+            builder: (_) =>
+                const PopScope(canPop: false, child: AppLoading()),
+          )
+        : null;
+    if (loading != null) unawaited(navigator.push(loading));
+    try {
+      return [
+        for (final file in files)
+          if (file.path case final path?)
+            await compressor.lighter((
+              name: file.name,
+              path: path,
+              size: file.lengthSync() ?? await file.length() ?? 0,
+            )),
+      ];
+    } finally {
+      if (loading != null && loading.isActive) navigator.removeRoute(loading);
     }
   }
 

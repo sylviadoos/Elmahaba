@@ -129,6 +129,39 @@ void main() {
     );
 
     blocTest<ChatUnreadBloc, int>(
+      "Home open: not asked here — Home's dashboard sets it, one request",
+      setUp: () => cardSays(146, 3),
+      build: build,
+      act: (bloc) async {
+        bloc
+          ..add(const LoadChatUnreadIntent(146))
+          ..add(const HomeOpenedIntent());
+        await Future<void>.delayed(Duration.zero);
+        reads.add(const ChatReadEntity(studentId: 146, unread: 0));
+        await Future<void>.delayed(Duration.zero);
+      },
+      expect: () => [3],
+      verify: (_) => verify(getNewMessagesCount(146)).called(1),
+    );
+
+    blocTest<ChatUnreadBloc, int>(
+      'Home closed again: asked here again',
+      setUp: () => cardSays(146, 3),
+      build: build,
+      act: (bloc) async {
+        bloc
+          ..add(const LoadChatUnreadIntent(146))
+          ..add(const HomeOpenedIntent())
+          ..add(const HomeClosedIntent());
+        await Future<void>.delayed(Duration.zero);
+        cardSays(146, 1);
+        reads.add(const ChatReadEntity(studentId: 146, unread: 0));
+        await Future<void>.delayed(Duration.zero);
+      },
+      expect: () => [3, 1],
+    );
+
+    blocTest<ChatUnreadBloc, int>(
       'nothing counted yet: left alone',
       build: build,
       act: (_) async {

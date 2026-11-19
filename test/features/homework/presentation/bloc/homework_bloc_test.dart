@@ -8,6 +8,7 @@ import 'package:al_mahhaba_school/core/base/base_state.dart';
 import 'package:al_mahhaba_school/core/base/cancel_handle.dart';
 import 'package:al_mahhaba_school/core/base/result.dart';
 import 'package:al_mahhaba_school/core/error/app_exception.dart';
+import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_filter.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_page_entity.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/bloc/homework_bloc.dart';
@@ -21,6 +22,7 @@ import '../../homework_mocks.mocks.dart';
 
 void main() {
   late MockGetHomeworkUseCase getHomework;
+  late MockFindHomeworkUseCase findHomework;
   late MockMarkChatReadUseCase markRead;
   late MockDownloadChatAttachmentUseCase downloadAttachment;
   late MockPreviewChatAttachmentUseCase previewAttachment;
@@ -28,12 +30,14 @@ void main() {
 
   setUpAll(() {
     provideResultDummy<HomeworkPageEntity>();
+    provideResultDummy<HomeworkEntity?>();
     provideResultDummy<int>();
     provideResultDummy<String>();
   });
 
   setUp(() {
     getHomework = MockGetHomeworkUseCase();
+    findHomework = MockFindHomeworkUseCase();
     markRead = MockMarkChatReadUseCase();
     downloadAttachment = MockDownloadChatAttachmentUseCase();
     previewAttachment = MockPreviewChatAttachmentUseCase();
@@ -46,6 +50,7 @@ void main() {
   HomeworkBloc build() {
     final bloc = HomeworkBloc(
       getHomework,
+      findHomework,
       markRead,
       downloadAttachment,
       previewAttachment,
@@ -393,5 +398,87 @@ void main() {
 
     await bloc.close();
     expect(cancel?.isCancelled, isTrue);
+  });
+
+  group('one homework, on its own page', () {
+    void found(Result<HomeworkEntity?> result) => when(
+      findHomework(any, any, cancel: anyNamed('cancel')),
+    ).thenAnswer((_) async => result);
+
+    blocTest<HomeworkBloc, HomeworkState>(
+      'from Home, held: shown as it is, nothing asked of the school',
+      build: build,
+      act: (bloc) => bloc.add(
+        ShowOneHomeworkIntent(
+          studentId: omar.studentId,
+          homeworkId: exercise.id,
+          homework: exercise,
+        ),
+      ),
+      expect: () => [
+        HomeworkState(
+          studentId: omar.studentId,
+          one: BaseState.success(exercise),
+        ),
+      ],
+      verify: (_) {
+        verifyZeroInteractions(findHomework);
+        verifyZeroInteractions(getHomework);
+      },
+    );
+
+    blocTest<HomeworkBloc, HomeworkState>(
+      'from the chat: looked for by its id, for the child it is about',
+      setUp: () => found(Success(data: reading)),
+      build: build,
+      act: (bloc) => bloc.add(
+        ShowOneHomeworkIntent(studentId: lina.studentId, homeworkId: 11),
+      ),
+      expect: () => [
+        HomeworkState(
+          studentId: lina.studentId,
+          one: const BaseState.loading(),
+        ),
+        HomeworkState(
+          studentId: lina.studentId,
+          one: BaseState.success(reading),
+        ),
+      ],
+      verify: (_) => verify(
+        findHomework(lina.studentId, 11, cancel: anyNamed('cancel')),
+      ).called(1),
+    );
+
+    blocTest<HomeworkBloc, HomeworkState>(
+      "not there any more: null, the page says so",
+      setUp: () => found(const Success(data: null)),
+      build: build,
+      act: (bloc) => bloc.add(
+        ShowOneHomeworkIntent(studentId: omar.studentId, homeworkId: 999),
+      ),
+      skip: 1,
+      expect: () => [
+        HomeworkState(
+          studentId: omar.studentId,
+          one: const BaseState.success(null),
+        ),
+      ],
+    );
+
+    blocTest<HomeworkBloc, HomeworkState>(
+      "it didn't load: why",
+      setUp: () => found(const Failure(exception: NetworkException())),
+      build: build,
+      act: (bloc) => bloc.add(
+        ShowOneHomeworkIntent(studentId: omar.studentId, homeworkId: 12),
+      ),
+      skip: 1,
+      expect: () => [
+        HomeworkState(
+          studentId: omar.studentId,
+          one: const BaseState.error(NetworkException()),
+        ),
+      ],
+    );
   });
 }
