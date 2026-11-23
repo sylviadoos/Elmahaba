@@ -105,7 +105,7 @@ class _NewComplaintViewState extends State<_NewComplaintView> {
   );
 
   void _submit({required int? categoryId, required int? studentId}) {
-    FocusScope.of(context).unfocus();
+    context.hideKeyboard();
     final description = _description.text.trim();
     if (categoryId == null || description.isEmpty) {
       setState(() => _tried = true);

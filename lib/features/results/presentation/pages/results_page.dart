@@ -16,7 +16,9 @@ import 'package:al_mahhaba_school/features/children/presentation/view_model/chil
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/children/presentation/widgets/no_children_state.dart';
 import 'package:al_mahhaba_school/features/results/presentation/extensions/child_certificate.dart';
+import 'package:al_mahhaba_school/features/results/presentation/results_args.dart';
 import 'package:al_mahhaba_school/features/results/presentation/view_model/results_event.dart';
+import 'package:al_mahhaba_school/features/results/presentation/view_model/results_state.dart';
 import 'package:al_mahhaba_school/features/results/presentation/view_model/results_view_model.dart';
 import 'package:al_mahhaba_school/features/results/presentation/widgets/result_details_view.dart';
 import 'package:al_mahhaba_school/features/results/presentation/widgets/result_filter.dart';
@@ -26,31 +28,65 @@ import 'package:al_mahhaba_school/features/shell/presentation/widgets/parent_tab
 /// The selected child's results: the newest one published shows first, and
 /// a filter above it picks any other — a month or a term. Under a month's,
 /// the certificate to download, with every month of the year on it. Kept
-/// up to date while it shows (see [PageRefresher]).
+/// up to date while it shows (see [PageRefresher]). Opened with [args], the
+/// result tapped on Home shows instead of the newest.
 class ResultsPage extends StatelessWidget {
-  const ResultsPage({super.key});
+  const ResultsPage({super.key, this.args});
+
+  final ResultsArgs? args;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<ResultsViewModel>(),
-      child: const _ResultsView(),
+      child: _ResultsView(args: args),
     );
   }
 }
 
 class _ResultsView extends StatefulWidget {
-  const _ResultsView();
+  const _ResultsView({this.args});
+
+  final ResultsArgs? args;
 
   @override
   State<_ResultsView> createState() => _ResultsViewState();
 }
 
 class _ResultsViewState extends State<_ResultsView> {
+  /// The result tapped on Home, until it's shown: the results may still be
+  /// on their way.
+  ResultsArgs? _wanted;
+
   @override
   void initState() {
     super.initState();
+    _wanted = widget.args;
     _loadResults();
+  }
+
+  /// A result tapped on Home while the tab was alive underneath: the page
+  /// stays, only what it was opened with changes.
+  @override
+  void didUpdateWidget(_ResultsView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final args = widget.args;
+    if (args != null && !identical(args, oldWidget.args)) {
+      _wanted = args;
+      _showWanted();
+    }
+  }
+
+  /// Shows the result tapped on Home once the results are here; the newest
+  /// stays when it's not among them.
+  void _showWanted() {
+    final wanted = _wanted;
+    final viewModel = context.read<ResultsViewModel>();
+    final results = viewModel.state.results;
+    if (wanted == null || results.state != StateType.success) return;
+    _wanted = null;
+    final picked = wanted.pickFrom(results.data ?? const []);
+    if (picked != null) viewModel.doAction(SelectResultEvent(picked.id));
   }
 
   /// The selected child's results; nothing to load without children. Also
@@ -75,13 +111,23 @@ class _ResultsViewState extends State<_ResultsView> {
     );
     final children = childrenState.data ?? const <ChildEntity>[];
 
-    return BlocListener<ChildrenViewModel, ChildrenState>(
-      // The children arrived or changed (a child linked, the list
-      // refreshed), or another one was picked, here or on another page.
-      listenWhen: (previous, current) =>
-          previous.children.data != current.children.data ||
-          current.showsOtherChildThan(previous),
-      listener: (context, state) => _loadResults(),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ChildrenViewModel, ChildrenState>(
+          // The children arrived or changed (a child linked, the list
+          // refreshed), or another one was picked, here or on another page.
+          listenWhen: (previous, current) =>
+              previous.children.data != current.children.data ||
+              current.showsOtherChildThan(previous),
+          listener: (context, state) => _loadResults(),
+        ),
+        BlocListener<ResultsViewModel, ResultsState>(
+          // The results came: the one tapped on Home can be picked now.
+          listenWhen: (previous, current) =>
+              previous.results != current.results,
+          listener: (context, _) => _showWanted(),
+        ),
+      ],
       // Asked again as a notification arrives (a result published), the
       // app comes back, or the tab shows again; pulling down asks too.
       child: PageRefresher(

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/base/base_state.dart';
+import 'package:al_mahhaba_school/core/error/app_exception.dart';
 import 'package:al_mahhaba_school/features/attendance/domain/use_cases/get_month_attendance_use_case.dart';
 import 'package:al_mahhaba_school/features/chat/domain/entities/chat_read_entity.dart';
 import 'package:al_mahhaba_school/features/chat/domain/use_cases/watch_chat_reads_use_case.dart';
@@ -115,37 +116,65 @@ class HomeBloc extends Bloc<HomeIntent, HomeState> {
     );
   }
 
+  /// The dashboard, into the state. Nothing in here is meant to throw —
+  /// the use case answers with a [Result] either way — but anything that
+  /// did would leave [HomeState.isRefreshing] on, and that is worse than
+  /// the error itself: `_onRefresh` returns at once while it's on, so Home
+  /// would never refresh again, and pulling down would spin for good.
   Future<void> _load(int childId, Emitter<HomeState> emit) async {
-    
-    final result = await _getChildDashboard(childId);
-    // Another child was picked meanwhile: theirs is on its way.
-    if (state.childId != childId) return;
-    final shown = state.dashboard.data;
-    result.when(
-      success: (dashboard) => emit(
-        state.copyWith(
-          dashboard: BaseState.success(dashboard),
-          isRefreshing: false,
+    try {
+      final result = await _getChildDashboard(childId);
+      // Another child was picked meanwhile: theirs is on its way.
+      if (state.childId != childId) return;
+      final shown = state.dashboard.data;
+      result.when(
+        success: (dashboard) => emit(
+          state.copyWith(
+            dashboard: BaseState.success(dashboard),
+            isRefreshing: false,
+            failedLoads: 0,
+          ),
         ),
-      ),
-      failure: (exception) {
-        if (shown == null) {
+        failure: (exception) {
+          if (shown == null) {
+            emit(
+              state.copyWith(
+                dashboard: BaseState.error(exception),
+                isRefreshing: false,
+                failedLoads: state.failedLoads + 1,
+              ),
+            );
+            return;
+          }
+          // Only a refresh: what's shown stays, the next one tries again.
+          debugPrint('Home refresh: $exception');
           emit(
             state.copyWith(
-              dashboard: BaseState.error(exception),
               isRefreshing: false,
+              failedLoads: state.failedLoads + 1,
             ),
           );
-          return;
-        }
-        // Only a refresh: what's shown stays, the next one tries again.
-        debugPrint('Home refresh: $exception');
-        emit(state.copyWith(isRefreshing: false));
-      },
-    );
-    if (_askAgain && !isClosed) {
-      _askAgain = false;
-      add(const RefreshHomeIntent());
+        },
+      );
+      if (_askAgain && !isClosed) {
+        _askAgain = false;
+        add(const RefreshHomeIntent());
+      }
+    } catch (error, stackTrace) {
+      debugPrint('Home load: $error\n$stackTrace');
+      // Closed while the dashboard was on its way: there's no state left
+      // to put right, and emitting on a closed bloc throws again.
+      if (isClosed) return;
+      emit(
+        state.copyWith(
+          // Nothing shown yet: "Try again", not a skeleton that never ends.
+          dashboard: state.dashboard.data == null
+              ? const BaseState.error(UnknownException())
+              : state.dashboard,
+          isRefreshing: false,
+          failedLoads: state.failedLoads + 1,
+        ),
+      );
     }
   }
 }

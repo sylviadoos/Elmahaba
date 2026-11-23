@@ -116,104 +116,119 @@ class _AppTextFieldState extends State<AppTextField> {
       letterSpacing: widget.letterSpacing,
     );
 
-    Widget box = AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      height: multiline ? null : widget.height.h,
-      clipBehavior: Clip.antiAlias,
-      padding: EdgeInsetsDirectional.only(
-        start: widget.prefix == null
-            ? (widget.prefixIcon == null ? 16 : 14).w
-            : 0,
-        end: showToggle ? 6.w : 16.w,
-        top: multiline ? 14.h : 0,
-        bottom: multiline ? 14.h : 0,
-      ),
-      decoration: BoxDecoration(
-        color: focused ? AppColors.white : widget.fillColor,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(
-          color: hasError
-              ? AppColors.error
-              : focused
-              ? AppColors.actionRed
-              : AppColors.line,
-          width: 1.5,
+    // The whole box counts as the field: the password toggle and the
+    // padding around the text don't put the keyboard away.
+    Widget box = TextFieldTapRegion(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        height: multiline ? null : widget.height.h,
+        clipBehavior: Clip.antiAlias,
+        padding: EdgeInsetsDirectional.only(
+          start: widget.prefix == null
+              ? (widget.prefixIcon == null ? 16 : 14).w
+              : 0,
+          end: showToggle ? 6.w : 16.w,
+          top: multiline ? 14.h : 0,
+          bottom: multiline ? 14.h : 0,
         ),
-        boxShadow: focused
-            ? [
-                BoxShadow(
-                  color: hasError
-                      ? AppColors.error.withValues(alpha: 0.15)
-                      : AppColors.rose,
-                  spreadRadius: 4,
-                ),
-              ]
-            : null,
-      ),
-      child: Row(
-        crossAxisAlignment: multiline
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
-        children: [
-          if (widget.prefix != null) ...[widget.prefix!, SizedBox(width: 14.w)],
-          if (widget.prefixIcon != null) ...[
-            AppSvgIcon(widget.prefixIcon!, size: 20.r, color: AppColors.slate),
-            SizedBox(width: 10.w),
-          ],
-          Expanded(
-            child: TextField(
-              focusNode: _focusNode,
-              controller: widget.controller,
-              keyboardType:
-                  widget.keyboardType ??
-                  (multiline ? TextInputType.multiline : null),
-              minLines: widget.minLines,
-              maxLines: multiline ? widget.minLines + 4 : 1,
-              textInputAction: widget.textInputAction,
-              autofillHints: widget.autofillHints,
-              inputFormatters: widget.inputFormatters,
-              obscureText: _obscure,
-              onChanged: widget.onChanged,
-              onSubmitted: widget.onSubmitted,
-              style: inputStyle,
-              // The outer box draws the border and fill, so switch off every
-              // state the app's input theme would add.
-              decoration: InputDecoration(
-                isCollapsed: true,
-                filled: false,
-                contentPadding: EdgeInsets.zero,
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                focusedErrorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                hintText: widget.hint,
-                hintStyle: inputStyle?.copyWith(color: AppColors.placeholder),
-              ),
-            ),
+        decoration: BoxDecoration(
+          color: focused ? AppColors.white : widget.fillColor,
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: hasError
+                ? AppColors.error
+                : focused
+                ? AppColors.actionRed
+                : AppColors.line,
+            width: 1.5,
           ),
-          if (showToggle)
-            IconButton(
-              onPressed: () => setState(() => _obscure = !_obscure),
-              tooltip: _obscure
-                  ? context.l10n.showPassword
-                  : context.l10n.hidePassword,
-              style: IconButton.styleFrom(
-                fixedSize: Size.square(44.r),
-                padding: EdgeInsets.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.r),
-                ),
-              ),
-              icon: AppSvgIcon(
-                _obscure ? AppIcons.eye : AppIcons.eyeOff,
+          boxShadow: focused
+              ? [
+                  BoxShadow(
+                    color: hasError
+                        ? AppColors.error.withValues(alpha: 0.15)
+                        : AppColors.rose,
+                    spreadRadius: 4,
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          crossAxisAlignment: multiline
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.center,
+          children: [
+            if (widget.prefix != null) ...[
+              widget.prefix!,
+              SizedBox(width: 14.w),
+            ],
+            if (widget.prefixIcon != null) ...[
+              AppSvgIcon(
+                widget.prefixIcon!,
                 size: 20.r,
                 color: AppColors.slate,
               ),
+              SizedBox(width: 10.w),
+            ],
+            Expanded(
+              child: TextField(
+                focusNode: _focusNode,
+                controller: widget.controller,
+                keyboardType:
+                    widget.keyboardType ??
+                    (multiline ? TextInputType.multiline : null),
+                minLines: widget.minLines,
+                maxLines: multiline ? widget.minLines + 4 : 1,
+                textInputAction: widget.textInputAction,
+                autofillHints: widget.autofillHints,
+                inputFormatters: widget.inputFormatters,
+                obscureText: _obscure,
+                onChanged: widget.onChanged,
+                onSubmitted: widget.onSubmitted,
+                // Done typing: a tap anywhere else puts the keyboard away. A
+                // box of several lines has no key for it (Enter is a new
+                // line), and on a phone Flutter leaves it up otherwise.
+                onTapOutside: (_) => _focusNode.unfocus(),
+                style: inputStyle,
+                // The outer box draws the border and fill, so switch off every
+                // state the app's input theme would add.
+                decoration: InputDecoration(
+                  isCollapsed: true,
+                  filled: false,
+                  contentPadding: EdgeInsets.zero,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  hintText: widget.hint,
+                  hintStyle: inputStyle?.copyWith(color: AppColors.placeholder),
+                ),
+              ),
             ),
-        ],
+            if (showToggle)
+              IconButton(
+                onPressed: () => setState(() => _obscure = !_obscure),
+                tooltip: _obscure
+                    ? context.l10n.showPassword
+                    : context.l10n.hidePassword,
+                style: IconButton.styleFrom(
+                  fixedSize: Size.square(44.r),
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+                icon: AppSvgIcon(
+                  _obscure ? AppIcons.eye : AppIcons.eyeOff,
+                  size: 20.r,
+                  color: AppColors.slate,
+                ),
+              ),
+          ],
+        ),
       ),
     );
 

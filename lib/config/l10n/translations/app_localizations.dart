@@ -2546,6 +2546,48 @@ abstract class AppLocalizations {
   /// **'This homework is no longer here.'**
   String get homeworkNotFound;
 
+  /// No description provided for @updateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Update required'**
+  String get updateRequired;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version is available'**
+  String get updateAvailable;
+
+  /// No description provided for @updateRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This version of the app is no longer supported. Update the app to keep using it.'**
+  String get updateRequiredMessage;
+
+  /// No description provided for @updateAvailableMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version of the app is available, with improvements and fixes.'**
+  String get updateAvailableMessage;
+
+  /// No description provided for @newVersionNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String newVersionNumber(String version);
+
+  /// No description provided for @updateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateNow;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
   /// No description provided for @homeworkCount.
   ///
   /// In en, this message translates to:

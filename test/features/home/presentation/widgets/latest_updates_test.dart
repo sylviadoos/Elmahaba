@@ -7,6 +7,7 @@ import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/features/announcements/presentation/announcement_args.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_updates.dart';
+import 'package:al_mahhaba_school/features/results/presentation/results_args.dart';
 import 'package:al_mahhaba_school/features/homework/domain/entities/homework_entity.dart';
 import 'package:al_mahhaba_school/features/homework/presentation/homework_args.dart';
 
@@ -136,6 +137,11 @@ void main() {
     await tester.tap(find.text(termResult.title));
     await tester.pumpAndSettle();
     expect(find.text(AppRoutes.results), findsOneWidget);
+    // That result, not the newest.
+    final result = extras[AppRoutes.results]! as ResultsArgs;
+    expect(result.resultId, termResult.id);
+    expect(result.title, termResult.title);
+    expect(result.academicYear, termResult.academicYear);
   });
 
   testWidgets('fits a small phone in Arabic', (tester) async {

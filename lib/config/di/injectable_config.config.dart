@@ -63,6 +63,30 @@ import 'package:al_mahhaba_school/features/app_status/domain/use_cases/get_app_s
     as _i23;
 import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_bloc.dart'
     as _i437;
+import 'package:al_mahhaba_school/features/app_version/data/data_sources/app_info_data_source.dart'
+    as _i976;
+import 'package:al_mahhaba_school/features/app_version/data/data_sources/app_info_data_source_impl.dart'
+    as _i878;
+import 'package:al_mahhaba_school/features/app_version/data/data_sources/app_version_local_data_source.dart'
+    as _i901;
+import 'package:al_mahhaba_school/features/app_version/data/data_sources/app_version_local_data_source_impl.dart'
+    as _i477;
+import 'package:al_mahhaba_school/features/app_version/data/data_sources/app_version_remote_data_source.dart'
+    as _i590;
+import 'package:al_mahhaba_school/features/app_version/data/data_sources/app_version_remote_data_source_impl.dart'
+    as _i992;
+import 'package:al_mahhaba_school/features/app_version/data/data_sources/app_version_static_data_source.dart'
+    as _i162;
+import 'package:al_mahhaba_school/features/app_version/data/repos/app_version_repo_impl.dart'
+    as _i850;
+import 'package:al_mahhaba_school/features/app_version/domain/repos/app_version_repo.dart'
+    as _i385;
+import 'package:al_mahhaba_school/features/app_version/domain/use_cases/check_app_version_use_case.dart'
+    as _i1021;
+import 'package:al_mahhaba_school/features/app_version/domain/use_cases/get_saved_forced_update_use_case.dart'
+    as _i492;
+import 'package:al_mahhaba_school/features/app_version/presentation/bloc/app_version_bloc.dart'
+    as _i797;
 import 'package:al_mahhaba_school/features/attendance/data/data_sources/attendance_remote_data_source.dart'
     as _i257;
 import 'package:al_mahhaba_school/features/attendance/data/data_sources/attendance_remote_data_source_impl.dart'
@@ -169,10 +193,14 @@ import 'package:al_mahhaba_school/features/children/domain/use_cases/get_childre
     as _i760;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/get_saved_children_use_case.dart'
     as _i449;
+import 'package:al_mahhaba_school/features/children/domain/use_cases/get_selected_child_use_case.dart'
+    as _i456;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/link_child_use_case.dart'
     as _i528;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/resend_child_link_code_use_case.dart'
     as _i225;
+import 'package:al_mahhaba_school/features/children/domain/use_cases/save_selected_child_use_case.dart'
+    as _i176;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/send_child_link_code_use_case.dart'
     as _i1049;
 import 'package:al_mahhaba_school/features/children/domain/use_cases/verify_child_link_use_case.dart'
@@ -394,6 +422,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i833.DeviceInfoPlugin>(
       () => coreInjectableModule.deviceInfo(),
     );
+    gh.lazySingleton<_i976.AppInfoDataSource>(
+      () => _i878.AppInfoDataSourceImpl(),
+    );
     gh.factory<bool>(
       () => coreInjectableModule.smsMisrFirst(),
       instanceName: 'smsMisrFirst',
@@ -424,11 +455,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.singleton<_i575.AuthInterceptor>(
       () => _i575.AuthInterceptor(gh<_i9.SecureStorage>()),
     );
+    gh.lazySingleton<_i901.AppVersionLocalDataSource>(
+      () => _i477.AppVersionLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i1016.PhoneVerificationDataSource>(
       () => _i988.PhoneVerificationDataSourceImpl(gh<_i59.FirebaseAuth>()),
     );
     gh.lazySingleton<_i236.ContactRemoteDataSource>(
       () => _i33.ContactStaticDataSource(),
+      registerFor: {_static},
+    );
+    gh.lazySingleton<_i590.AppVersionRemoteDataSource>(
+      () => _i162.AppVersionStaticDataSource(),
       registerFor: {_static},
     );
     gh.lazySingleton<_i640.AppStatusRemoteDataSource>(
@@ -623,6 +661,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i113.GetNewsUseCase>(
       () => _i113.GetNewsUseCase(gh<_i1024.NewsRepo>()),
     );
+    gh.lazySingleton<_i590.AppVersionRemoteDataSource>(
+      () => _i992.AppVersionRemoteDataSourceImpl(
+        gh<_i438.ApiService>(instanceName: 'schoolApi'),
+      ),
+      registerFor: {_api},
+    );
     gh.lazySingleton<_i380.ExcusesRemoteDataSource>(
       () => _i859.ExcusesRemoteDataSourceImpl(
         gh<_i438.ApiService>(instanceName: 'schoolApi'),
@@ -692,6 +736,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i484.NewsViewModel>(
       () => _i484.NewsViewModel(gh<_i113.GetNewsUseCase>()),
     );
+    gh.lazySingleton<_i385.AppVersionRepo>(
+      () => _i850.AppVersionRepoImpl(
+        gh<_i590.AppVersionRemoteDataSource>(),
+        gh<_i901.AppVersionLocalDataSource>(),
+        gh<_i976.AppInfoDataSource>(),
+      ),
+    );
     gh.factory<_i889.AuthViewModel>(
       () => _i889.AuthViewModel(
         gh<_i378.CheckRegisterPhoneUseCase>(),
@@ -729,6 +780,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i417.GetHomeworkUseCase>(
       () => _i417.GetHomeworkUseCase(gh<_i243.HomeworkRepo>()),
+    );
+    gh.lazySingleton<_i1021.CheckAppVersionUseCase>(
+      () => _i1021.CheckAppVersionUseCase(gh<_i385.AppVersionRepo>()),
+    );
+    gh.lazySingleton<_i492.GetSavedForcedUpdateUseCase>(
+      () => _i492.GetSavedForcedUpdateUseCase(gh<_i385.AppVersionRepo>()),
     );
     gh.factory<_i322.ProfileViewModel>(
       () => _i322.ProfileViewModel(
@@ -796,11 +853,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i449.GetSavedChildrenUseCase>(
       () => _i449.GetSavedChildrenUseCase(gh<_i668.ChildrenRepo>()),
     );
+    gh.lazySingleton<_i456.GetSelectedChildUseCase>(
+      () => _i456.GetSelectedChildUseCase(gh<_i668.ChildrenRepo>()),
+    );
     gh.lazySingleton<_i528.LinkChildUseCase>(
       () => _i528.LinkChildUseCase(gh<_i668.ChildrenRepo>()),
     );
     gh.lazySingleton<_i225.ResendChildLinkCodeUseCase>(
       () => _i225.ResendChildLinkCodeUseCase(gh<_i668.ChildrenRepo>()),
+    );
+    gh.lazySingleton<_i176.SaveSelectedChildUseCase>(
+      () => _i176.SaveSelectedChildUseCase(gh<_i668.ChildrenRepo>()),
     );
     gh.lazySingleton<_i1049.SendChildLinkCodeUseCase>(
       () => _i1049.SendChildLinkCodeUseCase(gh<_i668.ChildrenRepo>()),
@@ -818,6 +881,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i515.MarkLatestResultReadUseCase(
         gh<_i758.HomeRepo>(),
         gh<_i619.ChatRepo>(),
+      ),
+    );
+    gh.factory<_i797.AppVersionBloc>(
+      () => _i797.AppVersionBloc(
+        gh<_i1021.CheckAppVersionUseCase>(),
+        gh<_i492.GetSavedForcedUpdateUseCase>(),
       ),
     );
     gh.lazySingleton<_i778.DownloadChatAttachmentUseCase>(
@@ -922,6 +991,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i449.GetSavedChildrenUseCase>(),
         gh<_i760.GetChildrenUseCase>(),
         gh<_i528.LinkChildUseCase>(),
+        gh<_i456.GetSelectedChildUseCase>(),
+        gh<_i176.SaveSelectedChildUseCase>(),
       ),
     );
     gh.factory<_i530.ChatUnreadBloc>(

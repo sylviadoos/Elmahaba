@@ -27,9 +27,9 @@ abstract final class AppConfig {
   static String get websiteBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-      //'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
+      'http://192.168.0.219/Almahabbah-schools-Website/public/api/',
       // Live:
-      _liveWebsite,
+      //_liveWebsite,
     Environment.staging || Environment.prod => _liveWebsite,
   };
 
@@ -37,9 +37,9 @@ abstract final class AppConfig {
   static String get schoolBaseUrl => switch (environment) {
     Environment.dev =>
       // Office:
-      //'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
+      'http://192.168.0.219/Almahhaba-School-back-API/public/api/',
       // Live:
-      _liveSchool,
+      //_liveSchool,
     //'http://192.168.0.106:8080/mariam_hany/almahaba316/Almahhaba-School-back-API/public/api/',
     Environment.staging || Environment.prod => _liveSchool,
   };
@@ -112,6 +112,17 @@ abstract final class AppConfig {
 
   /// [smsMisrFirst]'s name in dependency injection.
   static const String smsMisrFirstName = 'smsMisrFirst';
+
+  /// The app's store pages, opened by "Update" when the school's version
+  /// check names none.
+  static const String androidStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.almahabbahschools.parents&hl=ar';
+  static const String iosStoreUrl =
+      'https://apps.apple.com/eg/app/al-mahabbah-schools/id6829427828';
+
+  /// [androidStoreUrl] or [iosStoreUrl], for "android" or "ios".
+  static String storeUrlFor(String platform) =>
+      platform == 'ios' ? iosStoreUrl : androidStoreUrl;
 
   static bool get isProduction => environment == Environment.prod;
 

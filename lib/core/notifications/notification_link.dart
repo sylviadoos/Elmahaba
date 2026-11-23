@@ -39,3 +39,8 @@ ChatLinkEntity? notificationLink(Map<String, dynamic> data) {
 
 /// An id sent as a number or as text; null when it's neither.
 int? _id(Object? value) => jsonDouble(value)?.toInt();
+
+/// The child a notification is about, by `studentId`, from its `data`
+/// (`student_id`, as text or a number); null when it names none.
+int? notificationStudentId(Map<String, dynamic> data) =>
+    _id(data['student_id']);

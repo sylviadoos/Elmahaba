@@ -18,7 +18,11 @@ extension ContextExtensions on BuildContext {
 
   bool get isRtl => Directionality.of(this) == TextDirection.rtl;
 
-  void hideKeyboard() => FocusScope.of(this).unfocus();
+  /// Puts the keyboard away for good: the field typed in loses its focus,
+  /// so the page forgets it. Unfocusing the page's scope instead would
+  /// leave the page remembering the field, and a sheet opening and closing
+  /// over it (adding a file) would bring the keyboard back.
+  void hideKeyboard() => FocusManager.instance.primaryFocus?.unfocus();
 
   /// A short message at the bottom (`AppToast`): gone after a few seconds,
   /// or when closed. Green with a tick, or red with a cross when

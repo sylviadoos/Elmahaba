@@ -93,7 +93,7 @@ class _NewExcuseViewState extends State<_NewExcuseView> {
   }
 
   void _submit() {
-    FocusScope.of(context).unfocus();
+    context.hideKeyboard();
     if (_documents.isEmpty) {
       setState(() => _tried = true);
       return;

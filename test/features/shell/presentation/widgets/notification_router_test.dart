@@ -13,9 +13,13 @@ import 'package:al_mahhaba_school/core/notifications/notification_service.dart';
 import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_state.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_event.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
+import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/widgets/notification_router.dart';
 
 import '../../../auth/auth_fixtures.dart';
+import '../../../announcements/announcements_fixtures.dart' show lina, omar;
 import '../../../auth/auth_mocks.mocks.dart';
 
 /// Firebase isn't set up in tests: a notification is tapped by calling
@@ -40,6 +44,7 @@ class _Taps implements NotificationService {
 void main() {
   late _Taps notifications;
   late MockParentViewModel parentViewModel;
+  late MockChildrenViewModel childrenViewModel;
   late StreamController<ParentState> parentStates;
   late GoRouter router;
 
@@ -52,6 +57,15 @@ void main() {
     parentViewModel = MockParentViewModel();
     parentStates = StreamController.broadcast();
     when(parentViewModel.stream).thenAnswer((_) => parentStates.stream);
+    childrenViewModel = MockChildrenViewModel();
+    // Omar and Lina, Lina shown: the last one the parent looked at.
+    when(childrenViewModel.state).thenReturn(
+      const ChildrenState(
+        children: BaseState.success([omar, lina]),
+        selectedId: 1209,
+      ),
+    );
+    when(childrenViewModel.stream).thenAnswer((_) => const Stream.empty());
     getIt.registerSingleton<NotificationService>(notifications);
     addTearDown(getIt.reset);
     addTearDown(notifications.close);
@@ -83,8 +97,11 @@ void main() {
     addTearDown(router.dispose);
 
     await tester.pumpWidget(
-      BlocProvider<ParentViewModel>.value(
-        value: parentViewModel,
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<ParentViewModel>.value(value: parentViewModel),
+          BlocProvider<ChildrenViewModel>.value(value: childrenViewModel),
+        ],
         child: NotificationRouter(
           router: router,
           child: MaterialApp.router(routerConfig: router),
@@ -92,6 +109,13 @@ void main() {
       ),
     );
   }
+
+  /// The child with [studentId] picked to show on every page.
+  Matcher picks(int studentId) => isA<SelectChildEvent>().having(
+    (event) => event.studentId,
+    'studentId',
+    studentId,
+  );
 
   /// The page the parent is looking at.
   String shown() => shownRoutePath(router.routerDelegate);
@@ -187,5 +211,67 @@ void main() {
     await settle(tester);
 
     expect(shown(), AppRoutes.home);
+  });
+
+  group('the child it is about', () {
+    testWidgets("a message to Omar while Lina's chat was the last open: "
+        "Omar's chat opens", (tester) async {
+      await pumpApp(tester, signedIn: true, at: AppRoutes.home);
+
+      notifications.tap({'type': 'message', 'student_id': '${omar.studentId}'});
+      await settle(tester);
+
+      verify(
+        childrenViewModel.doAction(argThat(picks(omar.studentId))),
+      ).called(1);
+      expect(shown(), AppRoutes.chat);
+    });
+
+    testWidgets('the tab it opens is theirs too', (tester) async {
+      await pumpApp(tester, signedIn: true, at: AppRoutes.home);
+
+      notifications.tap({'screen': 'fees', 'student_id': omar.studentId});
+      await settle(tester);
+
+      verify(
+        childrenViewModel.doAction(argThat(picks(omar.studentId))),
+      ).called(1);
+      expect(shown(), AppRoutes.fees);
+    });
+
+    testWidgets('no child named: the one shown stays', (tester) async {
+      await pumpApp(tester, signedIn: true, at: AppRoutes.home);
+
+      notifications.tap();
+      await settle(tester);
+
+      verifyNever(childrenViewModel.doAction(any));
+      expect(shown(), AppRoutes.chat);
+    });
+
+    testWidgets("not one of the parent's: the one shown stays", (tester) async {
+      await pumpApp(tester, signedIn: true, at: AppRoutes.home);
+
+      notifications.tap({'type': 'message', 'student_id': '4040'});
+      await settle(tester);
+
+      verifyNever(childrenViewModel.doAction(any));
+      expect(shown(), AppRoutes.chat);
+    });
+
+    testWidgets('the list not loaded yet (the push opened the app): '
+        'picked all the same, to show once it comes', (tester) async {
+      when(
+        childrenViewModel.state,
+      ).thenReturn(const ChildrenState(children: BaseState.loading()));
+      await pumpApp(tester, signedIn: true, at: AppRoutes.home);
+
+      notifications.tap({'type': 'message', 'student_id': '${omar.studentId}'});
+      await settle(tester);
+
+      verify(
+        childrenViewModel.doAction(argThat(picks(omar.studentId))),
+      ).called(1);
+    });
   });
 }

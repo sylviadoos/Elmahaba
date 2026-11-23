@@ -1369,6 +1369,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeworkNotFound => 'This homework is no longer here.';
 
   @override
+  String get updateRequired => 'Update required';
+
+  @override
+  String get updateAvailable => 'A new version is available';
+
+  @override
+  String get updateRequiredMessage =>
+      'This version of the app is no longer supported. Update the app to keep using it.';
+
+  @override
+  String get updateAvailableMessage =>
+      'A new version of the app is available, with improvements and fixes.';
+
+  @override
+  String newVersionNumber(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get updateNow => 'Update';
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
   String homeworkCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

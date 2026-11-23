@@ -15,6 +15,7 @@ class ChildrenLocalDataSourceImpl implements ChildrenLocalDataSource {
   final FlutterSecureStorage _storage;
 
   static const _childrenKey = 'children';
+  static const _selectedKey = 'selected_child';
 
   @override
   Future<List<ChildModel>> getSavedChildren() async {
@@ -40,5 +41,22 @@ class ChildrenLocalDataSourceImpl implements ChildrenLocalDataSource {
   );
 
   @override
-  Future<void> clearChildren() => _storage.delete(key: _childrenKey);
+  Future<int?> getSelectedChildId() async {
+    try {
+      return int.tryParse(await _storage.read(key: _selectedKey) ?? '');
+    } catch (_) {
+      // Unreadable: the first child shows, as before one was ever picked.
+      return null;
+    }
+  }
+
+  @override
+  Future<void> saveSelectedChildId(int studentId) =>
+      _storage.write(key: _selectedKey, value: '$studentId');
+
+  @override
+  Future<void> clearChildren() async {
+    await _storage.delete(key: _childrenKey);
+    await _storage.delete(key: _selectedKey);
+  }
 }

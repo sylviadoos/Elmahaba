@@ -49,6 +49,7 @@ import 'package:al_mahhaba_school/features/profile/presentation/pages/profile_pa
 import 'package:al_mahhaba_school/features/profile/presentation/pages/settings_page.dart';
 import 'package:al_mahhaba_school/features/results/presentation/pages/certificate_preview_page.dart';
 import 'package:al_mahhaba_school/features/results/presentation/pages/results_page.dart';
+import 'package:al_mahhaba_school/features/results/presentation/results_args.dart';
 import 'package:al_mahhaba_school/features/results/presentation/pdf/certificate_pdf_file.dart';
 import 'package:al_mahhaba_school/features/shell/presentation/pages/parent_shell_page.dart';
 import 'package:al_mahhaba_school/features/splash/presentation/pages/splash_page.dart';
@@ -237,7 +238,12 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: AppRoutes.results,
-              builder: (context, state) => const ResultsPage(),
+              // A result tapped on Home: that one, not the newest.
+              builder: (context, state) => ResultsPage(
+                args: state.extra is ResultsArgs
+                    ? state.extra! as ResultsArgs
+                    : null,
+              ),
             ),
           ],
         ),

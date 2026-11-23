@@ -9,6 +9,13 @@ abstract interface class ChildrenLocalDataSource {
 
   Future<void> saveChildren(List<ChildEntity> children);
 
-  /// Forgets them (log out), so the next parent doesn't see them.
+  /// The child last picked to show on every page, by `studentId`; null
+  /// when none was (or it can't be read).
+  Future<int?> getSelectedChildId();
+
+  Future<void> saveSelectedChildId(int studentId);
+
+  /// Forgets them and the one picked (log out), so the next parent
+  /// doesn't see them.
   Future<void> clearChildren();
 }

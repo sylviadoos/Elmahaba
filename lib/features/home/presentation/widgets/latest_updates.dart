@@ -11,6 +11,7 @@ import 'package:al_mahhaba_school/core/widgets/app_svg_icon.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/announcement_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_entity.dart';
 import 'package:al_mahhaba_school/features/home/domain/entities/latest_result_entity.dart';
+import 'package:al_mahhaba_school/features/results/presentation/results_args.dart';
 import 'package:al_mahhaba_school/features/home/presentation/extensions/latest_labels.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_card.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/latest_row.dart';
@@ -36,6 +37,9 @@ class LatestUpdates extends StatelessWidget {
         context.push(AppRoutes.announcements, extra: childId);
     void openHomework() => context.push(AppRoutes.homework, extra: childId);
     void openResults() => context.go(AppRoutes.results);
+    // That result, not the newest (see `ResultsArgs`).
+    void openResult(LatestResultEntity result) =>
+        context.go(AppRoutes.results, extra: ResultsArgs.of(result));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -104,7 +108,7 @@ class LatestUpdates extends StatelessWidget {
             subtitle: result.academicYear,
             unread: !result.isRead,
             trailing: _date(context, result.publishedAt),
-            onTap: openResults,
+            onTap: () => openResult(result),
           ),
         ),
       ],

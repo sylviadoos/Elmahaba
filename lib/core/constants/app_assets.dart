@@ -24,9 +24,15 @@ abstract final class AppImages {
   static const String logoMarkWhite = '${AppAssets.images}/logo_mark_white.svg';
 
   /// The monthly examination certificate, blank (1491 × 1055, from the
-  /// school's A4 landscape PDF): the app writes the marks on it.
+  /// school's A4 landscape PDF): the app writes the marks on it. Fourth
+  /// primary and up: with Science, Social Studies and ICT.
   static const String monthlyCertificate =
       '${AppAssets.images}/monthly_certificate.jpg';
+
+  /// [monthlyCertificate] for first to third primary: the same page, without
+  /// Science, Social Studies and ICT.
+  static const String monthlyCertificatePrimary =
+      '${AppAssets.images}/monthly_certificate_primary.jpg';
   static const String newsBeeDegree = '${AppAssets.images}/news_bee_degree.jpg';
   static const String newsBirthdays = '${AppAssets.images}/news_birthdays.jpg';
   static const String sparkle = '${AppAssets.images}/sparkle.svg';
