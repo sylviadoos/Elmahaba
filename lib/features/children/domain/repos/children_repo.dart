@@ -13,6 +13,13 @@ abstract interface class ChildrenRepo {
   /// [getChildren]); empty when none are. No API call.
   Future<List<ChildEntity>> getSavedChildren();
 
+  /// The child last picked to show on every page (`studentId`), kept on
+  /// the phone across launches; null when none was. No API call.
+  Future<int?> getSelectedChildId();
+
+  /// Keeps [studentId] as the child picked, for the next launch.
+  Future<void> saveSelectedChildId(int studentId);
+
   /// The children on the parent's account, from the API — and saved.
   Future<Result<List<ChildEntity>>> getChildren();
 

@@ -380,6 +380,24 @@ class MockChildrenLocalDataSource extends _i1.Mock
           as _i6.Future<void>);
 
   @override
+  _i6.Future<int?> getSelectedChildId() =>
+      (super.noSuchMethod(
+            Invocation.method(#getSelectedChildId, []),
+            returnValue: _i6.Future<int?>.value(),
+            returnValueForMissingStub: _i6.Future<int?>.value(),
+          )
+          as _i6.Future<int?>);
+
+  @override
+  _i6.Future<void> saveSelectedChildId(int? studentId) =>
+      (super.noSuchMethod(
+            Invocation.method(#saveSelectedChildId, [studentId]),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
+          )
+          as _i6.Future<void>);
+
+  @override
   _i6.Future<void> clearChildren() =>
       (super.noSuchMethod(
             Invocation.method(#clearChildren, []),

@@ -17,6 +17,7 @@ import 'package:al_mahhaba_school/features/children/presentation/view_model/chil
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_view_model.dart';
 import 'package:al_mahhaba_school/features/results/domain/entities/result_details_entity.dart';
 import 'package:al_mahhaba_school/features/results/presentation/pages/results_page.dart';
+import 'package:al_mahhaba_school/features/results/presentation/results_args.dart';
 import 'package:al_mahhaba_school/features/results/presentation/view_model/results_view_model.dart';
 import 'package:al_mahhaba_school/features/results/presentation/widgets/result_filter_chip.dart';
 
@@ -66,20 +67,24 @@ void main() {
   /// Opens Results for [omar], the school answering [results].
   Future<void> pump(
     WidgetTester tester,
-    Result<List<ResultDetailsEntity>> results,
-  ) async {
+    Result<List<ResultDetailsEntity>> results, {
+    ResultsArgs? opened,
+    void Function(GoRouter router)? onRouter,
+  }) async {
     tester.usePhoneScreen();
     when(getResults(any)).thenAnswer((_) async => results);
     final router = GoRouter(
       initialLocation: AppRoutes.results,
+      initialExtra: opened,
       routes: [
         GoRoute(
           path: AppRoutes.results,
-          builder: (_, _) => const ResultsPage(),
+          builder: (_, state) => ResultsPage(args: state.extra as ResultsArgs?),
         ),
       ],
     );
     addTearDown(router.dispose);
+    onRouter?.call(router);
 
     await tester.pumpWidget(
       TestApp(
@@ -218,5 +223,89 @@ void main() {
     await tester.pump();
 
     expect(find.text(november.title), findsOneWidget);
+  });
+
+  group('a result tapped on Home', () {
+    /// The chip that's shown as picked.
+    String picked(WidgetTester tester) => tester
+        .widgetList<ResultFilterChip>(find.byType(ResultFilterChip))
+        .singleWhere((chip) => chip.isSelected)
+        .label;
+
+    ResultsArgs tapped(ResultDetailsEntity result, {int? id}) => ResultsArgs(
+      resultId: id ?? result.id,
+      title: result.title,
+      academicYear: result.academicYear,
+    );
+
+    testWidgets('October, not the newest: October shows', (tester) async {
+      await pump(tester, Success(data: allResults), opened: tapped(october));
+
+      expect(picked(tester), 'October');
+      expect(find.text(october.title), findsWidgets);
+      expect(find.text(november.title), findsNothing);
+    });
+
+    testWidgets('numbered otherwise on Home: found by its title in its '
+        'school year', (tester) async {
+      await pump(
+        tester,
+        Success(data: allResults),
+        opened: tapped(october, id: 1244),
+      );
+
+      expect(picked(tester), 'October');
+    });
+
+    testWidgets('not among them any more: the newest', (tester) async {
+      await pump(
+        tester,
+        Success(data: allResults),
+        opened: const ResultsArgs(
+          resultId: 1,
+          title: 'Withdrawn',
+          academicYear: '2026-2027',
+        ),
+      );
+
+      expect(picked(tester), 'November');
+    });
+
+    testWidgets('the tab alive underneath, on the newest: it moves to the '
+        'one tapped', (tester) async {
+      late GoRouter router;
+      await pump(
+        tester,
+        Success(data: allResults),
+        onRouter: (r) => router = r,
+      );
+      expect(picked(tester), 'November');
+
+      router.go(AppRoutes.results, extra: tapped(october));
+      await tester.pumpAndSettle();
+
+      expect(picked(tester), 'October');
+    });
+
+    testWidgets('tapped again after picking another month: shown again', (
+      tester,
+    ) async {
+      late GoRouter router;
+      await pump(
+        tester,
+        Success(data: allResults),
+        opened: tapped(october),
+        onRouter: (r) => router = r,
+      );
+      await tester.ensureVisible(chip('November'));
+      await tester.tap(chip('November'));
+      await tester.pump();
+      expect(picked(tester), 'November');
+
+      router.go(AppRoutes.results, extra: tapped(october));
+      await tester.pumpAndSettle();
+
+      expect(picked(tester), 'October');
+    });
   });
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show Bidi;
 import 'package:pdf/pdf.dart';
@@ -8,7 +9,8 @@ import 'package:al_mahhaba_school/features/results/domain/entities/monthly_certi
 import 'package:al_mahhaba_school/features/results/presentation/pdf/certificate_pdf_file.dart';
 
 /// The school's monthly examination certificate: its own blank page
-/// ([AppImages.monthlyCertificate]) with the student written on its lines
+/// ([AppImages.monthlyCertificate], or [AppImages.monthlyCertificatePrimary]
+/// for first to third primary) with the student written on its lines
 /// and each mark in its box — by subject, month (October, November, March,
 /// April) and part (monthly exam, homework…). What the page has no box for
 /// (another subject or month) isn't written; the app shows all of it.
@@ -16,13 +18,12 @@ abstract final class MonthlyCertificatePdf {
   static Future<CertificatePdfFile> build(
     MonthlyCertificateEntity certificate,
   ) async {
+    final template = _templateFor(certificate.grade);
     final font = pw.Font.ttf(
       await rootBundle.load('assets/fonts/Cairo-Bold.ttf'),
     );
     final background = pw.MemoryImage(
-      (await rootBundle.load(
-        AppImages.monthlyCertificate,
-      )).buffer.asUint8List(),
+      (await rootBundle.load(template.image)).buffer.asUint8List(),
     );
 
     final document = pw.Document(
@@ -46,7 +47,7 @@ abstract final class MonthlyCertificatePdf {
               fit: pw.BoxFit.fill,
             ),
             ..._student(certificate, font),
-            ..._marks(certificate, font),
+            ..._marks(certificate, template, font),
           ],
         ),
       ),
@@ -64,8 +65,31 @@ abstract final class MonthlyCertificatePdf {
     );
   }
 
-  // The page is A4 landscape; the blank certificate is 1491 × 1055 px, and
-  // everything below is measured on it.
+  /// The blank page [grade]'s certificate is written on, e.g.
+  /// [AppImages.monthlyCertificatePrimary] for "Second Primary".
+  @visibleForTesting
+  static String templateFor(String grade) => _templateFor(grade).image;
+
+  static _Template _templateFor(String grade) =>
+      _isEarlyPrimary(grade) ? _earlyPrimary : _primary;
+
+  /// First, second or third primary, however the school writes it: "Second
+  /// Primary", "Grade 2", "Primary 3", "الصف الثاني الابتدائي"… Anything
+  /// else — fourth primary and up, KG, or nothing — isn't.
+  static bool _isEarlyPrimary(String grade) {
+    final text = grade.toLowerCase();
+    final primary = RegExp(r'primary|\bgrade\b|ابتدائ').hasMatch(text);
+    final firstToThird =
+        RegExp(
+          r'\b(1|2|3|1st|2nd|3rd|first|second|third|one|two|three)\b',
+        ).hasMatch(text) ||
+        RegExp('أول|اول|ثاني|ثانى|ثانية|تانية|ثالث|تالتة|[١٢٣]').hasMatch(text);
+    return primary && firstToThird;
+  }
+
+  // The page is A4 landscape; both blank certificates are 1491 × 1055 px,
+  // and everything below is measured on them. Only the subjects' columns
+  // differ between them.
   static final double _pageWidth = PdfPageFormat.a4.landscape.width;
   static final double _pageHeight = PdfPageFormat.a4.landscape.height;
   static const double _imageWidth = 1491;
@@ -73,18 +97,35 @@ abstract final class MonthlyCertificatePdf {
 
   static const _ink = PdfColor.fromInt(0xFF1E2C8C);
 
-  /// Each subject's four month columns, by their lines' x.
-  static const _subjectColumns = <String, List<double>>{
-    'arabic': [205, 236.5, 270.5, 303.5, 334],
-    'math': [337, 370.5, 403.5, 437.5, 469],
-    'englishol': [472, 504.5, 538.5, 573.5, 606],
-    'englishal': [609, 641.5, 675.5, 710.5, 743],
-    'german': [746, 777.5, 810.5, 844.5, 876],
-    'science': [880, 913.5, 947.5, 980.5, 1012],
-    'socialstudies': [1015, 1048.5, 1082.5, 1116.5, 1149],
-    'religion': [1153, 1190.5, 1232.5, 1271.5, 1309],
-    'ict': [1312, 1347.5, 1384, 1426.5, 1465],
-  };
+  /// Fourth primary and up.
+  static const _primary = _Template(
+    image: AppImages.monthlyCertificate,
+    subjectColumns: {
+      'arabic': [205, 236.5, 270.5, 303.5, 334],
+      'math': [337, 370.5, 403.5, 437.5, 469],
+      'englishol': [472, 504.5, 538.5, 573.5, 606],
+      'englishal': [609, 641.5, 675.5, 710.5, 743],
+      'german': [746, 777.5, 810.5, 844.5, 876],
+      'science': [880, 913.5, 947.5, 980.5, 1012],
+      'socialstudies': [1015, 1048.5, 1082.5, 1116.5, 1149],
+      'religion': [1153, 1190.5, 1232.5, 1271.5, 1309],
+      'ict': [1312, 1347.5, 1384, 1426.5, 1465],
+    },
+  );
+
+  /// First to third primary: no Science, Social Studies or ICT, so each
+  /// subject is wider.
+  static const _earlyPrimary = _Template(
+    image: AppImages.monthlyCertificatePrimary,
+    subjectColumns: {
+      'arabic': [205, 257, 309.5, 362, 414],
+      'math': [417, 467, 519.5, 572, 624],
+      'englishol': [627, 677, 729.5, 782, 834],
+      'englishal': [837, 887, 939.5, 992, 1044],
+      'german': [1047, 1097, 1149.5, 1202, 1254],
+      'religion': [1257, 1307, 1359.5, 1412, 1466],
+    },
+  );
 
   /// Other names the school may give them.
   static const _subjectAliases = {
@@ -173,6 +214,7 @@ abstract final class MonthlyCertificatePdf {
   /// Each mark in its box.
   static List<pw.Widget> _marks(
     MonthlyCertificateEntity certificate,
+    _Template template,
     pw.Font font,
   ) {
     final monthKeys = {
@@ -181,7 +223,7 @@ abstract final class MonthlyCertificatePdf {
     final boxes = <pw.Widget>[];
     for (final subject in certificate.subjects) {
       final name = _key(subject.name);
-      final columns = _subjectColumns[_subjectAliases[name] ?? name];
+      final columns = template.subjectColumns[_subjectAliases[name] ?? name];
       if (columns == null) continue;
       for (final (column, month) in _monthColumns.indexed) {
         final marks = subject.marks[monthKeys[month]];
@@ -249,4 +291,13 @@ abstract final class MonthlyCertificatePdf {
       ),
     );
   }
+}
+
+/// A blank certificate, and where each subject's four month columns are on
+/// it, by their lines' x.
+class _Template {
+  const _Template({required this.image, required this.subjectColumns});
+
+  final String image;
+  final Map<String, List<double>> subjectColumns;
 }

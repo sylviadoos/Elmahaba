@@ -14,6 +14,10 @@ abstract final class ApiEndpoints {
   /// GET: whether parents can log in now (`enabled`).
   static const String appStatus = 'mobile/app-status';
 
+  /// GET, no token: whether the installed version must or can be updated
+  /// (`?platform=android|ios&current_version=1.0.0`).
+  static const String appVersion = 'v1/parent/app-version';
+
   static const String login = 'mobile/login';
   static const String session = 'v1/parent/auth/session';
   static const String changePassword = 'v1/parent/auth/change-password';

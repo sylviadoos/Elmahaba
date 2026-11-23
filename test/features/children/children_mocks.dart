@@ -7,6 +7,8 @@
   MockSpec<GetSavedChildrenUseCase>(),
   MockSpec<GetChildrenUseCase>(),
   MockSpec<LinkChildUseCase>(),
+  MockSpec<GetSelectedChildUseCase>(),
+  MockSpec<SaveSelectedChildUseCase>(),
   MockSpec<VerifyChildLinkUseCase>(),
   MockSpec<ResendChildLinkCodeUseCase>(),
   MockSpec<SendChildLinkCodeUseCase>(),
@@ -22,7 +24,9 @@ import 'package:al_mahhaba_school/features/children/data/data_sources/children_l
 import 'package:al_mahhaba_school/features/children/data/data_sources/children_remote_data_source.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/get_children_use_case.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/get_saved_children_use_case.dart';
+import 'package:al_mahhaba_school/features/children/domain/use_cases/get_selected_child_use_case.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/link_child_use_case.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/resend_child_link_code_use_case.dart';
+import 'package:al_mahhaba_school/features/children/domain/use_cases/save_selected_child_use_case.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/send_child_link_code_use_case.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/verify_child_link_use_case.dart';

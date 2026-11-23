@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:al_mahhaba_school/core/base/base_cubit.dart';
@@ -9,7 +10,9 @@ import 'package:al_mahhaba_school/features/children/domain/entities/link_child_r
 import 'package:al_mahhaba_school/features/children/domain/entities/link_child_result_entity.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/get_children_use_case.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/get_saved_children_use_case.dart';
+import 'package:al_mahhaba_school/features/children/domain/use_cases/get_selected_child_use_case.dart';
 import 'package:al_mahhaba_school/features/children/domain/use_cases/link_child_use_case.dart';
+import 'package:al_mahhaba_school/features/children/domain/use_cases/save_selected_child_use_case.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_event.dart';
 import 'package:al_mahhaba_school/features/children/presentation/view_model/children_state.dart';
 
@@ -19,12 +22,22 @@ import 'package:al_mahhaba_school/features/children/presentation/view_model/chil
 /// actions, hence `void`.
 @injectable
 class ChildrenViewModel extends BaseCubit<ChildrenState, ChildrenEvent, void> {
-  ChildrenViewModel(this._getSavedChildren, this._getChildren, this._linkChild)
-    : super(const ChildrenState());
+  ChildrenViewModel(
+    this._getSavedChildren,
+    this._getChildren,
+    this._linkChild,
+    this._getSelectedChild,
+    this._saveSelectedChild,
+  ) : super(const ChildrenState());
 
   final GetSavedChildrenUseCase _getSavedChildren;
   final GetChildrenUseCase _getChildren;
   final LinkChildUseCase _linkChild;
+
+  /// The child picked, kept across launches: closing the app and opening it
+  /// again shows the same one.
+  final GetSelectedChildUseCase _getSelectedChild;
+  final SaveSelectedChildUseCase _saveSelectedChild;
 
   /// The API call in flight, so loads asked at once share it.
   Future<void>? _refreshing;
@@ -33,18 +46,41 @@ class ChildrenViewModel extends BaseCubit<ChildrenState, ChildrenEvent, void> {
   Future<void> doAction(ChildrenEvent event) async {
     switch (event) {
       case LoadChildrenEvent():
+        await _restoreSelected();
         await _showSaved(onlyIfEmpty: true);
         await _refresh();
       case ShowSavedChildrenEvent():
+        await _restoreSelected();
         await _showSaved(onlyIfEmpty: false);
       case SelectChildEvent(:final studentId):
         emit(state.copyWith(selectedId: () => studentId));
+        unawaited(_keepSelected(studentId));
       case ClearChildrenEvent():
         emit(const ChildrenState());
       case LinkChildEvent(:final request):
         await _link(request);
       case ChildLinkVerifiedEvent(:final child):
         await _verified(child);
+    }
+  }
+
+  /// The child picked before the app was closed, before the list shows, so
+  /// every page opens on them. One picked since (a notification tapped)
+  /// stands; one no longer on the account shows the first instead.
+  Future<void> _restoreSelected() async {
+    if (state.selectedId != null) return;
+    final saved = await _getSelectedChild();
+    if (isClosed || saved == null || state.selectedId != null) return;
+    emit(state.copyWith(selectedId: () => saved));
+  }
+
+  /// Only remembered: if the phone can't keep it, the first child shows
+  /// next time, as before one was ever picked.
+  Future<void> _keepSelected(int studentId) async {
+    try {
+      await _saveSelectedChild(studentId);
+    } catch (error) {
+      debugPrint('Keeping the child picked: $error');
     }
   }
 

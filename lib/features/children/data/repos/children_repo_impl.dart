@@ -33,6 +33,13 @@ class ChildrenRepoImpl implements ChildrenRepo {
       _localDataSource.getSavedChildren();
 
   @override
+  Future<int?> getSelectedChildId() => _localDataSource.getSelectedChildId();
+
+  @override
+  Future<void> saveSelectedChildId(int studentId) =>
+      _localDataSource.saveSelectedChildId(studentId);
+
+  @override
   Future<Result<List<ChildEntity>>> getChildren() => Result.guard(() async {
     final children = await _remoteDataSource.getChildren();
     await _localDataSource.saveChildren(children);

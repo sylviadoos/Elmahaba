@@ -113,6 +113,17 @@ abstract final class AppConfig {
   /// [smsMisrFirst]'s name in dependency injection.
   static const String smsMisrFirstName = 'smsMisrFirst';
 
+  /// The app's store pages, opened by "Update" when the school's version
+  /// check names none.
+  static const String androidStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.almahabbahschools.parents&hl=ar';
+  static const String iosStoreUrl =
+      'https://apps.apple.com/eg/app/al-mahabbah-schools/id6829427828';
+
+  /// [androidStoreUrl] or [iosStoreUrl], for "android" or "ios".
+  static String storeUrlFor(String platform) =>
+      platform == 'ios' ? iosStoreUrl : androidStoreUrl;
+
   static bool get isProduction => environment == Environment.prod;
 
   /// Network and router logs: debug builds only, never production. Release

@@ -13,6 +13,8 @@ import 'package:al_mahhaba_school/core/app_settings/locale_theme_state.dart';
 import 'package:al_mahhaba_school/core/widgets/screen_util_scope.dart';
 import 'package:al_mahhaba_school/features/app_status/presentation/bloc/app_status_bloc.dart';
 import 'package:al_mahhaba_school/features/app_status/presentation/widgets/app_status_refresher.dart';
+import 'package:al_mahhaba_school/features/app_version/presentation/bloc/app_version_bloc.dart';
+import 'package:al_mahhaba_school/features/app_version/presentation/widgets/update_gate.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_state.dart';
 import 'package:al_mahhaba_school/features/auth/presentation/view_model/parent_view_model.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_unread_bloc.dart';
@@ -41,6 +43,9 @@ class AlMahhabaApp extends StatelessWidget {
           // only, so it's known by the first visitor page; never for a
           // signed-in parent, who uses the app whatever it says.
           BlocProvider(create: (_) => getIt<AppStatusBloc>()),
+          // Whether the installed version must or can be updated, asked as
+          // the app opens (see `UpdateGate`).
+          BlocProvider(create: (_) => getIt<AppVersionBloc>()),
         ],
         // Recorded sessions go by the parent signed in (their id, nothing
         // personal); logging out starts a new one.
@@ -72,7 +77,11 @@ class AlMahhabaApp extends StatelessWidget {
                           AppLocalizations.localizationsDelegates,
                       supportedLocales: AppLocalizations.supportedLocales,
                       routerConfig: appRouter,
-                      builder: DevicePreview.appBuilder,
+                      // Over every page: an update the school forces holds
+                      // the whole app back until it's installed.
+                      builder: (context, child) => UpdateGate(
+                        child: DevicePreview.appBuilder(context, child),
+                      ),
                     ),
                   ),
                 ),

@@ -11,6 +11,7 @@ import 'package:al_mahhaba_school/features/home/domain/entities/child_dashboard_
 import 'package:al_mahhaba_school/features/home/domain/extensions/dashboard_chat_counts.dart';
 import 'package:al_mahhaba_school/features/home/presentation/extensions/dashboard_fees_labels.dart';
 import 'package:al_mahhaba_school/features/home/presentation/widgets/home_stat_card.dart';
+import 'package:al_mahhaba_school/features/results/presentation/results_args.dart';
 
 /// The four Home cards — the latest result, the days present, the next fees
 /// installment and messages — each opening its page.
@@ -49,7 +50,11 @@ class HomeStats extends StatelessWidget {
           // The year it's for, then the school's title for it.
           value: orDash(result?.academicYear),
           subtitle: result == null ? l10n.noResultsYet : result.title,
-          onTap: () => context.go(AppRoutes.results),
+          // That result, not merely the newest (see `ResultsArgs`).
+          onTap: () => context.go(
+            AppRoutes.results,
+            extra: result == null ? null : ResultsArgs.of(result),
+          ),
         ),
         HomeStatCard(
           title: l10n.attendance,
