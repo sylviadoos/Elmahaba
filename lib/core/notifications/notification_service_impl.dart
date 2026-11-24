@@ -72,11 +72,17 @@ class NotificationServiceImpl implements NotificationService {
     }
 
     FirebaseMessaging.onMessage.listen(_showWhileOpen);
-    FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) => _taps.add(message.data),
-    );
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      // TEMP: unconditional, to diagnose the iOS tap-to-deep-link issue on
+      // TestFlight builds, where AppConfig.enableLogging is always false.
+      debugPrint('TEMP Tap from background: data ${message.data}');
+      _taps.add(message.data);
+    });
     // The app was closed, and a push opened it.
     final opening = await _messaging.getInitialMessage();
+    debugPrint(
+      'TEMP getInitialMessage: ${opening == null ? 'null' : opening.data}',
+    );
     if (opening != null) _taps.add(opening.data);
 
     // For sending a test push from the Firebase console, and for telling

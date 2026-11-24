@@ -68,6 +68,8 @@ class _NotificationRouterState extends State<NotificationRouter> {
   }
 
   void _tapped(Map<String, dynamic> data) {
+    // TEMP: see notification_service_impl.dart for why this is unconditional.
+    debugPrint('TEMP NotificationRouter: tapped $data');
     _pending = data;
     _openPending();
   }
@@ -83,6 +85,10 @@ class _NotificationRouterState extends State<NotificationRouter> {
 
   void _openPending() {
     final data = _pending;
+    debugPrint(
+      'TEMP NotificationRouter: openPending data=${data != null} '
+      'signedIn=$_signedIn onSplash=$_onSplash',
+    );
     if (data == null || !_signedIn || _onSplash) return;
     _pending = null;
     // What says it can be opened is the router changing (the splash

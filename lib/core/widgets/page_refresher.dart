@@ -68,13 +68,24 @@ class _PageRefresherState extends State<PageRefresher>
   /// Whether the page is the one shown, as of the router's last change.
   bool _shown = true;
 
+  /// How long to wait before refreshing on a notification: the push can
+  /// reach the phone slightly ahead of the write it announces becoming
+  /// visible to reads, so refreshing the instant it arrives risks fetching
+  /// what's about to be replaced.
+  static const _notificationRefreshDelay = Duration(seconds: 2);
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _notifications = getIt<NotificationService>().onReceived.listen(
-      (_) => _refreshIfShown(),
+      (_) => unawaited(_refreshAfterDelay()),
     );
+  }
+
+  Future<void> _refreshAfterDelay() async {
+    await Future.delayed(_notificationRefreshDelay);
+    _refreshIfShown();
   }
 
   @override
