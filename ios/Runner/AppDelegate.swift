@@ -63,3 +63,27 @@ import FirebaseMessaging
         )
     }
 }
+
+// With FirebaseAppDelegateProxyEnabled off, nothing else is registered as the
+// notification center's delegate, so these two must be implemented here, or
+// a push that arrives while the app is open is never shown and a tap on a
+// delivered one is never reported back to Flutter.
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        Messaging.messaging().appDidReceiveMessage(notification.request.content.userInfo)
+        completionHandler([.banner, .list, .sound, .badge])
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        Messaging.messaging().appDidReceiveMessage(response.notification.request.content.userInfo)
+        completionHandler()
+    }
+}
