@@ -62,14 +62,12 @@ import FirebaseMessaging
             didFailToRegisterForRemoteNotificationsWithError: error
         )
     }
-}
 
-// With FirebaseAppDelegateProxyEnabled off, nothing else is registered as the
-// notification center's delegate, so these two must be implemented here, or
-// a push that arrives while the app is open is never shown and a tap on a
-// delivered one is never reported back to Flutter.
-extension AppDelegate: UNUserNotificationCenterDelegate {
-    func userNotificationCenter(
+    // With FirebaseAppDelegateProxyEnabled off, nothing else is registered as
+    // the notification center's delegate, so these two must be implemented
+    // here, or a push that arrives while the app is open is never shown and
+    // a tap on a delivered one is never reported back to Flutter.
+    override func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
@@ -78,7 +76,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         completionHandler([.banner, .list, .sound, .badge])
     }
 
-    func userNotificationCenter(
+    override func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
