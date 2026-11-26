@@ -56,7 +56,8 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
       return _show(intent.studentId, emit);
     });
     on<RetryChatIntent>((_, emit) => _show(state.studentId, emit));
-    on<RefreshChatIntent>(_onRefresh);
+    on<RefreshChatIntent>((_, emit) => _refresh(emit));
+    on<PullRefreshChatIntent>((_, emit) => _refresh(emit, pulled: true));
     on<LoadOlderChatIntent>(_onLoadOlder);
     on<ItemSeenIntent>(_onItemSeen);
     on<ItemsReadChangedIntent>(_onItemsReadChanged);
@@ -185,6 +186,8 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
       state
           .copyWith(
             isRequested: true,
+            // The refresh pulled for is dropped with the chat it was for.
+            isPullRefreshing: false,
             studentId: () => studentId,
             aboutId: () => null,
             replyingTo: () => null,
@@ -217,22 +220,29 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
   /// Also when older items didn't load: the parent is down at the newest,
   /// far from "Try again" up top, and the school's news mustn't wait for
   /// it. That row stays as it is.
-  Future<void> _onRefresh(
-    RefreshChatIntent intent,
-    Emitter<ChatState> emit,
-  ) async {
+  ///
+  /// [pulled] by the parent: a spinner shows until the answer is in — that
+  /// of the refresh already on its way, if one is — and a snack bar says
+  /// why when it didn't come.
+  Future<void> _refresh(
+    Emitter<ChatState> emit, {
+    bool pulled = false,
+  }) async {
     if (!state.isRequested || state.chat.data == null) return;
     // Older items are on their way: asking now would join an answer to a
     // chat that is about to change under it. Once they're here instead.
     if (state.chat.state == StateType.moreLoading) {
       _refreshPending = true;
+      if (pulled) emit(state.copyWith(isPullRefreshing: true));
       return;
     }
     final settled = switch (state.chat.state) {
       StateType.success || StateType.error => true,
       _ => false,
     };
-    if (!settled || _refreshing != null) return;
+    if (!settled) return;
+    if (pulled) emit(state.copyWith(isPullRefreshing: true));
+    if (_refreshing != null) return;
     final load = _loads;
     final cancel = _refreshing = CancelHandle();
     final studentId = state.studentId;
@@ -255,19 +265,29 @@ class ChatBloc extends BaseBloc<ChatIntent, ChatState, ChatEffect> {
     if (load != _loads) return;
     final chat = state.chat;
     final shown = chat.data;
+    final wasPulled = state.isPullRefreshing;
     if (shown == null) return;
     result.when(
       // As it was: older ones that didn't load still say so.
       success: (newest) => emit(
-        state.showing(
-          BaseState.all(
-            state: chat.state,
-            data: newest.after(shown),
-            exception: chat.exception,
-          ),
-        ),
+        state
+            .showing(
+              BaseState.all(
+                state: chat.state,
+                data: newest.after(shown),
+                exception: chat.exception,
+              ),
+            )
+            .copyWith(isPullRefreshing: false),
       ),
-      failure: (exception) => debugPrint('Refreshing the chat: $exception'),
+      failure: (exception) {
+        debugPrint('Refreshing the chat: $exception');
+        if (!wasPulled) return;
+        emit(state.copyWith(isPullRefreshing: false));
+        if (exception is! CancelledException) {
+          emitEffect(ShowErrorEffect(exception));
+        }
+      },
     );
   }
 

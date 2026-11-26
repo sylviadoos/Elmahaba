@@ -212,6 +212,12 @@ abstract class AppLocalizations {
   /// **'Session expired, please log in again'**
   String get expiredToken;
 
+  /// No description provided for @sessionReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account was logged in on another device. Please log in again.'**
+  String get sessionReplaced;
+
   /// No description provided for @accountWithdrawn.
   ///
   /// In en, this message translates to:

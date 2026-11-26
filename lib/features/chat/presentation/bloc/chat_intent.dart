@@ -54,6 +54,13 @@ final class RefreshChatIntent extends ChatIntent {
   const RefreshChatIntent();
 }
 
+/// The parent pulled past the newest item: the same, but a spinner shows
+/// under it until the answer is in, and a snack bar says why when it
+/// didn't come.
+final class PullRefreshChatIntent extends ChatIntent {
+  const PullRefreshChatIntent();
+}
+
 /// Loads the items before the oldest shown (the parent scrolled up to it).
 final class LoadOlderChatIntent extends ChatIntent {
   const LoadOlderChatIntent();

@@ -18,6 +18,7 @@
   "serverError": "Something went wrong on our side. Please try again in a few minutes.",
   "unexpectedError": "Something went wrong. Please try again.",
   "expiredToken": "Session expired, please log in again",
+  "sessionReplaced": "Your account was logged in on another device. Please log in again.",
   "accountWithdrawn": "Your account is no longer available because the student is no longer enrolled at the school. Please contact the school.",
   "phoneNumberIsNotValid": "This phone number is not valid",
   "thisFieldIsRequired": "This field is required",

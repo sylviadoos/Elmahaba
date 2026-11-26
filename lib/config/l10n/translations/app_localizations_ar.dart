@@ -70,6 +70,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get expiredToken => 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى';
 
   @override
+  String get sessionReplaced =>
+      'تم تسجيل الدخول إلى حسابك من جهاز آخر. يرجى تسجيل الدخول مرة أخرى.';
+
+  @override
   String get accountWithdrawn =>
       'لم يعد حسابك متاحًا لأن الطالب لم يعد مقيدًا بالمدرسة، يرجى التواصل مع المدرسة';
 

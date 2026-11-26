@@ -57,6 +57,45 @@ void main() {
     });
   });
 
+  group('logged in on another phone (session_replaced)', () {
+    const message =
+        'تم تسجيل الدخول إلى حسابك من جهاز آخر. يرجى تسجيل الدخول مرة أخرى.';
+
+    /// As the API sends it, to any request from the phone it replaced.
+    final body = {
+      'status': 'error',
+      'code': 'session_replaced',
+      'message': message,
+    };
+
+    test('signs the parent out, with the server\'s message', () {
+      final exception = DioExceptionHandler.handle(_answer(401, body));
+
+      expect(
+        exception,
+        isA<UnauthorizedException>()
+            .having((e) => e.isSessionReplaced, 'isSessionReplaced', isTrue)
+            .having((e) => e.isAccountWithdrawn, 'isAccountWithdrawn', isFalse)
+            .having((e) => e.message, 'message', message),
+      );
+    });
+
+    test('an ended session is not one', () {
+      final exception = DioExceptionHandler.handle(
+        _answer(401, {'code': 'unauthenticated', 'message': 'Log in again.'}),
+      );
+
+      expect(
+        exception,
+        isA<UnauthorizedException>().having(
+          (e) => e.isSessionReplaced,
+          'isSessionReplaced',
+          isFalse,
+        ),
+      );
+    });
+  });
+
   group('the other 401s are left as they were', () {
     test('an ended session: signed out, not withdrawn', () {
       final exception = DioExceptionHandler.handle(

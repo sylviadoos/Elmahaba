@@ -8,6 +8,12 @@ abstract final class DioExceptionHandler {
   /// `{"code": "unauthenticated", "message": "Please log in again."}`
   static const _sessionEndedCode = 'unauthenticated';
 
+  /// `{"code": "session_replaced", "message": "تم تسجيل الدخول إلى حسابك من
+  /// جهاز آخر…"}` (401): a parent is signed in on one phone only, so
+  /// logging in on another ends this one's session. Its message, in the
+  /// account's language, is shown as the parent is signed out.
+  static const _sessionReplacedCode = 'session_replaced';
+
   /// `{"code": "account_withdrawn", "message": "…", "school_contact": {…}}`
   /// — the child left the school, so the account is closed. It can answer
   /// any request, not only log in, so the parent is signed out wherever
@@ -39,6 +45,13 @@ abstract final class DioExceptionHandler {
             message: message,
             statusCode: statusCode,
             isAccountWithdrawn: true,
+          );
+        }
+        if (statusCode == StatusCode.expiredToken &&
+            code == _sessionReplacedCode) {
+          return UnauthorizedException(
+            message: message,
+            isSessionReplaced: true,
           );
         }
         // A 401 is an ended session unless the API names another reason,

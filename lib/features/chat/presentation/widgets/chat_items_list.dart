@@ -17,6 +17,8 @@ import 'package:al_mahhaba_school/features/chat/presentation/extensions/chat_lin
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_day_label.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_older_failed.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_parent_bubble.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_pull_to_refresh.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_refreshing_indicator.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_school_item.dart';
 
 /// A row of the list, and how to build it once it comes on screen.
@@ -52,22 +54,29 @@ class ChatItemsList extends StatelessWidget {
     // moving it.
     final indexOf = {for (final (i, row) in rows.indexed) row.key: last - i};
 
-    return ListView.builder(
-      controller: scroll,
-      reverse: true,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
-      itemCount: rows.length,
-      findChildIndexCallback: (key) => indexOf[key],
-      itemBuilder: (context, index) {
-        final row = rows[last - index];
-        // Each row built under its own context: what it watches (e.g. the
-        // excuse opening) rebuilds that row, not the whole list.
-        return KeyedSubtree(
-          key: row.key,
-          child: Builder(builder: row.build),
-        );
-      },
+    // Pulled past the newest: what the school sent since.
+    return ChatPullToRefresh(
+      onRefresh: () =>
+          context.read<ChatBloc>().add(const PullRefreshChatIntent()),
+      child: ListView.builder(
+        controller: scroll,
+        reverse: true,
+        // A chat shorter than the screen can be pulled too.
+        physics: const AlwaysScrollableScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+        itemCount: rows.length,
+        findChildIndexCallback: (key) => indexOf[key],
+        itemBuilder: (context, index) {
+          final row = rows[last - index];
+          // Each row built under its own context: what it watches (e.g. the
+          // excuse opening) rebuilds that row, not the whole list.
+          return KeyedSubtree(
+            key: row.key,
+            child: Builder(builder: row.build),
+          );
+        },
+      ),
     );
   }
 
@@ -168,6 +177,12 @@ class ChatItemsList extends StatelessWidget {
         ));
       }
       previous = item;
+    }
+    if (state.isPullRefreshing) {
+      rows.add((
+        key: const ValueKey('newer:loading'),
+        build: (_) => const ChatRefreshingIndicator(),
+      ));
     }
     return rows;
   }

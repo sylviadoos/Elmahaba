@@ -16,6 +16,7 @@ import 'package:al_mahhaba_school/features/chat/domain/entities/chat_page_entity
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/bloc/chat_intent.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_older_failed.dart';
+import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_refreshing_indicator.dart';
 import 'package:al_mahhaba_school/features/chat/presentation/widgets/chat_timeline.dart';
 
 import '../../../../helpers/result_dummy.dart';
@@ -100,6 +101,50 @@ void main() {
 
     await tester.pump(const Duration(seconds: 1));
   });
+
+  testWidgets(
+    'pulled past the newest: a spinner under it, until the newest are in',
+    (tester) async {
+      final older = schoolItem('message:1', about: omar);
+      final newer = schoolItem('message:2', about: omar);
+      when(
+        getChat(studentId: anyNamed('studentId'), cancel: anyNamed('cancel')),
+      ).thenAnswer((_) async => Success(data: chatPage([older])));
+      final bloc = build()
+        ..add(const ChildrenChangedIntent([omar], isLoading: false));
+      addTearDown(bloc.close);
+
+      await show(tester, bloc);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byType(ChatRefreshingIndicator), findsNothing);
+
+      final answer = Completer<Result<ChatPageEntity>>();
+      when(
+        getChat(
+          studentId: anyNamed('studentId'),
+          limit: anyNamed('limit'),
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) => answer.future);
+
+      // The finger up, past the newest at the bottom.
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pump();
+      expect(find.byType(ChatRefreshingIndicator), findsOneWidget);
+
+      answer.complete(Success(data: chatPage([older, newer])));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(ChatRefreshingIndicator), findsNothing);
+      // (Read by now: it came on screen.)
+      expect(bloc.state.page?.items.map((item) => item.key), [
+        older.key,
+        newer.key,
+      ]);
+    },
+  );
 
   testWidgets('nothing in the chat yet: "No messages yet"', (tester) async {
     when(

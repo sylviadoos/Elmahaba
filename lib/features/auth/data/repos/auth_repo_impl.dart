@@ -163,9 +163,13 @@ class AuthRepoImpl implements AuthRepo {
       return SessionStatus.active;
     } on UnauthorizedException catch (exception) {
       await _forgetSession();
-      return exception.isAccountWithdrawn
-          ? SessionStatus.withdrawn
-          : SessionStatus.ended;
+      return switch (exception) {
+        UnauthorizedException(isAccountWithdrawn: true) =>
+          SessionStatus.withdrawn,
+        UnauthorizedException(isSessionReplaced: true) =>
+          SessionStatus.replaced,
+        _ => SessionStatus.ended,
+      };
     }
   });
 

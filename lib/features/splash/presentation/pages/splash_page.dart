@@ -90,6 +90,8 @@ class _SplashPageState extends State<SplashPage> {
     switch (session) {
       case SessionStatus.ended:
         context.showSnackBar(l10n.expiredToken, isError: true);
+      case SessionStatus.replaced:
+        context.showSnackBar(l10n.sessionReplaced, isError: true);
       case SessionStatus.withdrawn:
         context.showSnackBar(l10n.accountWithdrawn, isError: true);
       case SessionStatus.none || SessionStatus.active:
@@ -98,7 +100,9 @@ class _SplashPageState extends State<SplashPage> {
     context.go(switch (session) {
       SessionStatus.none => AppRoutes.onboarding,
       SessionStatus.active => AppRoutes.home,
-      SessionStatus.ended || SessionStatus.withdrawn => AppRoutes.login,
+      SessionStatus.ended ||
+      SessionStatus.replaced ||
+      SessionStatus.withdrawn => AppRoutes.login,
     });
   }
 

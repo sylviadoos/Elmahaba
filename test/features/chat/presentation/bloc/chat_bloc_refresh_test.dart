@@ -693,4 +693,112 @@ void main() {
       await bloc.close();
     });
   });
+
+  group('the parent pulls past the newest', () {
+    test('a spinner until the newest are in, then they show', () async {
+      final answer = Completer<Result<ChatPageEntity>>();
+      final bloc = build();
+      await openOn(bloc, chatPage([omarItem]));
+      when(
+        getChat(
+          studentId: omar.studentId,
+          limit: anyNamed('limit'),
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) => answer.future);
+
+      bloc.add(const PullRefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      expect(bloc.state.isPullRefreshing, isTrue);
+
+      answer.complete(Success(data: chatPage([omarItem, newest])));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(bloc.state.isPullRefreshing, isFalse);
+      expect(bloc.state.page?.items, [omarItem, newest]);
+      expect(effects, isEmpty);
+      await bloc.close();
+    });
+
+    test("it didn't come: the spinner goes, a snack bar says why, what's "
+        'shown stays', () async {
+      final bloc = build();
+      await openOn(bloc, chatPage([omarItem]));
+      when(
+        getChat(
+          studentId: omar.studentId,
+          limit: anyNamed('limit'),
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) async => const Failure(exception: NetworkException()));
+
+      bloc.add(const PullRefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+
+      expect(bloc.state.isPullRefreshing, isFalse);
+      expect(bloc.state.page?.items, [omarItem]);
+      expect(effects.single, isA<ShowErrorEffect>());
+      await bloc.close();
+    });
+
+    test('a refresh on its way already: no second request, the spinner '
+        'until it ends', () async {
+      final answer = Completer<Result<ChatPageEntity>>();
+      final bloc = build();
+      await openOn(bloc, chatPage([omarItem]));
+      when(
+        getChat(
+          studentId: omar.studentId,
+          limit: anyNamed('limit'),
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) => answer.future);
+
+      bloc.add(const RefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const PullRefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      expect(bloc.state.isPullRefreshing, isTrue);
+
+      answer.complete(Success(data: chatPage([omarItem, newest])));
+      await Future<void>.delayed(Duration.zero);
+
+      verify(
+        getChat(
+          studentId: omar.studentId,
+          limit: 5,
+          cancel: anyNamed('cancel'),
+        ),
+      ).called(1);
+      expect(bloc.state.isPullRefreshing, isFalse);
+      expect(bloc.state.page?.items, [omarItem, newest]);
+      await bloc.close();
+    });
+
+    test('another child picked meanwhile: no spinner left behind', () async {
+      final answer = Completer<Result<ChatPageEntity>>();
+      final bloc = build();
+      await openOn(bloc, chatPage([omarItem]));
+      when(
+        getChat(
+          studentId: omar.studentId,
+          limit: anyNamed('limit'),
+          cancel: anyNamed('cancel'),
+        ),
+      ).thenAnswer((_) => answer.future);
+      fullPage(lina.studentId, chatPage([linaItem]));
+
+      bloc.add(const PullRefreshChatIntent());
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(ShowChildChatIntent(lina.studentId));
+      await Future<void>.delayed(Duration.zero);
+      answer.complete(const Failure(exception: CancelledException()));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(bloc.state.isPullRefreshing, isFalse);
+      expect(bloc.state.page?.items, [linaItem]);
+      expect(effects.whereType<ShowErrorEffect>(), isEmpty);
+      await bloc.close();
+    });
+  });
 }

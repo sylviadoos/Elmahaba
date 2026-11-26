@@ -18,6 +18,7 @@ class ChatState extends Equatable {
     this.isRequested = false,
     this.studentId,
     this.chat = const BaseState.initial(),
+    this.isPullRefreshing = false,
     this.screensWithNews = const {},
     this.othersUnread = false,
     this.downloadingId,
@@ -45,6 +46,10 @@ class ChatState extends Equatable {
   /// Everything loaded, oldest first. `moreLoading` while older items load;
   /// an error with data when they didn't.
   final BaseState<ChatPageEntity> chat;
+
+  /// The parent pulled past the newest item, and the newest are on their
+  /// way: a spinner shows under it.
+  final bool isPullRefreshing;
 
   /// The screens the school's unread items lead to, as they loaded: what
   /// the parent saw here stays dotted until the chat opens again.
@@ -149,6 +154,7 @@ class ChatState extends Equatable {
     bool? isRequested,
     int? Function()? studentId,
     BaseState<ChatPageEntity>? chat,
+    bool? isPullRefreshing,
     Set<ChatScreen>? screensWithNews,
     bool? othersUnread,
     int? Function()? downloadingId,
@@ -166,6 +172,7 @@ class ChatState extends Equatable {
     isRequested: isRequested ?? this.isRequested,
     studentId: studentId != null ? studentId() : this.studentId,
     chat: chat ?? this.chat,
+    isPullRefreshing: isPullRefreshing ?? this.isPullRefreshing,
     screensWithNews: screensWithNews ?? this.screensWithNews,
     othersUnread: othersUnread ?? this.othersUnread,
     downloadingId: downloadingId != null ? downloadingId() : this.downloadingId,
@@ -186,6 +193,7 @@ class ChatState extends Equatable {
     isRequested,
     studentId,
     chat,
+    isPullRefreshing,
     screensWithNews,
     othersUnread,
     downloadingId,

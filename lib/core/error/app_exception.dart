@@ -23,8 +23,11 @@ sealed class AppException implements Exception {
           // The school turned the parents app off for now (503).
           ServerException(code: 'mobile_app_disabled') => l10n.appUnavailable,
           ServerException() => l10n.serverError,
-          UnauthorizedException(:final isAccountWithdrawn) =>
-            isAccountWithdrawn ? l10n.accountWithdrawn : l10n.expiredToken,
+          UnauthorizedException(isAccountWithdrawn: true) =>
+            l10n.accountWithdrawn,
+          UnauthorizedException(isSessionReplaced: true) =>
+            l10n.sessionReplaced,
+          UnauthorizedException() => l10n.expiredToken,
           PhoneVerificationException() => l10n.phoneVerificationFailed,
           NetworkException() => l10n.noInternet,
           CancelledException() => l10n.cancelled,
@@ -60,14 +63,21 @@ final class ServerException extends AppException {
 }
 
 /// The parent isn't signed in any more: the session is missing or expired,
-/// or the account itself is closed ([isAccountWithdrawn]). Either way the
-/// app forgets the session and opens Log in.
+/// they logged in on another phone ([isSessionReplaced]), or the account
+/// itself is closed ([isAccountWithdrawn]). Either way the app forgets the
+/// session and opens Log in.
 final class UnauthorizedException extends AppException {
   const UnauthorizedException({
     super.message,
     super.statusCode = StatusCode.expiredToken,
     this.isAccountWithdrawn = false,
+    this.isSessionReplaced = false,
   });
+
+  /// The account was logged in on another phone (`session_replaced`): a
+  /// parent is signed in on one phone at a time, the last one they logged
+  /// in on. Logging in here again works — and signs that phone out.
+  final bool isSessionReplaced;
 
   /// The child was withdrawn from the school, so the account is no longer
   /// available (`account_withdrawn`). Logging in again won't work — only

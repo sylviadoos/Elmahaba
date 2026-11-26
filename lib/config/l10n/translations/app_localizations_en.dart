@@ -70,6 +70,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get expiredToken => 'Session expired, please log in again';
 
   @override
+  String get sessionReplaced =>
+      'Your account was logged in on another device. Please log in again.';
+
+  @override
   String get accountWithdrawn =>
       'Your account is no longer available because the student is no longer enrolled at the school. Please contact the school.';
 

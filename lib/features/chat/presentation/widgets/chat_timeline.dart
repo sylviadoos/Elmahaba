@@ -26,6 +26,7 @@ class ChatTimeline extends StatelessWidget {
       // that itself).
       buildWhen: (previous, current) =>
           previous.chat != current.chat ||
+          previous.isPullRefreshing != current.isPullRefreshing ||
           previous.noReply != current.noReply ||
           previous.studentId != current.studentId ||
           previous.children != current.children,

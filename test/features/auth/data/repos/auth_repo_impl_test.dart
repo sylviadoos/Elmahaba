@@ -446,6 +446,23 @@ void main() {
       },
     );
 
+    test(
+      'logged in on another phone: replaced, and all of it forgotten',
+      () async {
+        when(localDataSource.hasToken()).thenAnswer((_) async => true);
+        when(
+          remoteDataSource.checkSession(),
+        ).thenThrow(const UnauthorizedException(isSessionReplaced: true));
+
+        expect(await repo.checkSession(), isSuccess(SessionStatus.replaced));
+        verifyInOrder([
+          localDataSource.clearToken(),
+          localDataSource.clearParent(),
+          childrenLocalDataSource.clearChildren(),
+        ]);
+      },
+    );
+
     test('the account is closed: withdrawn, and all of it forgotten', () async {
       when(localDataSource.hasToken()).thenAnswer((_) async => true);
       when(
