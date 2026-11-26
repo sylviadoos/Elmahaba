@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/l10n/translations/app_localizations.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
@@ -311,6 +312,7 @@ void main() {
       await tester.pump();
 
       pushes.send();
+      await tester.pump(PageRefresher.notificationDelay);
       await tester.pumpAndSettle();
 
       expect(calls, 2);
@@ -326,6 +328,7 @@ void main() {
       router.push(AppRoutes.settings);
       await tester.pumpAndSettle();
       pushes.send();
+      await tester.pump(PageRefresher.notificationDelay);
       await tester.pumpAndSettle();
       expect(calls, 1);
 

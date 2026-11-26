@@ -63,17 +63,24 @@ import FirebaseMessaging
         )
     }
 
-    // With FirebaseAppDelegateProxyEnabled off, nothing else is registered as
-    // the notification center's delegate, so these two must be implemented
-    // here, or a push that arrives while the app is open is never shown and
-    // a tap on a delivered one is never reported back to Flutter.
+    // Both must go on to `super`: FlutterAppDelegate hands them to the
+    // plugins, and only then does Firebase tell the app — `onMessage` (Home
+    // refreshes) and `onMessageOpenedApp` / `getInitialMessage` (a tap opens
+    // the page the push is about). Answering iOS here instead would show the
+    // banner, but the app would never hear of the push or the tap.
+    // Firebase answers iOS itself, with what the app asked for in
+    // `setForegroundNotificationPresentationOptions`.
     override func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
         Messaging.messaging().appDidReceiveMessage(notification.request.content.userInfo)
-        completionHandler([.banner, .list, .sound, .badge])
+        super.userNotificationCenter(
+            center,
+            willPresent: notification,
+            withCompletionHandler: completionHandler
+        )
     }
 
     override func userNotificationCenter(
@@ -82,6 +89,10 @@ import FirebaseMessaging
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         Messaging.messaging().appDidReceiveMessage(response.notification.request.content.userInfo)
-        completionHandler()
+        super.userNotificationCenter(
+            center,
+            didReceive: response,
+            withCompletionHandler: completionHandler
+        )
     }
 }

@@ -63,6 +63,7 @@ void main() {
     expect(refreshes, 0);
 
     pushes.received.add({'type': 'excuse'});
+    await tester.pump(PageRefresher.notificationDelay);
     await tester.pump();
 
     expect(refreshes, 1);
@@ -88,6 +89,7 @@ void main() {
     await tester.pumpAndSettle();
     // Still looking at this page, so the push is for it.
     pushes.received.add({'type': 'chat'});
+    await tester.pump(PageRefresher.notificationDelay);
     await tester.pump();
     expect(refreshes, 1);
 
@@ -105,6 +107,7 @@ void main() {
     await tester.pumpAndSettle();
 
     pushes.received.add({'type': 'excuse'});
+    await tester.pump(PageRefresher.notificationDelay);
     await tester.pump();
     expect(refreshes, 0);
 
@@ -152,6 +155,7 @@ void main() {
     await tester.pumpAndSettle();
     // Hidden under the other tab, but alive: a push waits.
     pushes.received.add({'type': 'excuse'});
+    await tester.pump(PageRefresher.notificationDelay);
     await tester.pump();
     expect(refreshes, 0);
 
@@ -282,6 +286,7 @@ void aliveIsNotShown() {
   Future<bool> pushRefreshesHome(WidgetTester tester) async {
     final before = refreshes;
     pushes.received.add({'type': 'announcement'});
+    await tester.pump(PageRefresher.notificationDelay);
     await tester.pump();
     return refreshes > before;
   }

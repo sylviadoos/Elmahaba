@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:al_mahhaba_school/core/widgets/page_refresher.dart';
 import 'package:al_mahhaba_school/config/di/injectable_config.dart';
 import 'package:al_mahhaba_school/config/routes/app_routes.dart';
 import 'package:al_mahhaba_school/core/base/base_state.dart';
@@ -160,6 +161,7 @@ void main() {
     asked.clear();
 
     pushes.arrive();
+    await tester.pump(PageRefresher.notificationDelay);
     await tester.pumpAndSettle();
 
     expect(asked, [omar.studentId]);
@@ -187,6 +189,7 @@ void main() {
     asked.clear();
 
     pushes.arrive();
+    await tester.pump(PageRefresher.notificationDelay);
     await tester.pumpAndSettle();
 
     // The trap this guards: the router's own location still reads /home
@@ -210,6 +213,7 @@ void main() {
     asked.clear();
 
     pushes.arrive();
+    await tester.pump(PageRefresher.notificationDelay);
     await tester.pumpAndSettle();
 
     // The moment a chat badge matters most.
